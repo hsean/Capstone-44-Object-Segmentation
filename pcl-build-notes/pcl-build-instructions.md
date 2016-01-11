@@ -31,7 +31,7 @@ sudo apt-get install cmake
 ```
 
 ### Step 4: Modify the CMakeLists.txt to create a new executable for testing
-In your pcl sourcedir, there is a "segmentation" directory.  Within that directory, find the file "CMakeLists.txt", and replace it with the one [here](https://github.com/hsean/Capstone-44-Object-Segmentation/pcl-build-notes/CMakeLists.txt).
+In your pcl sourcedir, there is a "segmentation" directory.  Within that directory, find the file "CMakeLists.txt", and replace it with the one [here](https://github.com/hsean/Capstone-44-Object-Segmentation/blob/master/pcl-build-notes/CMakeLists.txt).
 
 ### Step 5: generate build configuration
 Create a build directory.  This is to prevent the source directory from becoming polluted with intermediate build files.
@@ -52,7 +52,7 @@ You should now have a Makefile at the root of your pcl-build directory. Run 'mak
 ### Step 7: Run it 
 If your build was successful, you should have an executable called "cylinder_segmentation" at the top level of your pcl build directory.
 
-Drop [this sample data file](https://github.com/hsean/Capstone-44-Object-Segmentation/pcl-build-notes/table\_scene\_mug\_stereo\_textured.pcd) into the root of your pcl build directory, and run the cylinder_segmentation:
+Drop [this sample data file](https://github.com/hsean/Capstone-44-Object-Segmentation/blob/master/pcl-build-notes/table_scene_mug_stereo_textured.pcd) into the root of your pcl build directory, and run the cylinder_segmentation:
 
 ```
 ./cylinder_segmentation 
