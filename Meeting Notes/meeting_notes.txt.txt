@@ -1,0 +1,71 @@
+*****************************************
+[********** Meeting 1/14/2016 **********]
+*****************************************
+
+Key Points:
+* color
+* tecture
+* lighting
+
+People feel better when they are in the loop
+
+Meet with Perkowski every week
+Meet with Intel every 3 weeks
+
+Test on different floors (e.g. colored carpet, tiles)
+Test using different lights
+Use paper, boxes, circles
+Test OpenCV 2D methods
+Test PCL 3D methods
+
+Test how often image recognition is correct and how often
+object is mistaken for another object? (confusion matrix)
+
+Dilation, closing, hardware and software transforms, edge detection.
+NOTE: Lighting conditions are very important!
+
+NOTE: Change "software" to "toolkit"
+NOTE: Do not need to define "cheap"
+
+Target Hardware: Nook (2 to 5 frames per second)
+distance: 0.6m to 2.5m
+keep ROS in mind for the future
+* Compare RealSense R200 to Kinect
+
+From sponsor meeting: "Build a good implementation that uses a 
+                       minimum amount of compute power"
+
+A MAX 97% success rate (this would be phenomenal)
+Look into OpenCV GPU offload
+
+Meeting: Perkowski wants to be at all of are meetings
+  Thursday 10 - 12pm
+  
+To-Do by next week:
+  Take 200+ pictures from realsense camera for data
+  Two sets of data, one on carpet, another on tiled (reflective) floor
+  create a confusion matrix
+  Have a working demo in two weeks
+  Look into Agile method
+  
+Questions:
+  What type of lighting are we allowed to use? (structured or non-structured)
+  What type of objects?
+  what type of surface?
+  Should the software be capable of working in untested rooms?
+  Are objects always on the floor, or can they be objects in a referigerator?
+  What is the target environment? (office, factory, home, retirement home)
+  What should the vision software return? (3D box, object recognition)
+  What are our MUSTS? (expected minimum)
+  What are the expected deliverables?
+  What are their other requirements?
+  Is doxigen ok for documentation?
+  Should large objects like chairs, cats, dogs be recognized?
+  What languages should we support?
+  What are the requirements?
+  What library should we use? (PCL OpenCV)
+  How often does the sponsor want to meet?
+  
+  
+  
+  
