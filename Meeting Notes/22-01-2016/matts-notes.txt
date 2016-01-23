@@ -1,0 +1,25 @@
+Meeting at Intel, Friday Jan 22, 2015
+
+Basics & Requirements
+  • Need to agree on an interface with the Robot team
+  ⁃ will likely be something like: we return a bounding box, and do the necessary coordinate transforms, for the object and the hand
+  ⁃ we can add special colors/markers to the hand, to assist in identifying it
+  • To begin with, we’ll focus on finding a single, simple object, like a medicine bottle, at various positions on the plane
+  • we could assume a fixed position for the camera
+  • should subtract all points below the plane, to reduce dataset going into computation
+  • will target 5 framers per second, but will likely start out at a much lower rate, eg, 1 frame/4 seconds, then optimize from there
+
+Misc:
+  • Clustering would be worth looking at as an optimization technique
+  • but “over-clustering” could result in misinterpreting the data
+  • stretch goal: auto tune the algorithms based on environment, lighting etc
+  • Gazebo simulator, for ROS, could aid the other team in using our code without requiring a full hardware setup
+  • a GUI, for debugging our code would be useful
+  • steer clear of certain 2d libraries, eg CERF, SIV, which could be time-sinks
+  • look into new version of real sense driver: librealsense
+
+
+Program Management
+  • Need to create a task list, from which we can decide on milestones, such as finding the simple object
+  ⁃ ideally group the task list into chunks, for example, tracking the hand, doing the coordinate transforms, etc
+  • coordinate next sponsor meeting to include other team
