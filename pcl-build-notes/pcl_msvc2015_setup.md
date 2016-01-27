@@ -36,7 +36,6 @@ If this option is greyed out, make sure PCL_DEMO is selected in the solution exp
 One can extract the properties based on ones system from the PCL Properties file.
 For simplicity, the properties for Win 64-bit VS2015 will be displayed below
 ```
-DEBUG|x64
 C/C++ > General > Additional Include Directories:
 $(PCL_ROOT)\include\pcl-1.7;
 $(PCL_ROOT)\3rdParty\Boost\include\boost-1_57;
@@ -47,6 +46,7 @@ $(PCL_ROOT)\3rdParty\VTK\include\vtk-6.2;
 
 Linker > General > Additional Library Directories:
 $(PCL_ROOT)\lib;
+$(PCL_ROOT)\lib\$(Configuration);
 $(PCL_ROOT)\3rdParty\Boost\lib;
 $(PCL_ROOT)\3rdParty\FLANN\lib;
 $(PCL_ROOT)\3rdParty\QHull\lib;
@@ -217,3 +217,38 @@ vtkzlib-6.2-gd.lib;
 ```
 
 It is useful to note that only <pcl_common_debug.lib> and <pcl_io_debug.lib> are needed to run the pcd_write example on the PCL website.  
+
+### Step 5: Test 
+now place the following code in main.cpp
+```
+#include <iostream>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+
+int
+  main (int argc, char** argv)
+{
+  pcl::PointCloud<pcl::PointXYZ> cloud;
+
+  // Fill in the cloud data
+  cloud.width    = 5;
+  cloud.height   = 1;
+  cloud.is_dense = false;
+  cloud.points.resize (cloud.width * cloud.height);
+
+  for (size_t i = 0; i < cloud.points.size (); ++i)
+  {
+    cloud.points[i].x = 1024 * rand () / (RAND_MAX + 1.0f);
+    cloud.points[i].y = 1024 * rand () / (RAND_MAX + 1.0f);
+    cloud.points[i].z = 1024 * rand () / (RAND_MAX + 1.0f);
+  }
+
+  pcl::io::savePCDFileASCII ("test_pcd.pcd", cloud);
+  std::cerr << "Saved " << cloud.points.size () << " data points to test_pcd.pcd." << std::endl;
+
+  for (size_t i = 0; i < cloud.points.size (); ++i)
+    std::cerr << "    " << cloud.points[i].x << " " << cloud.points[i].y << " " << cloud.points[i].z << std::endl;
+
+  return (0);
+}
+```
