@@ -1,5 +1,5 @@
 //
-//  geometric_object.hpp
+//  segmentation_pipeline.hpp
 //  PCLTestbench
 //
 //  A few utility data structures and functions to encapsulate
@@ -25,20 +25,13 @@
 #include <pcl/common/common.h>
 #include <pcl/features/moment_of_inertia_estimation.h>
 
-
 namespace C44{
 	using namespace pcl;
 	using namespace Eigen;
 
 	typedef PointCloud<PointXYZ> Cloud3D;
-	struct BoundingBoxImproved;
+	struct BoundingBox;
 	
-	struct BoundingBox{
-	  public:
-	  const Eigen::Quaternionf orientation;
-	  const Eigen::Vector3f position;
-	  const Eigen::Vector3f dimensions;
-	};
 	 
 	
 	struct GeometricObject{
@@ -76,7 +69,7 @@ namespace C44{
 		GeometricObject(mc,points,normals){}
 		
 		BoundingBox getBoundingBox() const;
-		BoundingBoxImproved getBoundingBoxImproved() const;
+		
 		
 	};
 	
@@ -91,9 +84,12 @@ namespace C44{
 				
 		Plane getPlane();
 		GraspableObject getObject(SacModel model);
+    Cloud3D::Ptr getFilteredCloud() const{
+      return filteredCloud;
+    }
 	};
 
-	struct BoundingBoxImproved{
+	struct BoundingBox{
 	public:
 		//from documentation/tutorials/moment_of_inertia.php#moment-of-inertia
 		const std::vector<float> moment_of_inertia;
@@ -110,12 +106,5 @@ namespace C44{
 	};
 
 }
-
-
-
-
-
-
-
 
 #endif //geometric_object_hpp

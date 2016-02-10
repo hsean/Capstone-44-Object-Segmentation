@@ -1,5 +1,5 @@
 //
-//  geometric_object.cpp
+//  segmentation_pipeline.cpp
 //  PCLTestbench
 //
 //  Created on 2/5/16.
@@ -94,7 +94,6 @@ GraspableObject SegmentationPipeline::getObject(SacModel model)
 	ModelCoefficients::Ptr objectCoefficients(new ModelCoefficients);
 	ExtractIndices<PointXYZ> extract;
 	ExtractIndices<Normal> extract_normals;
-	//SACSegmentationFromNormals<PointXYZ, Normal> seg;
 	PointCloud<Normal>::Ptr normals(new PointCloud<Normal>);
 	PointIndices::Ptr inliers(new PointIndices);
 	
@@ -136,59 +135,15 @@ GraspableObject SegmentationPipeline::getObject(SacModel model)
 	Cloud3D::Ptr cylinderCloud(new Cloud3D);
 	extract.filter(*cylinderCloud);
 	
-	
-	
-	
 	GraspableObject ret(*objectCoefficients,cylinderCloud,normals);
 	
 	return ret;
-	
 }
+
+
+
 
 BoundingBox GraspableObject::getBoundingBox() const{
-	Vector4f pcaCentroid;
-	pcl::compute3DCentroid(*this->pointCloud, pcaCentroid);
-	Matrix3f covariance;
-	computeCovarianceMatrixNormalized(*this->pointCloud,
-																		pcaCentroid,
-																		covariance);
-	SelfAdjointEigenSolver<Matrix3f>
-	eigen_solver(covariance, ComputeEigenvectors);
-	Matrix3f eigenVectorsPCA = eigen_solver.eigenvectors();
-	eigenVectorsPCA.col(2) = eigenVectorsPCA.col(0).cross(eigenVectorsPCA.col(1));
-	
-	// Transform the original cloud to the origin where the
-	//principal components correspond to the axes.
-	Eigen::Matrix4f projectionTransform(Matrix4f::Identity());
-	projectionTransform.block<3,3>(0,0) = eigenVectorsPCA.transpose();
-	projectionTransform.block<3,1>(0,3) = -1.f *
-	(projectionTransform.block<3,3>(0,0) *
-	 pcaCentroid.head<3>());
-	PointCloud<PointXYZ>::Ptr cloudPointsProjected (new PointCloud<PointXYZ>);
-	transformPointCloud(*this->pointCloud, *cloudPointsProjected, projectionTransform);
-	// Get the minimum and maximum points of the transformed cloud.
-	PointXYZ minPoint, maxPoint;
-	getMinMax3D(*cloudPointsProjected, minPoint, maxPoint);
-	const Vector3f meanDiagonal = 0.5f*(maxPoint.getVector3fMap() +
-																			minPoint.getVector3fMap());
-	
-	// Final transform
-	const Eigen::Quaternionf bboxQuaternion(eigenVectorsPCA);
-	//const Eigen::Vector3f bboxTransform = eigenVectorsPCA * meanDiagonal + pcaCentroid.head<3>();
-	const Eigen::Vector3f bboxTransform = meanDiagonal;// + pcaCentroid.head<3>();
-	float dx, dy,dz;
-	dx = maxPoint.x - minPoint.x;
-	dy = maxPoint.y - minPoint.y;
-	dz = maxPoint.z - minPoint.z;
-	Eigen::Vector3f dimensions = {dx,dy,dz};
-	BoundingBox ret = {bboxQuaternion,bboxTransform,dimensions};
-	return ret;
-	
-}
-
-
-
-BoundingBoxImproved GraspableObject::getBoundingBoxImproved() const{
 	MomentOfInertiaEstimation<PointXYZ> feature_extractor;
 	feature_extractor.setInputCloud (this->pointCloud);
 	feature_extractor.compute();
@@ -214,7 +169,7 @@ BoundingBoxImproved GraspableObject::getBoundingBoxImproved() const{
 	feature_extractor.getMassCenter (mass_center);
 
 
-	BoundingBoxImproved ret = {
+	BoundingBox ret = {
 		moment_of_inertia,
 		eccentricity,
 		min_point_AABB,

@@ -64,53 +64,7 @@ isOnly2DImage (const pcl::PCLPointField &field)
 	return (false);
 }
 
-void
-printHelp (int, char **argv)
-{
-	print_error ("Syntax is: %s <file_name 1..N>.<pcd or vtk> <options>\n", argv[0]);
-	print_info ("  where options are:\n");
-	print_info ("                     -bc r,g,b                = background color\n");
-	print_info ("                     -fc r,g,b                = foreground color\n");
-	print_info ("                     -ps X                    = point size ("); print_value ("1..64"); print_info (") \n");
-	print_info ("                     -opaque X                = rendered point cloud opacity ("); print_value ("0..1"); print_info (")\n");
-	print_info ("                     -shading X               = rendered surface shading ("); print_value ("'flat' (default), 'gouraud', 'phong'"); print_info (")\n");
-	print_info ("                     -position x,y,z          = absolute point cloud position in metres\n");
-	print_info ("                     -orientation r,p,y       = absolute point cloud orientation (roll, pitch, yaw) in radians\n");
-	
-	print_info ("                     -ax "); print_value ("n"); print_info ("                    = enable on-screen display of ");
-	print_color (stdout, TT_BRIGHT, TT_RED, "X"); print_color (stdout, TT_BRIGHT, TT_GREEN, "Y"); print_color (stdout, TT_BRIGHT, TT_BLUE, "Z");
-	print_info (" axes and scale them to "); print_value ("n\n");
-	print_info ("                     -ax_pos X,Y,Z            = if axes are enabled, set their X,Y,Z position in space (default "); print_value ("0,0,0"); print_info (")\n");
-	
-	print_info ("\n");
-	print_info ("                     -cam (*)                 = use given camera settings as initial view\n");
-	print_info (stderr, " (*) [Clipping Range / Focal Point / Position / ViewUp / Distance / Field of View Y / Window Size / Window Pos] or use a <filename.cam> that contains the same information.\n");
-	
-	print_info ("\n");
-	print_info ("                     -multiview 0/1           = enable/disable auto-multi viewport rendering (default "); print_value ("disabled"); print_info (")\n");
-	print_info ("\n");
-	
-	print_info ("\n");
-	print_info ("                     -normals 0/X             = disable/enable the display of every Xth point's surface normal as lines (default "); print_value ("disabled"); print_info (")\n");
-	print_info ("                     -normals_scale X         = resize the normal unit vector size to X (default "); print_value ("0.02"); print_info (")\n");
-	print_info ("\n");
-	print_info ("                     -pc 0/X                  = disable/enable the display of every Xth point's principal curvatures as lines (default "); print_value ("disabled"); print_info (")\n");
-	print_info ("                     -pc_scale X              = resize the principal curvatures vectors size to X (default "); print_value ("0.02"); print_info (")\n");
-	print_info ("\n");
-	print_info ("                     -immediate_rendering 0/1 = use immediate mode rendering to draw the data (default: "); print_value ("disabled"); print_info (")\n");
-	print_info ("                                                Note: the use of immediate rendering will enable the visualization of larger datasets at the expense of extra RAM.\n");
-	print_info ("                                                See http://en.wikipedia.org/wiki/Immediate_mode for more information.\n");
-	print_info ("                     -vbo_rendering 0/1       = use OpenGL 1.4+ Vertex Buffer Objects for rendering (default: "); print_value ("disabled"); print_info (")\n");
-	print_info ("                                                Note: the use of VBOs will enable the visualization of larger datasets at the expense of extra RAM.\n");
-	print_info ("                                                See http://en.wikipedia.org/wiki/Vertex_Buffer_Object for more information.\n");
-	print_info ("\n");
-	print_info ("                     -use_point_picking       = enable the usage of picking points on screen (default "); print_value ("disabled"); print_info (")\n");
-	print_info ("\n");
-	print_info ("                     -optimal_label_colors    = maps existing labels to the optimal sequential glasbey colors, label_ids will not be mapped to fixed colors (default "); print_value ("disabled"); print_info (")\n");
-	print_info ("\n");
-	
-	print_info ("\n(Note: for multiple .pcd files, provide multiple -{fc,ps,opaque,position,orientation} parameters; they will be automatically assigned to the right file)\n");
-}
+
 
 // Global visualizer object
 #if VTK_MAJOR_VERSION>=6 || (VTK_MAJOR_VERSION==5 && VTK_MINOR_VERSION>6)
@@ -189,11 +143,7 @@ main (int argc, char** argv)
 	srand (static_cast<unsigned int> (time (0)));
 	print_info ("The viewer window provides interactive commands; for help, press 'h' or 'H' from within the window.\n");
 	//doStuff(argv[1]);
-	if (argc < 2)
-	{
-		printHelp (argc, argv);
-		return (-1);
-	}
+
 	
 	bool debug = false;
 	pcl::console::parse_argument (argc, argv, "-debug", debug);
@@ -268,29 +218,6 @@ main (int argc, char** argv)
 	// Multiview enabled?
 	int y_s = 0, x_s = 0;
 	double x_step = 0, y_step = 0;
-	if (mview)
-	{
-		print_highlight ("Multi-viewport rendering enabled.\n");
-		
-		y_s = static_cast<int>(floor (sqrt (static_cast<float>(p_file_indices.size () + vtk_file_indices.size ()))));
-		x_s = y_s + static_cast<int>(ceil (double (p_file_indices.size () + vtk_file_indices.size ()) / double (y_s) - y_s));
-		
-		if (p_file_indices.size () != 0)
-		{
-			print_highlight ("Preparing to load "); print_value ("%d", p_file_indices.size ()); print_info (" pcd files.\n");
-		}
-		
-		if (vtk_file_indices.size () != 0)
-		{
-			print_highlight ("Preparing to load "); print_value ("%d", vtk_file_indices.size ()); print_info (" vtk files.\n");
-		}
-		
-		x_step = static_cast<double>(1.0 / static_cast<double>(x_s));
-		y_step = static_cast<double>(1.0 / static_cast<double>(y_s));
-		print_value ("%d", x_s);    print_info ("x"); print_value ("%d", y_s);
-		print_info (" / ");      print_value ("%f", x_step); print_info ("x"); print_value ("%f", y_step);
-		print_info (")\n");
-	}
 	
 	// Fix invalid multiple arguments
 	if (psize.size () != p_file_indices.size () && psize.size () > 0)
@@ -319,13 +246,16 @@ main (int argc, char** argv)
 	GeometryHandlerPtr geometry_handler;
 	
 	// Go through VTK files
-	pcl::PCLPointCloud2::Ptr cloud;
+  PCLPointCloud2::Ptr cloud;
+  Cloud3D::Ptr xyzCloud;
+  
 	
 	// Go through PCD files
 	for (size_t i = 0; i < p_file_indices.size (); ++i)
 	{
 		tt.tic ();
-		cloud.reset (new pcl::PCLPointCloud2);
+    cloud.reset (new PCLPointCloud2);
+    xyzCloud.reset(new Cloud3D);
 		//cylinderCloud.reset(new pcl::PCLPointCloud2);
 		Eigen::Vector4f origin;
 		Eigen::Quaternionf orientation;
@@ -335,22 +265,7 @@ main (int argc, char** argv)
 		
 		if (pcd.read (argv[p_file_indices.at (i)], *cloud, origin, orientation, version) < 0)
 			return (-1);
-		
-		
-		
-		
-//		pcl::VoxelGrid<pcl::PCLPointCloud2> grid;
-//		grid.setInputCloud (cloud);
-//		grid.setFilterFieldName ("z");
-//		float leaf_x, leaf_y, leaf_z;
-//		leaf_x = leaf_y = leaf_z = 0.01f;
-//		grid.setFilterLimits (-std::numeric_limits<double>::max (), std::numeric_limits<double>::max ());
-//		grid.setLeafSize (leaf_x, leaf_y, leaf_z);
-		//grid.filter (filteredCloud);
-		
-		
-		//viewer->addCube (min.x, max.x, min.y, max.y, min.z, max.z);
-		
+    fromPCLPointCloud2(*cloud, *xyzCloud);
 		
 
 		
@@ -369,41 +284,9 @@ main (int argc, char** argv)
 		
 		std::stringstream cloud_name;
 		
-		// ---[ Special check for 1-point multi-dimension histograms
-		if (cloud->fields.size () == 1 && isMultiDimensionalFeatureField (cloud->fields[0]))
-		{
-			cloud_name << argv[p_file_indices.at (i)];
-			
-#if VTK_MAJOR_VERSION>=6 || (VTK_MAJOR_VERSION==5 && VTK_MINOR_VERSION>6)
-			if (!ph)
-				ph.reset (new pcl::visualization::PCLPlotter);
-#endif
-			
-			pcl::getMinMax (*cloud, 0, cloud->fields[0].name, min_p, max_p);
-#if VTK_MAJOR_VERSION>=6 || (VTK_MAJOR_VERSION==5 && VTK_MINOR_VERSION>6)
-			ph->addFeatureHistogram (*cloud, cloud->fields[0].name, cloud_name.str ());
-#endif
-			print_info ("[done, "); print_value ("%g", tt.toc ()); print_info (" ms : "); print_value ("%d", cloud->fields[0].count); print_info (" points]\n");
-			continue;
-		}
+
 		
-		// ---[ Special check for 2D images
-		if (cloud->fields.size () == 1 && isOnly2DImage (cloud->fields[0]))
-		{
-			print_info ("[done, "); print_value ("%g", tt.toc ()); print_info (" ms : "); print_value ("%u", cloud->width * cloud->height); print_info (" points]\n");
-			print_info ("Available dimensions: "); print_value ("%s\n", pcl::getFieldsList (*cloud).c_str ());
-			
-			std::stringstream name;
-			name << "PCD Viewer :: " << argv[p_file_indices.at (i)];
-			pcl::visualization::ImageViewer::Ptr img (new pcl::visualization::ImageViewer (name.str ()));
-			pcl::PointCloud<pcl::RGB> rgb_cloud;
-			pcl::fromPCLPointCloud2 (*cloud, rgb_cloud);
-			
-			img->addRGBImage (rgb_cloud);
-			imgs.push_back (img);
-			
-			continue;
-		}
+
 		
 		cloud_name << argv[p_file_indices.at (i)] << "-" << i;
 		
@@ -426,42 +309,28 @@ main (int argc, char** argv)
 															rotation (0, 1),              rotation (1, 1),              rotation (2, 1));
 			}
 		}
-		Cloud3D::Ptr xyzCloud(new Cloud3D);
-		fromPCLPointCloud2(*cloud, *xyzCloud);
+    
+    
 		SegmentationPipeline pipeline(xyzCloud);
 		
-		//auto plane = findPlane(filteredCloud);
+		
 		auto mug = pipeline.getObject(SACMODEL_CYLINDER);
 		
-		//segmentCylinder(cloud,cylinderCloud);
+		
 		const auto bbox = mug.getBoundingBox();
-		const auto bbox2 = mug.getBoundingBoxImproved();
-		p->addCube (bbox2.min_point_AABB.x,
-								bbox2.max_point_AABB.x,
-								bbox2.min_point_AABB.y,
-								bbox2.max_point_AABB.y,
-								bbox2.min_point_AABB.z,
-								bbox2.max_point_AABB.z, 1.0, 1.0, 0.0, "AABB");
-//
-		Vector3f position(bbox2.position_OBB.x, bbox2.
+
+		Vector3f position(bbox.position_OBB.x, bbox.
 											 position_OBB.y,
-											 bbox2.position_OBB.z);
-		Quaternionf quat(bbox2.rotational_matrix_OBB);
+											 bbox.position_OBB.z);
+		Quaternionf mugOrientation(bbox.rotational_matrix_OBB);
 		
 		p->addCube(position,
-							 quat,
-							 bbox2.max_point_OBB.x - bbox2.min_point_OBB.x,
-							 bbox2.max_point_OBB.y - bbox2.min_point_OBB.y,
-							 bbox2.max_point_OBB.z - bbox2.min_point_OBB.z, "OBB");
+							 mugOrientation,
+							 bbox.max_point_OBB.x - bbox.min_point_OBB.x,
+							 bbox.max_point_OBB.y - bbox.min_point_OBB.y,
+							 bbox.max_point_OBB.z - bbox.min_point_OBB.z, "OBB");
 		
-		p->addCube(bbox.position,
-							 bbox.orientation,
-							 bbox.dimensions.x(),
-							 bbox.dimensions.y(),
-							 bbox.dimensions.z(),
-							 "bbox",
-							 viewport);
-		p->addCylinder(mug.coefficients,"cylinder",viewport);
+    // p->addCylinder(mug.coefficients,"cylinder",viewport);
 		// Multiview enabled?
 		if (mview)
 		{
@@ -493,88 +362,14 @@ main (int argc, char** argv)
 		
 		// Add the dataset with a XYZ and a random handler
 		geometry_handler.reset (new pcl::visualization::PointCloudGeometryHandlerXYZ<pcl::PCLPointCloud2> (cloud));
-		// Add the cloud to the renderer
-		//p->addPointCloud<pcl::PointXYZ> (cloud_xyz, geometry_handler, color_handler, cloud_name.str (), viewport);
-		pcl::PCLPointCloud2::Ptr cylinderCloud2d(new pcl::PCLPointCloud2);
-		//toPCLPointCloud2 (const pcl::PointCloud<PointT>& cloud, pcl::PCLPointCloud2& msg)
-		///pcl::toPCLPointCloud2(*cylinderCloud, *cylinderCloud2d);
-		//toPCLPointCloud2(*mug.pointCloud, *cylinderCloud2d);
-		PCDReader reader;
-		reader.read ("table_scene_mug_stereo_textured_cylinder.pcd", *cylinderCloud2d);
-		p->addPointCloud (cylinderCloud2d, geometry_handler, color_handler, origin, orientation, cloud_name.str (), viewport);
-		
-		
-		//p->addPointCloud (filteredCloud, geometry_handler, color_handler, origin, orientation, cloud_name.str (), viewport);
-		
+		p->addPointCloud (cloud, geometry_handler, color_handler, origin, orientation, cloud_name.str (), viewport);
 		
 		if (mview)
 			// Add text with file name
 			p->addText (argv[p_file_indices.at (i)], 5, 5, 10, 1.0, 1.0, 1.0, "text_" + std::string (argv[p_file_indices.at (i)]), viewport);
 		
-		// If normal lines are enabled
-		if (normals != 0)
-		{
-			int normal_idx = pcl::getFieldIndex (*cloud, "normal_x");
-			if (normal_idx == -1)
-			{
-				print_error ("Normal information requested but not available.\n");
-				continue;
-				//return (-1);
-			}
-			//
-			// Convert from blob to pcl::PointCloud
-			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
-			pcl::fromPCLPointCloud2 (*cloud, *cloud_xyz);
-			cloud_xyz->sensor_origin_ = origin;
-			cloud_xyz->sensor_orientation_ = orientation;
-			
-			pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
-			pcl::fromPCLPointCloud2 (*cloud, *cloud_normals);
-			std::stringstream cloud_name_normals;
-			cloud_name_normals << argv[p_file_indices.at (i)] << "-" << i << "-normals";
-			p->addPointCloudNormals<pcl::PointXYZ, pcl::Normal> (cloud_xyz, cloud_normals, normals, normals_scale, cloud_name_normals.str (), viewport);
-		}
-		
-		// If principal curvature lines are enabled
-		if (pc != 0)
-		{
-			if (normals == 0)
-				normals = pc;
-			
-			int normal_idx = pcl::getFieldIndex (*cloud, "normal_x");
-			if (normal_idx == -1)
-			{
-				print_error ("Normal information requested but not available.\n");
-				continue;
-				//return (-1);
-			}
-			int pc_idx = pcl::getFieldIndex (*cloud, "principal_curvature_x");
-			if (pc_idx == -1)
-			{
-				print_error ("Principal Curvature information requested but not available.\n");
-				continue;
-				//return (-1);
-			}
-			//
-			// Convert from blob to pcl::PointCloud
-			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
-			pcl::fromPCLPointCloud2 (*cloud, *cloud_xyz);
-			cloud_xyz->sensor_origin_ = origin;
-			cloud_xyz->sensor_orientation_ = orientation;
-			pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
-			pcl::fromPCLPointCloud2 (*cloud, *cloud_normals);
-			pcl::PointCloud<pcl::PrincipalCurvatures>::Ptr cloud_pc (new pcl::PointCloud<pcl::PrincipalCurvatures>);
-			pcl::fromPCLPointCloud2 (*cloud, *cloud_pc);
-			std::stringstream cloud_name_normals_pc;
-			cloud_name_normals_pc << argv[p_file_indices.at (i)] << "-" << i << "-normals";
-			int factor = (std::min)(normals, pc);
-			p->addPointCloudNormals<pcl::PointXYZ, pcl::Normal> (cloud_xyz, cloud_normals, factor, normals_scale, cloud_name_normals_pc.str (), viewport);
-			p->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 1.0, 0.0, 0.0, cloud_name_normals_pc.str ());
-			p->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 3, cloud_name_normals_pc.str ());
-			cloud_name_normals_pc << "-pc";
-			p->addPointCloudPrincipalCurvatures<pcl::PointXYZ, pcl::Normal> (cloud_xyz, cloud_normals, cloud_pc, factor, pc_scale, cloud_name_normals_pc.str (), viewport);
-			p->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 3, cloud_name_normals_pc.str ());
-		}
+
+    const auto filteredCloud = pipeline.getFilteredCloud();
 		
 		// Add every dimension as a possible color
 		if (!fcolorparam)
@@ -600,8 +395,8 @@ main (int argc, char** argv)
 					color_handler.reset (new pcl::visualization::PointCloudColorHandlerGenericField<pcl::PCLPointCloud2> (cloud, cloud->fields[f].name));
 				}
 				// Add the cloud to the renderer
-				//p->addPointCloud<pcl::PointXYZ> (cloud_xyz, color_handler, cloud_name.str (), viewport);
-				p->addPointCloud (cylinderCloud2d, color_handler, origin, orientation, cloud_name.str (), viewport);
+        //p->addPointCloud<pcl::PointXYZ> (cloud_xyz, color_handler, cloud_name.str (), viewport);
+        p->addPointCloud (cloud, color_handler, origin, orientation, cloud_name.str (), viewport);
 			}
 			// Set RGB color handler or label handler as default
 			p->updateColorHandlerIndex (cloud_name.str (), (rgb_idx ? rgb_idx : label_idx));
@@ -637,6 +432,7 @@ main (int argc, char** argv)
 		if (p->cameraFileLoaded ())
 			print_info ("Camera parameters restored from %s.\n", p->getCameraFile ().c_str ());
 		//delete cylinderCloud;
+    
 	}
 	
 	if (!mview && p)
@@ -654,6 +450,7 @@ main (int argc, char** argv)
 			str += ", " + std::string (argv[vtk_file_indices.at (i)]);
 		
 		p->addText (str, 5, 5, 10, 1.0, 1.0, 1.0, "text_allnames");
+   
 	}
 	
 	if (p)
@@ -683,9 +480,9 @@ main (int argc, char** argv)
 		bool stopped = false;
 		do
 		{
-#if VTK_MAJOR_VERSION>=6 || (VTK_MAJOR_VERSION==5 && VTK_MINOR_VERSION>6)
-			if (ph) ph->spinOnce ();
-#endif
+
+			if (ph)
+        ph->spinOnce ();
 			
 			for (int i = 0; i < int (imgs.size ()); ++i)
 			{
@@ -712,8 +509,6 @@ main (int argc, char** argv)
 	}
 	else
 	{
-		// If no images, continue
-#if VTK_MAJOR_VERSION>=6 || (VTK_MAJOR_VERSION==5 && VTK_MINOR_VERSION>6)
 		if (ph)
 		{
 			//print_highlight ("Setting the global Y range for all histograms to: "); print_value ("%f -> %f\n", min_p, max_p);
@@ -724,10 +519,10 @@ main (int argc, char** argv)
 			else
 				ph->spin ();
 		}
-		else
-#endif
+    else{
 			if (p)
 				p->spin ();
+    }
 	}
 }
 /* ]--- */
