@@ -52,7 +52,7 @@ Plane SegmentationPipeline::getPlane()
 	PointCloud<Normal>::Ptr cloud_normals2(new pcl::PointCloud<Normal>);
 	
 	// Estimate point normals
-	
+
 	// Create the segmentation object for the planar
 	// model and set all the parameters
 	seg.setOptimizeCoefficients (true);
@@ -89,7 +89,7 @@ Plane SegmentationPipeline::getPlane()
 
 }
 
-GraspableObject SegmentationPipeline::getObject(SacModel model)
+GraspableObject SegmentationPipeline::getGraspableObject(SacModel model)
 {
 	ModelCoefficients::Ptr objectCoefficients(new ModelCoefficients);
 	ExtractIndices<PointXYZ> extract;

@@ -239,13 +239,13 @@ main (int argc, char** argv)
 	float min_p = FLT_MAX; float max_p = -FLT_MAX;
 	
 	int k = 0, l = 0, viewport = 0;
-	// Load the data files
+
 	pcl::PCDReader pcd;
 	pcl::console::TicToc tt;
 	ColorHandlerPtr color_handler;
 	GeometryHandlerPtr geometry_handler;
 	
-	// Go through VTK files
+
   PCLPointCloud2::Ptr cloud;
   Cloud3D::Ptr xyzCloud;
   
@@ -256,7 +256,7 @@ main (int argc, char** argv)
 		tt.tic ();
     cloud.reset (new PCLPointCloud2);
     xyzCloud.reset(new Cloud3D);
-		//cylinderCloud.reset(new pcl::PCLPointCloud2);
+
 		Eigen::Vector4f origin;
 		Eigen::Quaternionf orientation;
 		int version;
@@ -314,14 +314,14 @@ main (int argc, char** argv)
 		SegmentationPipeline pipeline(xyzCloud);
 		
 		
-		auto mug = pipeline.getObject(SACMODEL_CYLINDER);
+		auto mug = pipeline.getGraspableObject(SACMODEL_CYLINDER);
 		
 		
 		const auto bbox = mug.getBoundingBox();
 
 		Vector3f position(bbox.position_OBB.x, bbox.
-											 position_OBB.y,
-											 bbox.position_OBB.z);
+                      position_OBB.y,
+											bbox.position_OBB.z);
 		Quaternionf mugOrientation(bbox.rotational_matrix_OBB);
 		
 		p->addCube(position,

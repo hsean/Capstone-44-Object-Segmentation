@@ -83,7 +83,7 @@ namespace C44{
 		SegmentationPipeline(Cloud3D::Ptr unfilteredCloud);
 				
 		Plane getPlane();
-		GraspableObject getObject(SacModel model);
+		GraspableObject getGraspableObject(SacModel model);
     Cloud3D::Ptr getFilteredCloud() const{
       return filteredCloud;
     }
