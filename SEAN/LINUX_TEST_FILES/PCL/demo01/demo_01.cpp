@@ -1,0 +1,235 @@
+/******************************************************************************
+ * Author: Sean Hendrickson
+ * File: demo_01.cpp
+ * Last Modified: 10 February 2016
+ * Description: This file filters a PCD file to get only components in a 
+ *              floor plane.  Assumptions are that only one object is
+ *              on the floor plane and that the lowest plane is the floor.
+ *              This program uses PCL for depth vision cameras.
+ ******************************************************************************/
+#include <iostream>
+#include <pcl/common/common.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/ModelCoefficients.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/segmentation/sac_segmentation.h>
+
+#define Z_CUTOFF 2.5     // 1 meter from camera
+
+void cuttoffZ(pcl::PointCloud<pcl::PointXYZ>::Ptr source, 
+              pcl::PointCloud<pcl::PointXYZ>::Ptr result, 
+              float maxZ);
+void cuttoffY(pcl::PointCloud<pcl::PointXYZ>::Ptr source, 
+              pcl::PointCloud<pcl::PointXYZ>::Ptr result,
+              float maxY);
+void downsample(pcl::PointCloud<pcl::PointXYZ>::Ptr source, 
+                pcl::PointCloud<pcl::PointXYZ>::Ptr result);
+void filter(pcl::PointCloud<pcl::PointXYZ>::Ptr source, 
+            pcl::PointCloud<pcl::PointXYZ>::Ptr result);
+/*int passthroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr source, 
+                      pcl::PointCloud<pcl::PointXYZ>::Ptr result,
+                      const std::string &field, float min, float max);*/
+void segment(pcl::PointCloud<pcl::PointXYZ>::Ptr source,
+             pcl::PointCloud<pcl::PointXYZ>::Ptr result,
+             pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_p,
+             pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_f);
+void getObjectsAbovePlane(pcl::PointCloud<pcl::PointXYZ>::Ptr source,
+                          pcl::PointCloud<pcl::PointXYZ>::Ptr plane,
+                          pcl::PointCloud<pcl::PointXYZ>::Ptr result);
+
+
+int main(int argc, char** argv)
+{
+	// initialize variables
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_original (new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ground (new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_p (new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_f (new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PCDReader reader;
+	pcl::PCDWriter writer;
+	
+	// read point cloud
+	std::cout << "Reading Point Cloud" << std::endl;
+	reader.read ("demo_01.pcd", *cloud_original);
+
+	// remove all points beyond 2.5 meters
+	std::cout << "Reducing Point Cloud" << std::endl;
+	cuttoffZ(cloud_original, cloud_filtered, Z_CUTOFF);
+	writer.write<pcl::PointXYZ> ("demo_step1.pcd", *cloud_filtered); // write out cloud
+	
+	// downsample pcd file
+	std::cout << "Downsampling Point Cloud" << std::endl;
+	downsample(cloud_original, cloud_filtered);
+	writer.write<pcl::PointXYZ> ("demo_step2.pcd", *cloud_filtered); // write out cloud
+	
+	// filter downsampled image
+	std::cout << "Removing Outliers from Point Cloud" << std::endl;
+	filter(cloud_filtered, cloud_filtered);
+	writer.write<pcl::PointXYZ> ("demo_step3.pcd", *cloud_filtered); // write out cloud
+	
+	// segment out planes
+	std::cout << "Finding planes in Point Cloud" << std::endl;
+	segment(cloud_filtered, cloud_filtered, cloud_p, cloud_f);
+	writer.write<pcl::PointXYZ> ("demo_step4.pcd", *cloud_filtered); // write out cloud
+	
+	// find maximum Y of lowest plane
+	std::cout << "Removing everything below plane in Point Cloud" << std::endl;
+	reader.read("demo_plane_0.pcd", *cloud_ground);
+	getObjectsAbovePlane(cloud_filtered, cloud_ground, cloud_filtered);
+	writer.write<pcl::PointXYZ> ("demo_step5.pcd", *cloud_filtered); // write out cloud
+	
+	return 0;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+void cuttoffZ(pcl::PointCloud<pcl::PointXYZ>::Ptr source, 
+              pcl::PointCloud<pcl::PointXYZ>::Ptr result,
+              float maxZ)
+{
+	pcl::PassThrough<pcl::PointXYZ> pass;
+	pass.setInputCloud (source);
+	pass.setFilterFieldName ("z");
+	pass.setFilterLimits (-1 * maxZ, maxZ);
+	pass.filter (*result);	
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+void cuttoffY(pcl::PointCloud<pcl::PointXYZ>::Ptr source, 
+              pcl::PointCloud<pcl::PointXYZ>::Ptr result,
+              float maxY)
+{
+	pcl::PassThrough<pcl::PointXYZ> pass;
+	pass.setInputCloud (source);
+	pass.setFilterFieldName ("y");
+	pass.setFilterLimits (maxY, maxY + 1000.0);
+	pass.filter (*result);	
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+/*int passthroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr source, 
+                      pcl::PointCloud<pcl::PointXYZ>::Ptr result,
+                      const std::string &field, float min, float max)
+{
+	if((field != 'x') || (field != 'y') || (field != 'z'))
+	{
+		return -1;
+	}
+	pcl::PassThrough<pcl::PointXYZ> pass;
+	pass.setInputCloud (source);
+	pass.setFilterFieldName (field);
+	pass.setFilterLimits (min, max);
+	pass.filter (*result);
+}*/
+
+
+///////////////////////////////////////////////////////////////////////////////
+void downsample(pcl::PointCloud<pcl::PointXYZ>::Ptr source,
+                pcl::PointCloud<pcl::PointXYZ>::Ptr result)
+{
+	pcl::VoxelGrid<pcl::PointXYZ> sor;
+	sor.setInputCloud (source);
+	sor.setLeafSize (0.01f, 0.01f, 0.01f);
+	sor.filter (*result);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+void filter(pcl::PointCloud<pcl::PointXYZ>::Ptr source,
+            pcl::PointCloud<pcl::PointXYZ>::Ptr result)
+{
+	pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+	sor.setInputCloud (source);
+	sor.setMeanK (50);
+	sor.setStddevMulThresh (1.0);
+	sor.filter (*result);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+void segment(pcl::PointCloud<pcl::PointXYZ>::Ptr source,
+             pcl::PointCloud<pcl::PointXYZ>::Ptr result,
+             pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_p,
+             pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_f)
+{
+	pcl::PCDWriter writer;
+	pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients ());
+	pcl::PointIndices::Ptr inliers (new pcl::PointIndices ());
+  
+	// Create the segmentation object
+	pcl::SACSegmentation<pcl::PointXYZ> seg;
+  
+	// Optional
+	seg.setOptimizeCoefficients (true);
+  
+	// Mandatory
+	seg.setModelType (pcl::SACMODEL_PLANE);
+	seg.setMethodType (pcl::SAC_RANSAC);
+	seg.setMaxIterations (1000);
+	seg.setDistanceThreshold (0.01);
+
+	// Create the filtering object
+	pcl::ExtractIndices<pcl::PointXYZ> extract;
+
+	int i = 0, nr_points = (int) source->points.size ();
+	// While 30% of the original cloud is still there
+	while (source->points.size () > 0.3 * nr_points)
+	{
+		// Segment the largest planar component from the remaining cloud
+		seg.setInputCloud (source);
+		seg.segment (*inliers, *coefficients);
+		if (inliers->indices.size () == 0)
+		{
+			std::cerr << "Could not estimate a planar model for the given dataset." << std::endl;
+			break;
+		}
+
+		// Extract the inliers
+		extract.setInputCloud (source);
+		extract.setIndices (inliers);
+		extract.setNegative (false);
+		extract.filter (*cloud_p);
+		std::cerr << "PointCloud representing the planar component: " 
+		          << cloud_p->width * cloud_p->height << " data points." 
+		          << std::endl;
+		
+		std::stringstream ss;
+		ss << "demo_plane_" << i << ".pcd";
+		writer.write<pcl::PointXYZ> (ss.str (), *cloud_p, false);
+
+		// Create the filtering object
+		extract.setNegative (true);
+		extract.filter (*cloud_f);
+		source.swap (cloud_f);
+		i++;
+	}
+} 
+
+
+///////////////////////////////////////////////////////////////////////////////
+void getObjectsAbovePlane(pcl::PointCloud<pcl::PointXYZ>::Ptr source,
+                          pcl::PointCloud<pcl::PointXYZ>::Ptr plane,
+                          pcl::PointCloud<pcl::PointXYZ>::Ptr result)
+{
+	// TODO: get rid or horid hardcoded stuff
+	pcl::PointXYZ minPoint, maxPoint;
+	pcl::getMinMax3D(*plane, minPoint, maxPoint);
+	std::cout << "min-point: " << minPoint.y << std::endl
+	          << "max-point: " << maxPoint.y << std::endl;
+			  
+	// filter everything below max point
+	//passthroughFilter(source, result, 'y', maxPoint.y, maxPoint.y + 0.05);
+	cuttoffY(source, result, maxPoint.y);      
+}
+
+
