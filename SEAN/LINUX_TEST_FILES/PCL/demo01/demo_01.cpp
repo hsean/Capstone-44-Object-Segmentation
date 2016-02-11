@@ -58,9 +58,17 @@ int main(int argc, char** argv)
 	pcl::PCDReader reader;
 	pcl::PCDWriter writer;
 	
-	// read point cloud
-	std::cout << "Reading Point Cloud" << std::endl;
-	reader.read ("demo_01.pcd", *cloud_original);
+	// read point cloud through command line
+	if (argc != 2)
+	{
+		std::cout <<"usage: "<< argv[0] <<" <filename>\n";
+		return 0;
+	}
+	else
+	{
+		std::cout << "Reading Point Cloud" << std::endl;
+		reader.read (argv[1], *cloud_original);
+	}
 
 	// remove all points beyond 2.5 meters
 	std::cout << "Reducing Point Cloud" << std::endl;
