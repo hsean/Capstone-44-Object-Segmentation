@@ -20,7 +20,7 @@
 #include <pcl/console/time.h>
 #include <pcl/search/kdtree.h>
 #include <vtkPolyDataReader.h>
-#include <pcl/filters/voxel_grid.h>
+//#include <pcl/filters/voxel_grid.h>
 #include "segmentation_pipeline.hpp"
 
 using namespace pcl::console;
@@ -235,7 +235,7 @@ main (int argc, char** argv)
 #if VTK_MAJOR_VERSION>=6 || (VTK_MAJOR_VERSION==5 && VTK_MINOR_VERSION>6)
 	boost::shared_ptr<pcl::visualization::PCLPlotter> ph;
 #endif
-	// Using min_p, max_p to set the global Y min/max range for the histogram
+	// Us ing min_p, max_p to set the global Y min/max range for the histogram
 	float min_p = FLT_MAX; float max_p = -FLT_MAX;
 	
 	int k = 0, l = 0, viewport = 0;
@@ -312,25 +312,34 @@ main (int argc, char** argv)
     
     
 		SegmentationPipeline pipeline(xyzCloud);
+    if (pipeline.performSegmentation()){
+      for (int i = 0; i < pipeline.graspableObjects.size(); i++){
+        auto obj = pipeline.graspableObjects[i];
+        
+        
+        const auto bbox = obj.getBoundingBox();
+        
+        Vector3f position(bbox.position_OBB.x, bbox.
+                          position_OBB.y,
+                          bbox.position_OBB.z);
+        Quaternionf objOrientation(bbox.rotational_matrix_OBB);
+        
+//        p->addCube(position,
+//                   objOrientation,
+//                   bbox.max_point_OBB.x - bbox.min_point_OBB.x,
+//                   bbox.max_point_OBB.y - bbox.min_point_OBB.y,
+//                   bbox.max_point_OBB.z - bbox.min_point_OBB.z, "OBB");
+        //
+        std::stringstream objName;
+        objName << "cylinder " << i;
+        p->addCylinder(obj.coefficients,objName.str(),viewport);
+        
+      }
+    } else {
+      print_error("could not find plane. aborting");
+      return -1;      
+    }
 		
-		
-		auto mug = pipeline.getGraspableObject(SACMODEL_CYLINDER);
-		
-		
-		const auto bbox = mug.getBoundingBox();
-
-		Vector3f position(bbox.position_OBB.x, bbox.
-                      position_OBB.y,
-											bbox.position_OBB.z);
-		Quaternionf mugOrientation(bbox.rotational_matrix_OBB);
-		
-		p->addCube(position,
-							 mugOrientation,
-							 bbox.max_point_OBB.x - bbox.min_point_OBB.x,
-							 bbox.max_point_OBB.y - bbox.min_point_OBB.y,
-							 bbox.max_point_OBB.z - bbox.min_point_OBB.z, "OBB");
-		
-    // p->addCylinder(mug.coefficients,"cylinder",viewport);
 		// Multiview enabled?
 		if (mview)
 		{
@@ -369,7 +378,7 @@ main (int argc, char** argv)
 			p->addText (argv[p_file_indices.at (i)], 5, 5, 10, 1.0, 1.0, 1.0, "text_" + std::string (argv[p_file_indices.at (i)]), viewport);
 		
 
-    const auto filteredCloud = pipeline.getFilteredCloud();
+    const auto filteredCloud = pipeline.getNoiseFreeCloud();
 		
 		// Add every dimension as a possible color
 		if (!fcolorparam)

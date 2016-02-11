@@ -11,20 +11,23 @@ using namespace C44;
 
 SegmentationPipeline::SegmentationPipeline(Cloud3D::Ptr rawCloud) :
 	tree(new search::KdTree<PointXYZ>()),
-	filteredCloud(new Cloud3D),
-	cloud_normals(new PointCloud<Normal>)
+	noiseFreeCloud(new Cloud3D),
+	cloud_normals(new PointCloud<Normal>),
+  plane(nullptr),
+  normalsMinusObjectsAndPlane(new PointCloud<Normal>),
+  cloudMinusObjectsAndPlane(new Cloud3D)
 {
-	
+ 
 	pcl::PassThrough<pcl::PointXYZ> pass;
 	
 	pass.setInputCloud(rawCloud);
 	pass.setFilterFieldName ("z");
 	pass.setFilterLimits (0, 1.5);
 	
-	pass.filter(*filteredCloud);
+	pass.filter(*noiseFreeCloud);
 	
 	std::cerr << "PointCloud after filtering has: " <<
-	filteredCloud->points.size ()      <<
+	noiseFreeCloud->points.size ()      <<
 	" data points."                    <<
 	std::endl;
 	
@@ -32,16 +35,28 @@ SegmentationPipeline::SegmentationPipeline(Cloud3D::Ptr rawCloud) :
 	
 	
 	ne.setSearchMethod(tree);
-	ne.setInputCloud(filteredCloud);
+	ne.setInputCloud(noiseFreeCloud);
 	ne.setKSearch(50);
 	ne.compute(*cloud_normals);
 
+  
+}
 
+bool SegmentationPipeline::performSegmentation(){
+  if (extractPlane()){
+    int max = 1;
+    bool stillFindingStuff = true;
+    do {
+      stillFindingStuff = extractGraspableObject(SACMODEL_CYLINDER);
+    } while (stillFindingStuff && graspableObjects.size() < max);
+    return true;
+  } else {
+    return false;
+  }
 }
 
 
-
-Plane SegmentationPipeline::getPlane()
+bool SegmentationPipeline::extractPlane()
 {
 	ModelCoefficients::Ptr coefficients_plane (new ModelCoefficients);
 	PointIndices::Ptr inliers (new PointIndices);
@@ -52,7 +67,7 @@ Plane SegmentationPipeline::getPlane()
 	PointCloud<Normal>::Ptr cloud_normals2(new pcl::PointCloud<Normal>);
 	
 	// Estimate point normals
-
+	
 	// Create the segmentation object for the planar
 	// model and set all the parameters
 	seg.setOptimizeCoefficients (true);
@@ -61,14 +76,14 @@ Plane SegmentationPipeline::getPlane()
 	seg.setMethodType(SAC_RANSAC);
 	seg.setMaxIterations (100);
 	seg.setDistanceThreshold (0.03);
-	seg.setInputCloud (filteredCloud);
+	seg.setInputCloud (noiseFreeCloud);
 	seg.setInputNormals (cloud_normals);
 	// Obtain the plane inliers and coefficients
 	seg.segment (*inliers, *coefficients_plane);
 	std::cerr << "Plane coefficients: " << *coefficients_plane << std::endl;
 
 	// Extract the planar inliers from the input cloud
-	extract.setInputCloud (filteredCloud);
+	extract.setInputCloud (noiseFreeCloud);
 	extract.setIndices (inliers);
 	extract.setNegative (false);
 
@@ -80,39 +95,35 @@ Plane SegmentationPipeline::getPlane()
 							 " data points." <<
 							 std::endl;
 	
-	
-
-	
-	Plane ret = Plane(*coefficients_plane,cloud_plane,cloud_normals,inliers);
-	
-	return ret;
-
+  
+  // Extract the planar inliers from the input cloud
+  if (cloud_plane->points.size() > 0){
+    this->plane = new Plane(*coefficients_plane,cloud_plane,cloud_normals,inliers);
+    extract.setInputCloud (noiseFreeCloud);
+    extract.setIndices (plane->inliers);
+    
+    
+    // Remove the planar inliers, extract the rest
+    extract.setNegative (true);
+    extract.filter (*cloudMinusObjectsAndPlane);
+    extract_normals.setNegative (true);
+    extract_normals.setInputCloud (cloud_normals);
+    extract_normals.setIndices(plane->inliers);
+    extract_normals.filter (*normalsMinusObjectsAndPlane);
+    return true;
+  } else{
+    return false;
+  }
 }
 
-GraspableObject SegmentationPipeline::getGraspableObject(SacModel model)
+bool SegmentationPipeline::extractGraspableObject(SacModel model)
 {
 	ModelCoefficients::Ptr objectCoefficients(new ModelCoefficients);
 	ExtractIndices<PointXYZ> extract;
 	ExtractIndices<Normal> extract_normals;
-	PointCloud<Normal>::Ptr normals(new PointCloud<Normal>);
+	
 	PointIndices::Ptr inliers(new PointIndices);
-	
-	// Extract the planar inliers from the input cloud
-	
-	Plane plane = getPlane();
-	extract.setInputCloud (filteredCloud);
-	extract.setIndices (plane.inliers);
-	
-	Cloud3D::Ptr cloudMinusPlane(new Cloud3D);
-	
-	// Remove the planar inliers, extract the rest
-	extract.setNegative (true);
-	extract.filter (*cloudMinusPlane);
-	extract_normals.setNegative (true);
-  extract_normals.setInputCloud (cloud_normals);
- 	extract_normals.setIndices(plane.inliers);
-	extract_normals.filter (*normals);
-
+  PointCloud<Normal>::Ptr objectNormals(new PointCloud<Normal>);
 	
 	// Create the segmentation object for cylinder segmentation and set all the parameters
 	seg.setOptimizeCoefficients (true);
@@ -122,68 +133,47 @@ GraspableObject SegmentationPipeline::getGraspableObject(SacModel model)
 	seg.setMaxIterations (10000);
 	seg.setDistanceThreshold (0.05);
 	seg.setRadiusLimits (0, 0.1);
-	seg.setInputCloud (cloudMinusPlane);
-	seg.setInputNormals (normals);
+	seg.setInputCloud (cloudMinusObjectsAndPlane);
+	seg.setInputNormals (normalsMinusObjectsAndPlane);
 	
 	// Obtain the cylinder inliers and coefficients
 	seg.segment (*inliers, *objectCoefficients);
 	std::cerr << "Object coefficients: " << *objectCoefficients << std::endl;
 	
-	extract.setInputCloud (cloudMinusPlane);
+	extract.setInputCloud (cloudMinusObjectsAndPlane);
 	extract.setIndices (inliers);
 	extract.setNegative (false);
 	Cloud3D::Ptr cylinderCloud(new Cloud3D);
 	extract.filter(*cylinderCloud);
+  //extract_normals.filter(*objectNormals);
+  if (cylinderCloud->size() == 0){
+    return false;
+  } else {
+    //subtract out the object just found from the original input cloud
+    extract.setInputCloud (cloudMinusObjectsAndPlane);
+    extract.setNegative (true);
+    extract.setIndices (inliers);
+    extract.filter (*cloudMinusObjectsAndPlane);
+    
+    extract_normals.setInputCloud (normalsMinusObjectsAndPlane);
+    extract_normals.setNegative (true);
+    extract_normals.setIndices(inliers);
+    extract_normals.filter (*normalsMinusObjectsAndPlane);
+
+    
+    GraspableObject obj(*objectCoefficients,cylinderCloud,objectNormals);
+    graspableObjects.push_back(obj);
+    return true;
+  }
 	
-	GraspableObject ret(*objectCoefficients,cylinderCloud,normals);
 	
-	return ret;
+	
+	
 }
 
 
-
-
-BoundingBox GraspableObject::getBoundingBox() const{
-	MomentOfInertiaEstimation<PointXYZ> feature_extractor;
-	feature_extractor.setInputCloud (this->pointCloud);
-	feature_extractor.compute();
-
-	std::vector<float> moment_of_inertia;
-	std::vector<float> eccentricity;
-	pcl::PointXYZ min_point_AABB;
-	pcl::PointXYZ max_point_AABB;
-	pcl::PointXYZ min_point_OBB;
-	pcl::PointXYZ max_point_OBB;
-	pcl::PointXYZ position_OBB;
-	Eigen::Matrix3f rotational_matrix_OBB;
-	float major_value, middle_value, minor_value;
-	Vector3f major_vector, middle_vector, minor_vector;
-	Vector3f mass_center;
-
-	feature_extractor.getMomentOfInertia (moment_of_inertia);
-	feature_extractor.getEccentricity (eccentricity);
-	feature_extractor.getAABB (min_point_AABB, max_point_AABB);
-	feature_extractor.getOBB (min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
-	feature_extractor.getEigenValues (major_value, middle_value, minor_value);
-	feature_extractor.getEigenVectors (major_vector, middle_vector, minor_vector);
-	feature_extractor.getMassCenter (mass_center);
-
-
-	BoundingBox ret = {
-		moment_of_inertia,
-		eccentricity,
-		min_point_AABB,
-		max_point_AABB,
-		min_point_OBB,
-		max_point_OBB,
-		position_OBB,
-		rotational_matrix_OBB,
-		major_value,
-		middle_value,
-		minor_value,
-		major_vector, middle_vector, minor_vector,
-		mass_center
-	};
-
-	return ret;
+SegmentationPipeline::~SegmentationPipeline(){
+  delete plane;
+  
 }
+
