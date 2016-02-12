@@ -2,8 +2,7 @@
 //  Geometries.cpp
 //  PCLTestbench
 //
-//  Created by Matthew Whiteside on 2/10/16.
-//  Copyright © 2016 capstone44. All rights reserved.
+//  Created on 2/10/16.
 //
 
 #include "geometries.hpp"
