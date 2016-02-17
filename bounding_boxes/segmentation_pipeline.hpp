@@ -11,13 +11,17 @@
 #ifndef geometric_object_hpp
 #define geometric_object_hpp
 
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/statistical_outlier_removal.h>
 #include "geometries.hpp"
-namespace C44{
+#include "c44_filters.hpp"
+
+namespace c44{
 	using namespace pcl;
 	using namespace Eigen;			
 	
 	class SegmentationPipeline{
-		Cloud3D::Ptr noiseFreeCloud, cloudMinusObjectsAndPlane;
+		Cloud3D::Ptr cloudMinusObjectsAndPlane;
 		SACSegmentationFromNormals<PointXYZ, Normal> seg;
 		search::KdTree<PointXYZ>::Ptr tree;
 		PointCloud<Normal>::Ptr cloud_normals, normalsMinusObjectsAndPlane;
@@ -30,9 +34,6 @@ namespace C44{
     bool performSegmentation();
 		std::vector<GraspableObject> graspableObjects;
 		
-    Cloud3D::Ptr getNoiseFreeCloud() const{
-      return noiseFreeCloud;
-    }
     void extractObjects();
     ~SegmentationPipeline();
 	};

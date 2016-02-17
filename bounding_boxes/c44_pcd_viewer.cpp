@@ -24,7 +24,7 @@
 #include "segmentation_pipeline.hpp"
 
 using namespace pcl::console;
-using namespace C44;
+using namespace c44;
 
 typedef pcl::visualization::PointCloudColorHandler<pcl::PCLPointCloud2> ColorHandler;
 typedef ColorHandler::Ptr ColorHandlerPtr;
@@ -262,11 +262,12 @@ main (int argc, char** argv)
 		int version;
 		
 		print_highlight (stderr, "Loading "); print_value (stderr, "%s ", argv[p_file_indices.at (i)]);
-		
+    //pcd.read<PointXYZ>(argv[p_file_indices.at (i)], *xyzCloud);
 		if (pcd.read (argv[p_file_indices.at (i)], *cloud, origin, orientation, version) < 0)
 			return (-1);
     fromPCLPointCloud2(*cloud, *xyzCloud);
-		
+
+    
 
 		
 		// Calculate transform if available.
@@ -323,34 +324,24 @@ main (int argc, char** argv)
                           position_OBB.y,
                           bbox.position_OBB.z);
         Quaternionf objOrientation(bbox.rotational_matrix_OBB);
+        std::stringstream boxName, cylName;
+        boxName << "oriented bounding box" << i;
+        p->addCube(position,
+                   objOrientation,
+                   bbox.max_point_OBB.x - bbox.min_point_OBB.x,
+                   bbox.max_point_OBB.y - bbox.min_point_OBB.y,
+                   bbox.max_point_OBB.z - bbox.min_point_OBB.z, boxName.str());
         
-//        p->addCube(position,
-//                   objOrientation,
-//                   bbox.max_point_OBB.x - bbox.min_point_OBB.x,
-//                   bbox.max_point_OBB.y - bbox.min_point_OBB.y,
-//                   bbox.max_point_OBB.z - bbox.min_point_OBB.z, "OBB");
-        //
-        std::stringstream objName;
-        objName << "cylinder " << i;
-        p->addCylinder(obj.coefficients,objName.str(),viewport);
+        
+        cylName << "cylinder " << i;
+        p->addCylinder(obj.coefficients,cylName.str(),viewport);
         
       }
     } else {
       print_error("could not find plane. aborting");
       return -1;      
     }
-		
-		// Multiview enabled?
-		if (mview)
-		{
-			p->createViewPort (k * x_step, l * y_step, (k + 1) * x_step, (l + 1) * y_step, viewport);
-			k++;
-			if (k >= x_s)
-			{
-				k = 0;
-				l++;
-			}
-		}
+
 		
 		if (cloud->width * cloud->height == 0)
 		{
@@ -378,7 +369,7 @@ main (int argc, char** argv)
 			p->addText (argv[p_file_indices.at (i)], 5, 5, 10, 1.0, 1.0, 1.0, "text_" + std::string (argv[p_file_indices.at (i)]), viewport);
 		
 
-    const auto filteredCloud = pipeline.getNoiseFreeCloud();
+    //const auto filteredCloud = pipeline.getNoiseFreeCloud();
 		
 		// Add every dimension as a possible color
 		if (!fcolorparam)
@@ -441,7 +432,7 @@ main (int argc, char** argv)
 		if (p->cameraFileLoaded ())
 			print_info ("Camera parameters restored from %s.\n", p->getCameraFile ().c_str ());
 		//delete cylinderCloud;
-    
+    break;
 	}
 	
 	if (!mview && p)

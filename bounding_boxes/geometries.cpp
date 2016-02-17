@@ -6,7 +6,7 @@
 //
 
 #include "geometries.hpp"
-using namespace C44;
+using namespace c44;
 
 BoundingBox GraspableObject::getBoundingBox() const{
   MomentOfInertiaEstimation<PointXYZ> feature_extractor;

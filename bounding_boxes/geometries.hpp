@@ -23,7 +23,7 @@
 
 #include <stdio.h>
 
-namespace C44{
+namespace c44{
   using namespace pcl;
   using namespace Eigen;
   typedef PointCloud<PointXYZ> Cloud3D;
