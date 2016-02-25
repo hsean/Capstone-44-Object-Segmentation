@@ -20,11 +20,11 @@
 #include <pcl/console/time.h>
 #include <pcl/search/kdtree.h>
 #include <vtkPolyDataReader.h>
-#include <pcl/filters/voxel_grid.h>
+//#include <pcl/filters/voxel_grid.h>
 #include "segmentation_pipeline.hpp"
 
 using namespace pcl::console;
-using namespace C44;
+using namespace c44;
 
 typedef pcl::visualization::PointCloudColorHandler<pcl::PCLPointCloud2> ColorHandler;
 typedef ColorHandler::Ptr ColorHandlerPtr;
@@ -235,7 +235,7 @@ main (int argc, char** argv)
 #if VTK_MAJOR_VERSION>=6 || (VTK_MAJOR_VERSION==5 && VTK_MINOR_VERSION>6)
 	boost::shared_ptr<pcl::visualization::PCLPlotter> ph;
 #endif
-	// Using min_p, max_p to set the global Y min/max range for the histogram
+	// Us ing min_p, max_p to set the global Y min/max range for the histogram
 	float min_p = FLT_MAX; float max_p = -FLT_MAX;
 	
 	int k = 0, l = 0, viewport = 0;
@@ -262,11 +262,12 @@ main (int argc, char** argv)
 		int version;
 		
 		print_highlight (stderr, "Loading "); print_value (stderr, "%s ", argv[p_file_indices.at (i)]);
-		
+    //pcd.read<PointXYZ>(argv[p_file_indices.at (i)], *xyzCloud);
 		if (pcd.read (argv[p_file_indices.at (i)], *cloud, origin, orientation, version) < 0)
 			return (-1);
     fromPCLPointCloud2(*cloud, *xyzCloud);
-		
+
+    
 
 		
 		// Calculate transform if available.
@@ -312,36 +313,35 @@ main (int argc, char** argv)
     
     
 		SegmentationPipeline pipeline(xyzCloud);
-		
-		
-		auto mug = pipeline.getGraspableObject(SACMODEL_CYLINDER);
-		
-		
-		const auto bbox = mug.getBoundingBox();
+    if (pipeline.performSegmentation()){
+      for (int i = 0; i < pipeline.graspableObjects.size(); i++){
+        auto obj = pipeline.graspableObjects[i];
+        
+        
+        const auto bbox = obj.getBoundingBox();
+        
+        Vector3f position(bbox.position_OBB.x, bbox.
+                          position_OBB.y,
+                          bbox.position_OBB.z);
+        Quaternionf objOrientation(bbox.rotational_matrix_OBB);
+        std::stringstream boxName, cylName;
+        boxName << "oriented bounding box" << i;
+        p->addCube(position,
+                   objOrientation,
+                   bbox.max_point_OBB.x - bbox.min_point_OBB.x,
+                   bbox.max_point_OBB.y - bbox.min_point_OBB.y,
+                   bbox.max_point_OBB.z - bbox.min_point_OBB.z, boxName.str());
+        
+        
+        cylName << "cylinder " << i;
+        p->addCylinder(obj.coefficients,cylName.str(),viewport);
+        
+      }
+    } else {
+      print_error("could not find plane. aborting");
+      return -1;      
+    }
 
-		Vector3f position(bbox.position_OBB.x, bbox.
-                      position_OBB.y,
-											bbox.position_OBB.z);
-		Quaternionf mugOrientation(bbox.rotational_matrix_OBB);
-		
-		p->addCube(position,
-							 mugOrientation,
-							 bbox.max_point_OBB.x - bbox.min_point_OBB.x,
-							 bbox.max_point_OBB.y - bbox.min_point_OBB.y,
-							 bbox.max_point_OBB.z - bbox.min_point_OBB.z, "OBB");
-		
-    // p->addCylinder(mug.coefficients,"cylinder",viewport);
-		// Multiview enabled?
-		if (mview)
-		{
-			p->createViewPort (k * x_step, l * y_step, (k + 1) * x_step, (l + 1) * y_step, viewport);
-			k++;
-			if (k >= x_s)
-			{
-				k = 0;
-				l++;
-			}
-		}
 		
 		if (cloud->width * cloud->height == 0)
 		{
@@ -369,7 +369,7 @@ main (int argc, char** argv)
 			p->addText (argv[p_file_indices.at (i)], 5, 5, 10, 1.0, 1.0, 1.0, "text_" + std::string (argv[p_file_indices.at (i)]), viewport);
 		
 
-    const auto filteredCloud = pipeline.getFilteredCloud();
+    //const auto filteredCloud = pipeline.getNoiseFreeCloud();
 		
 		// Add every dimension as a possible color
 		if (!fcolorparam)
@@ -432,7 +432,7 @@ main (int argc, char** argv)
 		if (p->cameraFileLoaded ())
 			print_info ("Camera parameters restored from %s.\n", p->getCameraFile ().c_str ());
 		//delete cylinderCloud;
-    
+    break;
 	}
 	
 	if (!mview && p)
