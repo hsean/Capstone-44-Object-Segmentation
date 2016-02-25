@@ -1,0 +1,44 @@
+Script started on Wed 24 Feb 2016 11:15:03 PM PST
+ 
+Reading Point Cloud
+size of original cloud: 172800 points
+TIME TEST DURATION: 1000
+RUNNING PASSTHROUGH FILTER TESTS
+    2: passThrough filter, custom 1: 64604 points
+    0: passThrough filter, custom 2: 64604 points
+    0: passThrough filter, custom 3: 64604 points
+RUNNING VOXEL FILTER TEST
+    4: voxel filter, default: 4620 points
+    4: voxel filter, custom 1: 1553 points
+    3: voxel filter, custom 2: 591 points
+    3: voxel filter, custom 3: 226 points
+RUNNING NOISE REMOVAL TEST
+  440: noise removal, default: 171414 points
+  860: noise removal, custom 1: 171227 points
+  288: noise removal, custom 2: 171972 points
+  445: noise removal, custom 3: 171822 points
+  442: noise removal, custom 4: 164459 points
+RUNNING PLANE SEGMENTATION TEST
+PointCloud representing the planar component: 27219 data points.
+ 2479: plane segmentation, default: 27219 points
+[1;31m[pcl::SampleConsensusModelPlane::optimizeModelCoefficients] Not enough inliers found to support a model (0)! Returning the same coefficients.
+[0;mERROR: No plane found
+PointCloud representing the planar component: 27219 data points.
+ 2923: plane segmentation, custom settings 2: 27219 points
+PointCloud representing the planar component: 27219 data points.
+ 2461: plane segmentation, custom settings 3: 27219 points
+PointCloud representing the planar component: 27219 data points.
+ 2474: plane segmentation, custom settings 4: 27219 points
+PointCloud representing the planar component: 27219 data points.
+ 2467: plane segmentation, custom settings 5: 27219 points
+PointCloud representing the planar component: 27219 data points.
+ 2483: plane segmentation, custom settings 6: 27219 points
+PointCloud representing the planar component: 11535 data points.
+ 2512: plane segmentation, custom settings 7: 11535 points
+PointCloud representing the planar component: 55902 data points.
+  539: plane segmentation, custom settings 8: 55902 points
+RUNNING EXTRACT PRISM TEST
+PRISM: OBJECTS CLOUD
+ 2329: polygonal prism, default: 22938 points
+
+Script done on Wed 24 Feb 2016 11:16:45 PM PST

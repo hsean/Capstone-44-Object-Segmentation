@@ -1,0 +1,2 @@
+#!/bin/bash 
+pcl_viewer -fc 255,0,0 -fc 0,255,0 -fc 255,0,255 -multiview 1 T01_passthrough_01.pcd T01_passthrough_02.pcd T01_passthrough_03.pcd

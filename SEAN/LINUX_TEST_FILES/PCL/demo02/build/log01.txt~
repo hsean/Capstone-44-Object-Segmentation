@@ -1,0 +1,56 @@
+Script started on Wed 24 Feb 2016 11:15:03 PM PST
+]0;hsean@ubuntu: ~/Documents/pcl/tests/test04_demo2FunctionBenchmarks/buildhsean@ubuntu:~/Documents/pcl/tests/test04_demo2FunctionBenchmarks/build$ ./view.sh ls[Kcd build/ls[Kcd demo02_testwDemo01Code/ls[Kcd .../view.shls[Kcd build/demo01ls[Kcd ..pcl_viewer -fc 255,0,0 -fc 0,255,0 -fc 255,0,255 -fc 0,100,2555 demo_plane_0.pcd demo_plane_1.pcd demo_plane_2.pcd demo_plane_3.pcd [A]0;hsean@ubuntu: ~/Documents/pcl/tests/test04_demo2FunctionBenchmarks/buildhsean@ubuntu:~/Documents/pcl/tests/test04_demo2FunctionBenchmarks/build$ cd ..[K
+[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[3Plscd demo01build/ls[K./view.sh[4Pcd ..[3Plscd demo02_testwDemo01Code/ls[Kcd build/ls[K./view.sh [K./view.sh ls[Kcd build/ls[Kcd build/ls[K./view.sh [K./demo_02_functionTests ../../re[K[K../realSense/correct_orientatioon/five_objects2.pcd 
+Reading Point Cloud
+size of original cloud: 172800 points
+TIME TEST DURATION: 1000
+RUNNING PASSTHROUGH FILTER TESTS
+    2: passThrough filter, custom 1: 64604 points
+    0: passThrough filter, custom 2: 64604 points
+    0: passThrough filter, custom 3: 64604 points
+RUNNING VOXEL FILTER TEST
+    4: voxel filter, default: 4620 points
+    4: voxel filter, custom 1: 1553 points
+    3: voxel filter, custom 2: 591 points
+    3: voxel filter, custom 3: 226 points
+RUNNING NOISE REMOVAL TEST
+  440: noise removal, default: 171414 points
+  860: noise removal, custom 1: 171227 points
+  288: noise removal, custom 2: 171972 points
+  445: noise removal, custom 3: 171822 points
+  442: noise removal, custom 4: 164459 points
+RUNNING PLANE SEGMENTATION TEST
+PointCloud representing the planar component: 27219 data points.
+ 2479: plane segmentation, default: 27219 points
+[1;31m[pcl::SampleConsensusModelPlane::optimizeModelCoefficients] Not enough inliers found to support a model (0)! Returning the same coefficients.
+[0;mERROR: No plane found
+PointCloud representing the planar component: 27219 data points.
+ 2923: plane segmentation, custom settings 2: 27219 points
+PointCloud representing the planar component: 27219 data points.
+ 2461: plane segmentation, custom settings 3: 27219 points
+PointCloud representing the planar component: 27219 data points.
+ 2474: plane segmentation, custom settings 4: 27219 points
+PointCloud representing the planar component: 27219 data points.
+ 2467: plane segmentation, custom settings 5: 27219 points
+PointCloud representing the planar component: 27219 data points.
+ 2483: plane segmentation, custom settings 6: 27219 points
+PointCloud representing the planar component: 11535 data points.
+ 2512: plane segmentation, custom settings 7: 11535 points
+PointCloud representing the planar component: 55902 data points.
+  539: plane segmentation, custom settings 8: 55902 points
+RUNNING EXTRACT PRISM TEST
+PRISM: OBJECTS CLOUD
+ 2329: polygonal prism, default: 22938 points
+]0;hsean@ubuntu: ~/Documents/pcl/tests/test04_demo2FunctionBenchmarks/buildhsean@ubuntu:~/Documents/pcl/tests/test04_demo2FunctionBenchmarks/build$ script
+Script started, file is typescript
+]0;hsean@ubuntu: ~/Documents/pcl/tests/test04_demo2FunctionBenchmarks/buildhsean@ubuntu:~/Documents/pcl/tests/test04_demo2FunctionBenchmarks/build$ endscript
+No command 'endscript' found, did you mean:
+ Command 'enscript' from package 'enscript' (universe)
+endscript: command not found
+]0;hsean@ubuntu: ~/Documents/pcl/tests/test04_demo2FunctionBenchmarks/buildhsean@ubuntu:~/Documents/pcl/tests/test04_demo2FunctionBenchmarks/build$ exit
+exit
+Script done, file is typescript
+]0;hsean@ubuntu: ~/Documents/pcl/tests/test04_demo2FunctionBenchmarks/buildhsean@ubuntu:~/Documents/pcl/tests/test04_demo2FunctionBenchmarks/build$ exit
+exit
+
+Script done on Wed 24 Feb 2016 11:16:45 PM PST

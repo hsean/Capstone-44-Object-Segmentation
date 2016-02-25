@@ -1,0 +1,3 @@
+#!/bin/bash 
+pcl_viewer -multiview 1 T03_noise_01.pcd T03_noise_02.pcd T03_noise_03.pcd T03_noise_04.pcd T03_noise_05.pcd table_scene_lms400.pcd
+

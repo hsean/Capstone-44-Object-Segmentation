@@ -1,0 +1,3 @@
+#!/bin/bash 
+pcl_viewer -multiview 1 T04_planeInliers_01 T04_planeInliers_03 T04_planeInliers_04 T04_planeInliers_05 T04_planeInliers_06 T04_planeInliers_07 T04_planeInliers_08 T04_planeInliers_09
+
