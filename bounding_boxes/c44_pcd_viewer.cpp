@@ -386,7 +386,7 @@ main (int argc, char** argv)
 				else if (cloud->fields[f].name == "label")
 				{
 					label_idx = f + 1;
-					color_handler.reset (new pcl::visualization::PointCloudColorHandlerLabelField<pcl::PCLPointCloud2> (cloud, !use_optimal_l_colors));
+//color_handler.reset (new pcl::visualization::PointCloudColorHandlerLabelField<pcl::PCLPointCloud2> (cloud, !use_optimal_l_colors));
 				}
 				else
 				{
