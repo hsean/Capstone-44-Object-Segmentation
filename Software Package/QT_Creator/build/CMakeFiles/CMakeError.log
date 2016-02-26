@@ -1,0 +1,96 @@
+Determining if the Q_WS_WIN exist failed with the following output:
+Change Dir: /home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec1323681006/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec1323681006.dir/build.make CMakeFiles/cmTryCompileExec1323681006.dir/build
+make[1]: Entering directory `/home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec1323681006.dir/CheckSymbolExists.cxx.o
+/usr/bin/c++    -I/usr/include/qt4    -o CMakeFiles/cmTryCompileExec1323681006.dir/CheckSymbolExists.cxx.o -c /home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+/home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx: In function ‘int main(int, char**)’:
+/home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:8:19: error: ‘Q_WS_WIN’ was not declared in this scope
+   return ((int*)(&Q_WS_WIN))[argc];
+                   ^
+make[1]: Leaving directory `/home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp'
+make[1]: *** [CMakeFiles/cmTryCompileExec1323681006.dir/CheckSymbolExists.cxx.o] Error 1
+make: *** [cmTryCompileExec1323681006/fast] Error 2
+
+File /home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
+/* */
+#include <QtCore/qglobal.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef Q_WS_WIN
+  return ((int*)(&Q_WS_WIN))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the Q_WS_QWS exist failed with the following output:
+Change Dir: /home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec1527232251/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec1527232251.dir/build.make CMakeFiles/cmTryCompileExec1527232251.dir/build
+make[1]: Entering directory `/home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec1527232251.dir/CheckSymbolExists.cxx.o
+/usr/bin/c++    -I/usr/include/qt4    -o CMakeFiles/cmTryCompileExec1527232251.dir/CheckSymbolExists.cxx.o -c /home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+/home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx: In function ‘int main(int, char**)’:
+/home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:8:19: error: ‘Q_WS_QWS’ was not declared in this scope
+   return ((int*)(&Q_WS_QWS))[argc];
+                   ^
+make[1]: *** [CMakeFiles/cmTryCompileExec1527232251.dir/CheckSymbolExists.cxx.o] Error 1
+make[1]: Leaving directory `/home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp'
+make: *** [cmTryCompileExec1527232251/fast] Error 2
+
+File /home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
+/* */
+#include <QtCore/qglobal.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef Q_WS_QWS
+  return ((int*)(&Q_WS_QWS))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the Q_WS_MAC exist failed with the following output:
+Change Dir: /home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec177657393/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec177657393.dir/build.make CMakeFiles/cmTryCompileExec177657393.dir/build
+make[1]: Entering directory `/home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec177657393.dir/CheckSymbolExists.cxx.o
+/usr/bin/c++    -I/usr/include/qt4    -o CMakeFiles/cmTryCompileExec177657393.dir/CheckSymbolExists.cxx.o -c /home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+/home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx: In function ‘int main(int, char**)’:
+/home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:8:19: error: ‘Q_WS_MAC’ was not declared in this scope
+   return ((int*)(&Q_WS_MAC))[argc];
+                   ^
+make[1]: *** [CMakeFiles/cmTryCompileExec177657393.dir/CheckSymbolExists.cxx.o] Error 1
+make[1]: Leaving directory `/home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp'
+make: *** [cmTryCompileExec177657393/fast] Error 2
+
+File /home/saroj/Capstone_Folder/QT_Creator/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
+/* */
+#include <QtCore/qglobal.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef Q_WS_MAC
+  return ((int*)(&Q_WS_MAC))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
