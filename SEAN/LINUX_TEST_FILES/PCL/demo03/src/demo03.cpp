@@ -318,7 +318,7 @@ void log_getPrism(pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud,
         //pcl::copyPointCloud(*sourceCloud, *sourceCloud);  // save original cloud
 	time_before_execution = boost::posix_time::microsec_clock::local_time();  // time before
 	result = c44::getPrism(sourceCloud, objectsCloud, minRadius, maxRadius, ransacIterations, 
-	                       thresholdDistance, maxObjectDistance, minObjectDistance);
+	                       thresholdDistance, minObjectDistance, maxObjectDistance);
 	time_after_execution = boost::posix_time::microsec_clock::local_time(); // time after
 	if(result < 0)
 	{
