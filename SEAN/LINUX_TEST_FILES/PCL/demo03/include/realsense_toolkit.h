@@ -110,4 +110,36 @@ int getPrism(pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud,
              double minRadius, double maxRadius,				
              int ransacIterations, double thresholdDistance, 
              double minObjectDistance, double maxObjectDistance);
+
+/**
+ * desc: This function takes a source PCD image an segments out objects found 
+ *       on a plane. The source image is downsampled and filtered prior to finding
+ *       a plane using RANSAC.
+ * param: (in) sourceCloud - ptr to input cloud
+ *        (out) objectsCloud - returns cloud with objects above plane
+ *        (in) leafSize - size of voxel in cm^3. (ex. 0.01 = 1 cm)
+ *        (in) neighborsToAnalyze - number of nearest neighbors to analyze (ex. 50)
+ *        (in) stdDeviation - standard deviation used to find outliers (ex. 1.0)   
+ *        (in) minRadius - minimum radius between plane and camera in radians (ex. 0)
+ *        (in) maxRadius - maximum radius between plane and camera in radians (ex. 1.57)
+ *        (in) ransacIterations - maximum amount of times RANSAC can estimate plane (ex. 1000)
+ *        (in) thresholdDistance - range of points considered inliers from plane model (ex 0.01 = 1cm)
+ *        (in) minObjectDistance - lowest point of objects above a plane (ex 0.01 = 1cm)
+ *        (in) maxObjectDistance - highest point of objects above a plane (ex 0.2 = 20cm)
+ * pre-cond: source cloud must contain a non-empty PCD file. Both sourceCloud and objectsCloud
+ *           must have objects initialized before being passed as parameters.
+ * post-cond: filtered data is passed back through objectsCloud
+ * ret: -1 if a plane could not be found else
+ *      -2 if source PCD is empty
+ *       0 if succesfull
+ */
+int segObjects(pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud,
+                        pcl::PointCloud<pcl::PointXYZ>::Ptr objectsCloud,
+                        float leafSize, int neighborsToAnalyze, double stdDeviation,
+                        double minRadius, double maxRadius,
+                        int ransacIterations, double thresholdDistance,
+                        double minObjectDistance, double maxObjectDistance);
 }
+
+
+

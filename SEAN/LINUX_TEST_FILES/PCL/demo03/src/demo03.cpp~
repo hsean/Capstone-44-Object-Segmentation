@@ -9,10 +9,10 @@
 #include "realsense_toolkit.h"
 #include "realsense_toolkit_tests.h"
 
-#define PASSTHROUGH_FILTER_TEST
-#define VOXEL_FILTER_TEST
-#define NOISE_REMOVAL_TEST
-#define EXTRACT_PRISM_DATA_TEST
+//#define PASSTHROUGH_FILTER_TEST
+//#define VOXEL_FILTER_TEST
+//#define NOISE_REMOVAL_TEST
+//#define EXTRACT_PRISM_DATA_TEST
 #define SEGMENT_OBJECTS_TEST
 
 #define LINUX

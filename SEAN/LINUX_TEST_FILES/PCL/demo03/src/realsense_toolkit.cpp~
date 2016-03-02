@@ -280,15 +280,15 @@ int c44::segObjects(pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud,
                     int ransacIterations, double thresholdDistance,
                     double minObjectDistance, double maxObjectDistance)
 {
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_objects (new pcl::PointCloud<pcl::PointXYZ>);
+	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
+	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_objects (new pcl::PointCloud<pcl::PointXYZ>);
 	int result = 0;         // catch return from function calls
 
 	// downsample source PCD image
-	c44::voxelFilter(sourceCloud, cloud_filtered, leafSize);  // call voxel filter
+	c44::voxelFilter(sourceCloud, sourceCloud, leafSize);  // call voxel filter
 	
 	// find objects on top of plane
-	result = c44::getPrism(cloud_filtered, cloud_objects, minRadius, maxRadius, ransacIterations, 
+	result = c44::getPrism(sourceCloud, sourceCloud, minRadius, maxRadius, ransacIterations, 
 	                       thresholdDistance, minObjectDistance, maxObjectDistance);
 						   
 	// check for errors from getPrism() 
@@ -298,7 +298,7 @@ int c44::segObjects(pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud,
 	}
 	
 	// remove noise from objects PCD using gaussian filter
-	c44::removeNoise(cloud_objects, objectsCloud, neighborsToAnalyze, stdDeviation);
+	c44::removeNoise(sourceCloud, objectsCloud, neighborsToAnalyze, stdDeviation);
 	
 	return 0;
 }
