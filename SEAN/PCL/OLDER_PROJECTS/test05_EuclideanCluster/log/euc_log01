@@ -1,0 +1,35 @@
+Script started on Tue 01 Mar 2016 10:07:34 PM PST
+]0;hsean@ubuntu: ~/Documents/pcl/tests/test05_EuclideanCluster/buildhsean@ubuntu:~/Documents/pcl/tests/test05_EuclideanCluster/build$ ./demo03 ../../../realSense/correct_orientation/five_objects2.pcd 
+Reading Point Cloud
+size of original cloud: 172800 points
+RUNNING EUCLIDEAN CLUSTER TEST
+PointCloud representing the Cluster: 109 data points.
+PointCloud representing the Cluster: 76 data points.
+PointCloud representing the Cluster: 69 data points.
+PointCloud representing the Cluster: 62 data points.
+PointCloud representing the Cluster: 24 data points.
+   10: Euclidean Cluster: 355 points
+]0;hsean@ubuntu: ~/Documents/pcl/tests/test05_EuclideanCluster/buildhsean@ubuntu:~/Documents/pcl/tests/test05_EuclideanCluster/build$ ./demo03 ../../../realSense/correct_orientation/five_objects2.pcd 
+Reading Point Cloud
+size of original cloud: 172800 points
+RUNNING EUCLIDEAN CLUSTER TEST
+PointCloud representing the Cluster: 109 data points.
+PointCloud representing the Cluster: 76 data points.
+PointCloud representing the Cluster: 69 data points.
+PointCloud representing the Cluster: 62 data points.
+PointCloud representing the Cluster: 24 data points.
+   10: Euclidean Cluster: 355 points
+]0;hsean@ubuntu: ~/Documents/pcl/tests/test05_EuclideanCluster/buildhsean@ubuntu:~/Documents/pcl/tests/test05_EuclideanCluster/build$ exit[K[K[K[K./demo03 ../../../realSense/correct_orientation/five_objects2.pcd [1P[1@3
+Reading Point Cloud
+size of original cloud: 172800 points
+RUNNING EUCLIDEAN CLUSTER TEST
+PointCloud representing the Cluster: 108 data points.
+PointCloud representing the Cluster: 77 data points.
+PointCloud representing the Cluster: 75 data points.
+PointCloud representing the Cluster: 60 data points.
+PointCloud representing the Cluster: 21 data points.
+    9: Euclidean Cluster: 353 points
+]0;hsean@ubuntu: ~/Documents/pcl/tests/test05_EuclideanCluster/buildhsean@ubuntu:~/Documents/pcl/tests/test05_EuclideanCluster/build$ exit
+exit
+
+Script done on Tue 01 Mar 2016 10:08:17 PM PST
