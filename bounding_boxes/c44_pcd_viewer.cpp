@@ -370,6 +370,7 @@ main (int argc, char** argv)
     return (-1);
 
   // Go through PCD files
+  BoundingBox* goldenModel = nullptr;
   for (size_t m = 0; m < numRows; m++)
   {
     for (size_t j = 0; j < numCols; ++j)
@@ -477,8 +478,14 @@ main (int argc, char** argv)
         for (int i = 0; i < pipeline.graspableObjects.size(); i++){
           auto obj = pipeline.graspableObjects[i];
           
-          
+          float difference;
           const auto bbox = obj.getBoundingBox();
+          if (goldenModel == nullptr){
+            goldenModel = new BoundingBox(obj.pointCloud);
+            difference = 0.0;
+          } else{
+            difference = bbox - *goldenModel;
+          }
           
           Vector3f position(bbox.position_OBB.x, bbox.
                             position_OBB.y,

@@ -30,18 +30,24 @@ namespace c44{
 
   struct BoundingBox{
   public:
-      //from documentation/tutorials/moment_of_inertia.php#moment-of-inertia
-      const std::vector<float> moment_of_inertia;
-      const std::vector<float> eccentricity;
-      const PointXYZ min_point_AABB;
-      const PointXYZ max_point_AABB;
-      const PointXYZ min_point_OBB;
-      const PointXYZ max_point_OBB;
-      const PointXYZ position_OBB;
-      const Matrix3f rotational_matrix_OBB;
-      const float major_value, middle_value, minor_value;
-      const Vector3f major_vector, middle_vector, minor_vector;
-      const Vector3f centroid;
+    BoundingBox(Cloud3D::Ptr cloud);
+    
+    //following documentation/tutorials/moment_of_inertia.php#moment-of-inertia
+    std::vector<float> moment_of_inertia;
+    std::vector<float> eccentricity;
+    PointXYZ min_point_AABB;
+    PointXYZ max_point_AABB;
+    PointXYZ min_point_OBB;
+    PointXYZ max_point_OBB;
+    PointXYZ position_OBB;
+    Matrix3f rotational_matrix_OBB;
+    float major_value, middle_value, minor_value;
+    Vector3f major_vector, middle_vector, minor_vector;
+    Vector3f centroid;
+    
+    //returns the 1 - determinant of transformation
+    // between `this` and the rhs
+    float operator -(const BoundingBox& rhs) const;
   };
 
 
