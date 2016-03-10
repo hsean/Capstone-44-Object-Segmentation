@@ -16,7 +16,7 @@ namespace c44
 {
   namespace filters{
     using namespace pcl;
-  //Sean's code
+    //Sean's code
     void cutoffZ(PointCloud<PointXYZ>::Ptr source,
                   PointCloud<PointXYZ>::Ptr result,
                   float maxZ = 1.5);
@@ -26,8 +26,8 @@ namespace c44
     void downsample(PointCloud<PointXYZ>::Ptr source,
                     PointCloud<PointXYZ>::Ptr result,
                     float voxelSize = 0.01);
-    void removeStatOutliers(pcl::PointCloud<pcl::PointXYZ>::Ptr source,
-                PointCloud<pcl::PointXYZ>::Ptr result);
+    void removeStatOutliers(PointCloud<pcl::PointXYZ>::Ptr source,
+                PointCloud<PointXYZ>::Ptr result);
   }
 }
 
