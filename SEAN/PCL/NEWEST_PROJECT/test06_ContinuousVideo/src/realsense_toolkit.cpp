@@ -309,16 +309,17 @@ int c44::segObjects(pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud,
  * desc: This function uses a "Euclidean Cluster Extraction" algorithm to pair
  *       separate data in a Point Cloud into separate objects.
  * param: (in) sourceCloud - ptr to input cloud
- *        (in) cluster_indicies - ojects that holds each cluster as an element of
- *                                a vector. cluster_indices[0] is cluster 1, and
- *                                cluster_indices[1] is cluster 2, and so on.
+ *        (out) cluster_indicies - ojects that holds each cluster as an element of
+ *                                 a vector. cluster_indices[0] is cluster 1, and
+ *                                 cluster_indices[1] is cluster 2, and so on.
  *        (in) clusterTolerance - The maximum distance between points in the
  *                                same cluster (e.g. 0.02 = 2cm)
  *        (in) minClusterSize - minimum number of points in a single cluster 
  *        (in) maxClusterSize - minimum number of points in a single cluster
+ * pre-cond: cluster_indicies needs to be declared before function call
  */
 void c44::clusterExtraction(pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud,
-                            std::vector<pcl::PointIndices>& cluster_indices,
+                            std::vector<pcl::PointIndices>* cluster_indices,
                             double clusterTolerance, int minClusterSize, 
                             int maxClusterSize)
 {
@@ -334,32 +335,5 @@ void c44::clusterExtraction(pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud,
 	ec.setMaxClusterSize (maxClusterSize);
 	ec.setSearchMethod (tree);
 	ec.setInputCloud (sourceCloud);
-	ec.extract (cluster_indices);
-
-	// move each cluster into a separate PCD file
-
-	#ifdef DEBUG
-	// TODO: fix passing cluster_indices through parameter. Right now passing out cluster_indices and then running the loop
-	//       below results in PCD files that, while not empty, display nothing
-	int j = 0;
-	for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
-	{
-		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
-		for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); ++pit)
-		{ 
-			cloud_cluster->points.push_back (sourceCloud->points[*pit]); //*
-		}
-		
-		cloud_cluster->width = cloud_cluster->points.size ();
-		cloud_cluster->height = 1;
-		cloud_cluster->is_dense = true;
-		
-		// write out cluster as a PCD file
-		std::cout << "PointCloud representing the Cluster: " << cloud_cluster->points.size () << " data points." << std::endl;
-		std::stringstream ss;
-		ss << "../pictures/cloud_cluster_" << j << ".pcd";
-		writer.write<pcl::PointXYZ> (ss.str (), *cloud_cluster, false); //*
-		j++;
-	}	
-	#endif
+	ec.extract (*cluster_indices);
 }

@@ -580,7 +580,7 @@ void log_getClusters(pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud,
 	}
 					
 	// find clusters
-	c44::clusterExtraction(objectsCloud, cluster_indices, clusterTolerance, 
+	c44::clusterExtraction(objectsCloud, &cluster_indices, clusterTolerance, 
 	                       minClusterSize, maxClusterSize);
 						   
 	// capture time at end of execution
@@ -589,10 +589,9 @@ void log_getClusters(pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud,
 	#ifdef DEBUG
 	difference = time_after_execution - time_before_execution;  // get execution time
 	std::cout << std::setw(5) << difference.total_milliseconds() << ": "
-		      << flavorText << objectsCloud->points.size() 
-		      << " points" << std::endl;
-	
-/*		  
+	          << flavorText << objectsCloud->points.size() 
+	          << " points" << std::endl;
+			  
 	// move each cluster into a separate PCD file
 	int j = 0;
 	for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
@@ -600,7 +599,7 @@ void log_getClusters(pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud,
 		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
 		for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); ++pit)
 		{ 
-			cloud_cluster->points.push_back (sourceCloud->points[*pit]); //*
+			cloud_cluster->points.push_back (objectsCloud->points[*pit]); //*
 		}
 		
 		cloud_cluster->width = cloud_cluster->points.size ();
@@ -613,7 +612,6 @@ void log_getClusters(pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud,
 		ss << pcdFileName << j << ".pcd";
 		writer.write<pcl::PointXYZ> (ss.str (), *cloud_cluster, false); //*
 		j++;
-	}
-*/		  
+	}	  
 	#endif				   
 }

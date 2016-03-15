@@ -151,16 +151,17 @@ int segObjects(pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud,
  * desc: This function uses a "Euclidean Cluster Extraction" algorithm to pair
  *       separate data in a Point Cloud into separate objects.
  * param: (in) sourceCloud - ptr to input cloud
- *        (in) cluster_indicies - ojects that holds each cluster as an element of
- *                                a vector. cluster_indices[0] is cluster 1, and
- *                                cluster_indices[1] is cluster 2, and so on.
+ *        (out) cluster_indicies - ojects that holds each cluster as an element of
+ *                                 a vector. cluster_indices[0] is cluster 1, and
+ *                                 cluster_indices[1] is cluster 2, and so on.
  *        (in) clusterTolerance - The maximum distance between points in the
  *                                same cluster (e.g. 0.02 = 2cm)
  *        (in) minClusterSize - minimum number of points in a single cluster 
  *        (in) maxClusterSize - minimum number of points in a single cluster
+ * pre-cond: cluster_indicies needs to be declared before function call
  */
  void clusterExtraction(pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud,
-                        std::vector<pcl::PointIndices>& cluster_indices,
+                        std::vector<pcl::PointIndices>* cluster_indices,
                         double clusterTolerance, int minClusterSize, 
                         int maxClusterSize);
 }
