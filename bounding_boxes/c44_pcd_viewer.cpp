@@ -478,13 +478,13 @@ main (int argc, char** argv)
         for (int i = 0; i < pipeline.graspableObjects.size(); i++){
           auto obj = pipeline.graspableObjects[i];
           
-          float difference;
+          float accuracy;
           const auto bbox = obj.getBoundingBox();
           if (goldenModel == nullptr){
             goldenModel = new BoundingBox(obj.pointCloud);
-            difference = 0.0;
+            accuracy = goldenModel->accuracyWRT(*goldenModel);
           } else{
-            difference = bbox - *goldenModel;
+            accuracy = bbox.accuracyWRT(*goldenModel);
           }
           
           Vector3f position(bbox.position_OBB.x, bbox.
@@ -500,6 +500,18 @@ main (int argc, char** argv)
                      bbox.max_point_OBB.z - bbox.min_point_OBB.z,
                      boxName.str(),
                      viewport);
+          
+//          boxName.clear();
+//          boxName << "AA bounding box" << m << ", " << j;
+//          p->addCube(bbox.min_point_AABB.x,
+//                     bbox.max_point_AABB.x,
+//                     bbox.min_point_AABB.y,
+//                     bbox.max_point_AABB.y,
+//                     bbox.min_point_AABB.z,
+//                     bbox.max_point_AABB.z, 1.0, 1.0, 0.0,
+//                     boxName.str(),
+//                     viewport);
+          
           p->setRepresentationToWireframeForAllActors();
           
           MomentOfInertiaEstimation<PointXYZ> feature_extractor;
@@ -527,7 +539,7 @@ main (int argc, char** argv)
                      max_point_OBB.z - min_point_OBB.z,
                      boxName.str(),
                      viewport);
-          p->setRepresentationToSurfaceForAllActors();
+          //p->setRepresentationToSurfaceForAllActors();
 
 //          PointXYZ p0(bbox.max_point_OBB.x,
 //                      bbox.max_point_OBB.y,
@@ -543,6 +555,15 @@ main (int argc, char** argv)
 //            p->addLine(p0, p1,0.0,1.0,0.0,lineID.str(),viewport);
 //          }
 
+          if (mview){
+            std::stringstream s;
+            //s << "Voxel size = " << voxelSize;
+            //        s << ", iterationDivisor = " << iterationDivisor;
+            s << "time: " << runTime << endl;
+            s << "accuracy: " << accuracy << endl;
+            p->addText (s.str(), 5, 30, 10, 1.0, 1.0, 1.0,
+                        s.str(), viewport);
+          }
 
           
           
@@ -562,14 +583,6 @@ main (int argc, char** argv)
       p->addPointCloud (cloud, geometry_handler, color_handler, origin, orientation, cloud_name.str (), viewport);
       
       
-      if (mview){
-        std::stringstream s;
-        s << "Voxel size = " << voxelSize;        
-        s << ", iterationDivisor = " << iterationDivisor;
-        s << ", time = " << runTime;
-        p->addText (s.str(), 5, 5, 10, 1.0, 1.0, 1.0,
-                    s.str(), viewport);
-      }
       
       // Add every dimension as a possible color
       if (!fcolorparam)
@@ -583,11 +596,11 @@ main (int argc, char** argv)
             rgb_idx = f + 1;
             color_handler.reset (new pcl::visualization::PointCloudColorHandlerRGBField<pcl::PCLPointCloud2> (cloud));
           }
-          else if (cloud->fields[f].name == "label")
-          {
-            label_idx = f + 1;
-            color_handler.reset (new pcl::visualization::PointCloudColorHandlerLabelField<pcl::PCLPointCloud2> (cloud, !use_optimal_l_colors));
-          }
+//          else if (cloud->fields[f].name == "label")
+//          {
+//            label_idx = f + 1;
+//            color_handler.reset (new pcl::visualization::PointCloudColorHandlerLabelField<pcl::PCLPointCloud2> (cloud, !use_optimal_l_colors));
+//          }
           else
           {
             if (!isValidFieldName (cloud->fields[f].name))
