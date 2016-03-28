@@ -478,7 +478,7 @@ main (int argc, char** argv)
         for (int i = 0; i < pipeline.graspableObjects.size(); i++){
           auto obj = pipeline.graspableObjects[i];
           
-          float accuracy;
+          AccuracyComponents accuracy;
           const auto bbox = obj.getBoundingBox();
           if (goldenModel == nullptr){
             goldenModel = new BoundingBox(obj.pointCloud);
@@ -487,13 +487,55 @@ main (int argc, char** argv)
             accuracy = bbox.accuracyWRT(*goldenModel);
           }
           
-          Vector3f position(bbox.position_OBB.x, bbox.
-                            position_OBB.y,
-                            bbox.position_OBB.z);
+          Vector3f _maxPoint(bbox.max_point_AABB.x,
+                             bbox.max_point_AABB.y,
+                             bbox.max_point_AABB.z);
+
+          Vector3f _minPoint(bbox.min_point_AABB.x,
+                             bbox.min_point_AABB.y,
+                             bbox.min_point_AABB.z);
+          
+          Vector3f _centroid(bbox.centroid.x(),
+                             bbox.centroid.y(),
+                             bbox.centroid.z());
+          
+          Vector3f _bbPosition(bbox.position_OBB.x,
+                              bbox.position_OBB.y,
+                              bbox.position_OBB.z);
+          
           Quaternionf objOrientation(bbox.rotational_matrix_OBB);
-          std::stringstream boxName, cylName, lineID;
+          Vector3f bbPosition = objOrientation * _bbPosition;
+          
+          PointXYZ centroid(_centroid.x(),
+                            _centroid.y(),
+                            _centroid.z());
+          
+          Eigen::Translation3f transform(bbPosition);
+          //Eigen::AngleAxis<float> _rotation(objOrientation);
+//          AngleAxis<float> transform(objOrientation);
+          //          Eigen::Transform<float,3,Affine> transform;
+          //transform.translate(bbox.centroid);
+          
+          //Transform<float,3,Affine> M(transform.matrix());
+          _maxPoint = transform * _maxPoint;
+          _minPoint = transform * _minPoint;
+          
+          
+          PointXYZ maxPoint(_maxPoint.x(),
+                            _maxPoint.y(),
+                            _maxPoint.z());
+          PointXYZ minPoint(_minPoint.x(),
+                            _minPoint.y(),
+                            _minPoint.z());
+          
+          
+          std::stringstream boxName;
+          
           boxName << "oriented bounding box" << m << ", " << j;
-          p->addCube(position,
+          
+
+          
+          p->addCube(_bbPosition,
                      objOrientation,
                      bbox.max_point_OBB.x - bbox.min_point_OBB.x,
                      bbox.max_point_OBB.y - bbox.min_point_OBB.y,
@@ -502,15 +544,69 @@ main (int argc, char** argv)
                      viewport);
           
 //          boxName.clear();
-//          boxName << "AA bounding box" << m << ", " << j;
-//          p->addCube(bbox.min_point_AABB.x,
-//                     bbox.max_point_AABB.x,
-//                     bbox.min_point_AABB.y,
-//                     bbox.max_point_AABB.y,
-//                     bbox.min_point_AABB.z,
-//                     bbox.max_point_AABB.z, 1.0, 1.0, 0.0,
+//          boxName << "blue oriented bounding box" << m << ", " << j;
+//          p->addCube(minPoint.x,
+//                     maxPoint.x,
+//                     minPoint.y,
+//                     maxPoint.y,
+//                     minPoint.z,
+//                     maxPoint.z,
+//                     0.0,0,1.0,
 //                     boxName.str(),
 //                     viewport);
+//
+          
+/*
+          boxName.clear();
+          boxName << "blue oriented bounding box" << m << ", " << j;
+          p->addCube(bbox.min_point_OBB.x + bbPosition.x(),
+                     bbox.max_point_OBB.x + bbPosition.x(),
+                     bbox.min_point_OBB.y + bbPosition.y(),
+                     bbox.max_point_OBB.y + bbPosition.y(),
+                     bbox.min_point_OBB.z + bbPosition.z(),
+                     bbox.max_point_OBB.z + bbPosition.z(),
+                     0.0,0,1.0,
+                     boxName.str(),
+                     viewport);
+*/
+          
+          boxName.clear();
+          boxName << "red oriented bounding box" << m << ", " << j;
+          p->addCube(bbox.min_point_OBB.x + bbox.position_OBB.x,
+                     bbox.max_point_OBB.x + bbox.position_OBB.x,
+                     bbox.min_point_OBB.y + bbox.position_OBB.y,
+                     bbox.max_point_OBB.y + bbox.position_OBB.y,
+                     bbox.min_point_OBB.z + bbox.position_OBB.z,
+                     bbox.max_point_OBB.z + bbox.position_OBB.z,
+                     1.0,0,0,
+                     boxName.str(),
+                     viewport);
+
+//          boxName.clear();
+//          boxName << "blue oriented bounding box" << m << ", " << j;
+//          p->addCube(bbox.min_point_OBB.x + bbox.centroid.x(),
+//                     bbox.max_point_OBB.x + bbox.centroid.x(),
+//                     bbox.min_point_OBB.y + bbox.centroid.y(),
+//                     bbox.max_point_OBB.y + bbox.centroid.y(),
+//                     bbox.min_point_OBB.z + bbox.centroid.z(),
+//                     bbox.max_point_OBB.z + bbox.centroid.z(),
+//                     0.0,0,1.0,
+//                     boxName.str(),
+//                     viewport);
+
+//          boxName.clear();
+//          boxName << "red oriented bounding box" << m << ", " << j;
+//          p->addCube(bbox.min_point_OBB.x + bbox.centroid.x(),
+//                     bbox.max_point_OBB.x + bbox.centroid.x(),
+//                     bbox.min_point_OBB.y + bbox.centroid.y(),
+//                     bbox.max_point_OBB.y + bbox.centroid.y(),
+//                     bbox.min_point_OBB.z + bbox.centroid.z(),
+//                     bbox.max_point_OBB.z + bbox.centroid.z(),
+//                     1.0,0,0,
+//                     boxName.str(),
+//                     viewport);
+
+          
           
           p->setRepresentationToWireframeForAllActors();
           
@@ -526,41 +622,22 @@ main (int argc, char** argv)
           
           
           feature_extractor.getOBB (min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
-          position = Vector3f(position_OBB.x,
-                   position_OBB.y,
-                   position_OBB.z);
+//          position = Vector3f(position_OBB.x,
+//                   position_OBB.y,
+//                   position_OBB.z);
           objOrientation = Quaternionf (rotational_matrix_OBB);
           
           boxName << "convex hull" << m << ", " << j;
-          p->addCube(position,
-                     objOrientation,
-                     max_point_OBB.x - min_point_OBB.x,
-                     max_point_OBB.y - min_point_OBB.y,
-                     max_point_OBB.z - min_point_OBB.z,
-                     boxName.str(),
-                     viewport);
-          //p->setRepresentationToSurfaceForAllActors();
 
-//          PointXYZ p0(bbox.max_point_OBB.x,
-//                      bbox.max_point_OBB.y,
-//                      bbox.max_point_OBB.z),
-//                    p1(bbox.min_point_OBB.x,
-//                       bbox.min_point_OBB.y,
-//                       bbox.min_point_OBB.z);
-//          
-//          lineID << "l" << m << ", " << j;;
-//          if (j == 0){
-//            p->addLine(p0, p1,1.0,0.0,0.0,lineID.str(),viewport);
-//          } else {
-//            p->addLine(p0, p1,0.0,1.0,0.0,lineID.str(),viewport);
-//          }
 
           if (mview){
             std::stringstream s;
             //s << "Voxel size = " << voxelSize;
             //        s << ", iterationDivisor = " << iterationDivisor;
             s << "time: " << runTime << endl;
-            s << "accuracy: " << accuracy << endl;
+            s << "posn. accuracy: " << accuracy.translational << endl;
+            s << "rot. accuracy: " << accuracy.orientational << endl;
+            s << "scale accuracy: " << accuracy.scalar << endl;
             p->addText (s.str(), 5, 30, 10, 1.0, 1.0, 1.0,
                         s.str(), viewport);
           }

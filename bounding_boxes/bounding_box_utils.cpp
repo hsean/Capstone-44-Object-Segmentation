@@ -5,7 +5,8 @@
 //  Created on 2/10/16.
 //
 
-#include "geometries.hpp"
+#include "bounding_box_utils.hpp"
+#define TARGET_OBJ_DIAMETER 4.0
 using namespace c44;
 
 BoundingBox::BoundingBox(Cloud3D::Ptr cloud){
@@ -21,19 +22,31 @@ BoundingBox::BoundingBox(Cloud3D::Ptr cloud){
   feature_extractor.getMassCenter (centroid);
 }
 
-float BoundingBox::accuracyWRT(const BoundingBox& rhs) const{
+AccuracyComponents BoundingBox::accuracyWRT(const BoundingBox& rhs) const{
   
   Vector3f translation(centroid.x(),centroid.y(),centroid.z());
   Vector3f rhsTranslation(rhs.centroid.x(),rhs.centroid.y(),rhs.centroid.z());
   
-  auto translationAccuracy = 1 - spread(translation,rhsTranslation);
   
+  auto distance = sqrtf(powf(position_OBB.x - rhs.position_OBB.x,2) +
+                        powf(position_OBB.y - rhs.position_OBB.y,2) +
+                        powf(position_OBB.z - rhs.position_OBB.z,2));
+
+  //float translationAccuracy = 1 - spread(translation,rhsTranslation);
+   float translationAccuracy = powf(2,-2.0*distance);
   auto bestFitRHSRotor = Quaternion<float>(rhs.rotational_matrix_OBB).
                                           normalized();
   auto lhsRotor = Quaternion<float>(rotational_matrix_OBB).normalized();
-  float orientationAccuracy = 1 - spread(lhsRotor.normalized(),
-                                         bestFitRHSRotor.normalized());
-  for (unsigned i = 1; i < 8; i++){
+//  float orientationAccuracy = 1 - spread(lhsRotor.normalized(),
+//                                         bestFitRHSRotor.normalized());
+  Quaternionf reversedRHSRotor = Quaternionf(-bestFitRHSRotor.x(),
+                                             -bestFitRHSRotor.y(),
+                                             -bestFitRHSRotor.z(),
+                                             -bestFitRHSRotor.w());
+  float orientationAccuracy = fmaxf(powf(lhsRotor.dot(bestFitRHSRotor),2.0),
+                                    powf(lhsRotor.dot(reversedRHSRotor),2.0));
+/*
+  for (unsigned i = 1; i < 7; i++){
     //auto shift = sizeof(float);
     auto rhsRotationMatrix = rhs.rotational_matrix_OBB;
     for (int signBitPosn = 0; signBitPosn < 3; signBitPosn++){
@@ -54,7 +67,7 @@ float BoundingBox::accuracyWRT(const BoundingBox& rhs) const{
     }
                                             
   }
-
+*/
   
   auto unshiftedMinPoint = Vector3f(min_point_OBB.x - centroid.x(),
                                     min_point_OBB.y - centroid.y(),
@@ -92,13 +105,16 @@ float BoundingBox::accuracyWRT(const BoundingBox& rhs) const{
                               rhs_unshiftedMinPoint.z());
   
   
-  
   auto scaleAccuracy = 1 - spread(scaleComponents, rhsScaleComponents);
   
-  return powf(translationAccuracy,2.0) *
-        powf(scaleAccuracy,0.5) *//scale accuracy has less 'weight'
-        powf(orientationAccuracy,0.5);//orientation accuracy has less weight too
+  AccuracyComponents ret = {
+    translationAccuracy,
+    orientationAccuracy,
+    scaleAccuracy
+  };
+  return ret;
 }
+
 
 
 
@@ -112,9 +128,7 @@ float c44::spread(const Eigen::Quaternion<float>& lhs,
                   const Eigen::Quaternion<float>& rhs)
 {
   float lhsQuadrance, rhsQuadrance, dotProd;
-  
-  
-  lhsQuadrance = lhs.x()*lhs.x() + lhs.y()*lhs.y() + lhs.z()*lhs.z() +
+    lhsQuadrance = lhs.x()*lhs.x() + lhs.y()*lhs.y() + lhs.z()*lhs.z() +
   lhs.w()*lhs.w();
   rhsQuadrance = rhs.x()*rhs.x() + rhs.y()*rhs.y() + rhs.z()*rhs.z() +
   rhs.w()*rhs.w();

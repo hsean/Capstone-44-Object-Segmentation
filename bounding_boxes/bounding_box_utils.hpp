@@ -28,6 +28,12 @@ namespace c44{
   using namespace Eigen;
   typedef PointCloud<PointXYZ> Cloud3D;
 
+  struct AccuracyComponents{
+  public:
+    float translational, orientational, scalar;
+  };
+
+  
   struct BoundingBox{
   public:
     BoundingBox(Cloud3D::Ptr cloud);
@@ -45,10 +51,12 @@ namespace c44{
     Vector3f centroid;
     
     //returns the accuracy of this bounding box with respect to `other`
-    float accuracyWRT(const BoundingBox& other) const;
+    AccuracyComponents accuracyWRT(const BoundingBox& rhs) const;
   };
+  
 
 
+  //struct which wraps a point cloud with a bit of extra functionality
   struct GeometricObject{
   public:
       const ModelCoefficients coefficients;
@@ -88,6 +96,15 @@ namespace c44{
       
   };
   
+  
+  /**
+   * desc: Measures the projective 'distance' between 2 matrices;
+   *       arguments are symmetric, in other words the order doesn't matter
+   * param: (lhs) the left matrix in the measurement
+   *        (rhs) the right matrix in the measurement
+   * ret: 0 if lhs and rhs are identical, 1 if they are 'perpendicular', i.e.,
+   *      as far apart as possible
+   */
   template<int rows, int cols>
   float spread(const Eigen::Matrix<float, rows, cols>& lhs,
                const Eigen::Matrix<float, rows, cols>& rhs)
@@ -107,8 +124,23 @@ namespace c44{
   }
   
 
+  /**
+   * desc: Measures the 'distance' between 2 quaternions, aka, orientations,
+   *       arguments are symmetric, in other words the order doesn't matter
+   * param: (lhs) the left quaternion in the measurement
+   *        (rhs) the right quaternion in the measurement
+   * pre-cond: the quaternions squared norm is equal to 1.
+   * ret: 0 if lhs and rhs are identical, 1 if they are 'perpendicular', i.e.,
+   *      as far apart as possible
+   */
   float spread(const Eigen::Quaternion<float>& lhs,
                const Eigen::Quaternion<float>& rhs);
   
+//  PointXYZ operator +(const PointXYZ& lhs, const Vector3f& rhs){
+//    PointXYZ ret(lhs.x + rhs.x(),
+//                 lhs.y + rhs.y(),
+//                 lhs.z + rhs.z());
+//    return ret;
+//  }
 }
 #endif /* Geometries_hpp */
