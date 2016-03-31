@@ -26,13 +26,13 @@ vector<PointXYZ> API::getObjBoundingBoxWRT(const ReferenceFrame& frame){
   return ret;
 }
 
-//private
+
 bool API::getCurrentFrame(PointCloud<PointXYZ>::Ptr dest){
   throw "not implemented yet";
   return false;
 }
 
-//private
+
 bool API::segmentCloud(PointCloud<PointXYZ>::Ptr src,
                        PointCloud<PointXYZ>::Ptr dest){
   throw "not implemented yet";
