@@ -56,6 +56,10 @@
 #include <pcl/console/time.h>
 #include <pcl/search/kdtree.h>
 #include <vtkPolyDataReader.h>
+#include <vtkTransform.h>
+#include <pcl/common/angles.h>
+
+
 #include "segmentation_pipeline.hpp"
 
 using namespace pcl::console;
@@ -300,8 +304,8 @@ main (int argc, char** argv)
     if (use_immediate_rendering)
       print_highlight ("Using immediate mode rendering.\n");
   }
-  const unsigned numRows = 4;
-  const unsigned numCols = 4;
+  const unsigned numRows = 2;
+  const unsigned numCols = 2;
   const unsigned numIterations = numRows * numCols;
   // Multiview enabled?
   int y_s = 0, x_s = 0;
@@ -460,11 +464,12 @@ main (int argc, char** argv)
       //p->addPointCloud<pcl::PointXYZ> (cloud_xyz, geometry_handler, color_handler, cloud_name.str (), viewport);
       pcl::fromPCLPointCloud2 (*cloud, *xyzCloud);
       
-      float voxelSize = j == 0 ? 0.001 : 0.005 *j;
+      float voxelSize = 0.012 + 0.002*j;
       float sampleSize = 100 - m * 25;
+      
       float stdDev = 1.0;
       float iterationDivisor = m + 1.0;
-      
+      //float iterationDivisor = 1.0;
       boost::posix_time::time_duration runTime;
       auto startTime = boost::posix_time::microsec_clock::local_time();
       
@@ -487,128 +492,102 @@ main (int argc, char** argv)
             accuracy = bbox.accuracyWRT(*goldenModel);
           }
           
-          Vector3f _maxPoint(bbox.max_point_AABB.x,
-                             bbox.max_point_AABB.y,
-                             bbox.max_point_AABB.z);
+          
+          Eigen::Translation3f translation(bbox.centroid.x(),
+                                           bbox.centroid.y(),
+                                           bbox.centroid.z());
+          Eigen::AngleAxisf rotation(bbox.rotational_matrix_OBB);
 
-          Vector3f _minPoint(bbox.min_point_AABB.x,
-                             bbox.min_point_AABB.y,
-                             bbox.min_point_AABB.z);
-          
-          Vector3f _centroid(bbox.centroid.x(),
-                             bbox.centroid.y(),
-                             bbox.centroid.z());
-          
-          Vector3f _bbPosition(bbox.position_OBB.x,
-                              bbox.position_OBB.y,
-                              bbox.position_OBB.z);
-          
-          Quaternionf objOrientation(bbox.rotational_matrix_OBB);
-          Vector3f bbPosition = objOrientation * _bbPosition;
-          
-          PointXYZ centroid(_centroid.x(),
-                            _centroid.y(),
-                            _centroid.z());
-          
-          Eigen::Translation3f transform(bbPosition);
-          //Eigen::AngleAxis<float> _rotation(objOrientation);
-//          AngleAxis<float> transform(objOrientation);
-          //          Eigen::Transform<float,3,Affine> transform;
-          //transform.translate(bbox.centroid);
-          
-          //Transform<float,3,Affine> M(transform.matrix());
-          _maxPoint = transform * _maxPoint;
-          _minPoint = transform * _minPoint;
-          
-          
-          PointXYZ maxPoint(_maxPoint.x(),
-                            _maxPoint.y(),
-                            _maxPoint.z());
-          PointXYZ minPoint(_minPoint.x(),
-                            _minPoint.y(),
-                            _minPoint.z());
-          
           
           std::stringstream boxName;
           
           boxName << "oriented bounding box" << m << ", " << j;
           
+          
+          
+          //generate the corners for the bounding box, i.e., the format
+          //desired by the other team
+          std::vector<Vector3f> corners;
+          corners.push_back(Vector3f(bbox.min_point_OBB.x,
+                                     bbox.min_point_OBB.y,
+                                     bbox.min_point_OBB.z));
+          corners.push_back(Vector3f(bbox.max_point_OBB.x,
+                                     bbox.min_point_OBB.y,
+                                     bbox.min_point_OBB.z));
+          corners.push_back(Vector3f(bbox.max_point_OBB.x,
+                                     bbox.max_point_OBB.y,
+                                     bbox.min_point_OBB.z));
+          corners.push_back(Vector3f(bbox.min_point_OBB.x,
+                                     bbox.max_point_OBB.y,
+                                     bbox.min_point_OBB.z));
+          corners.push_back(Vector3f(bbox.min_point_OBB.x,
+                                     bbox.min_point_OBB.y,
+                                     bbox.max_point_OBB.z));
+          corners.push_back(Vector3f(bbox.max_point_OBB.x,
+                                     bbox.min_point_OBB.y,
+                                     bbox.max_point_OBB.z));
+          corners.push_back(Vector3f(bbox.max_point_OBB.x,
+                                     bbox.max_point_OBB.y,
+                                     bbox.max_point_OBB.z));
+          corners.push_back(Vector3f(bbox.min_point_OBB.x,
+                                     bbox.max_point_OBB.y,
+                                     bbox.max_point_OBB.z));
+          vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+          for (int i = 0; i < corners.size(); i++){
+            corners[i] = translation * rotation * corners[i];
+          }
+          
+          //manually draw the lines for the bounding box
+          {
+            int i;
+            std::stringstream lineName;
+            PointXYZ p0, p1;
+            
+            for (i = 0; i < 3; i++){
+              lineName << "line_" << m << "_" << j << "_" <<
+                          i << "_to_" << (i+1);
+              
+              p1 = PointXYZ(corners[i+1].x(), corners[i+1].y(), corners[i+1].z());
+              p0 = PointXYZ(corners[i].x(), corners[i].y(), corners[i].z());
+              p->addLine(p0, p1, 1.0, 0.0, 0.0,lineName.str(),viewport);
+              lineName.clear();
+            }
+            
+            lineName << "line_" << m << "_" << j << "_3_to_0";
+            p1 = PointXYZ(corners[3].x(), corners[3].y(), corners[3].z());
+            p0 = PointXYZ(corners[0].x(), corners[0].y(), corners[0].z());
+            p->addLine(p0, p1, 1.0, 0.0, 0.0,lineName.str(),viewport);
+            
+            for (i = 4; i < 7; i++){
+              lineName << "line_" << m << "_" << j << "_" <<
+              i << "_to_" << (i+1);
+              p1 = PointXYZ(corners[i+1].x(), corners[i+1].y(), corners[i+1].z());
+              p0 = PointXYZ(corners[i].x(), corners[i].y(), corners[i].z());
+              p->addLine(p0, p1, 1.0, 0.0, 0.0,lineName.str(),viewport);
+              lineName.clear();
+            }
+            lineName << "line_" << m << "_" << j << "_7_to_4";
+            p1 = PointXYZ(corners[7].x(), corners[7].y(), corners[7].z());
+            p0 = PointXYZ(corners[4].x(), corners[4].y(), corners[4].z());
+            p->addLine(p0, p1, 1.0, 0.0, 0.0,lineName.str(),viewport);
+            
+            for (i = 0; i < 4; i++){
+              lineName << "line_" << m << "_" << j << "_" <<
+              i << "_to_" << (i+4);            
+              p1 = PointXYZ(corners[i+4].x(), corners[i+4].y(), corners[i+4].z());
+              p0 = PointXYZ(corners[i].x(), corners[i].y(), corners[i].z());
+              p->addLine(p0, p1, 1.0, 0.0, 0.0,lineName.str(),viewport);
+              lineName.clear();
+            }
+
+
+          }
+          
+          
+
 
           
-          p->addCube(_bbPosition,
-                     objOrientation,
-                     bbox.max_point_OBB.x - bbox.min_point_OBB.x,
-                     bbox.max_point_OBB.y - bbox.min_point_OBB.y,
-                     bbox.max_point_OBB.z - bbox.min_point_OBB.z,
-                     boxName.str(),
-                     viewport);
-          
-//          boxName.clear();
-//          boxName << "blue oriented bounding box" << m << ", " << j;
-//          p->addCube(minPoint.x,
-//                     maxPoint.x,
-//                     minPoint.y,
-//                     maxPoint.y,
-//                     minPoint.z,
-//                     maxPoint.z,
-//                     0.0,0,1.0,
-//                     boxName.str(),
-//                     viewport);
-//
-          
-/*
-          boxName.clear();
-          boxName << "blue oriented bounding box" << m << ", " << j;
-          p->addCube(bbox.min_point_OBB.x + bbPosition.x(),
-                     bbox.max_point_OBB.x + bbPosition.x(),
-                     bbox.min_point_OBB.y + bbPosition.y(),
-                     bbox.max_point_OBB.y + bbPosition.y(),
-                     bbox.min_point_OBB.z + bbPosition.z(),
-                     bbox.max_point_OBB.z + bbPosition.z(),
-                     0.0,0,1.0,
-                     boxName.str(),
-                     viewport);
-*/
-          
-          boxName.clear();
-          boxName << "red oriented bounding box" << m << ", " << j;
-          p->addCube(bbox.min_point_OBB.x + bbox.position_OBB.x,
-                     bbox.max_point_OBB.x + bbox.position_OBB.x,
-                     bbox.min_point_OBB.y + bbox.position_OBB.y,
-                     bbox.max_point_OBB.y + bbox.position_OBB.y,
-                     bbox.min_point_OBB.z + bbox.position_OBB.z,
-                     bbox.max_point_OBB.z + bbox.position_OBB.z,
-                     1.0,0,0,
-                     boxName.str(),
-                     viewport);
-
-//          boxName.clear();
-//          boxName << "blue oriented bounding box" << m << ", " << j;
-//          p->addCube(bbox.min_point_OBB.x + bbox.centroid.x(),
-//                     bbox.max_point_OBB.x + bbox.centroid.x(),
-//                     bbox.min_point_OBB.y + bbox.centroid.y(),
-//                     bbox.max_point_OBB.y + bbox.centroid.y(),
-//                     bbox.min_point_OBB.z + bbox.centroid.z(),
-//                     bbox.max_point_OBB.z + bbox.centroid.z(),
-//                     0.0,0,1.0,
-//                     boxName.str(),
-//                     viewport);
-
-//          boxName.clear();
-//          boxName << "red oriented bounding box" << m << ", " << j;
-//          p->addCube(bbox.min_point_OBB.x + bbox.centroid.x(),
-//                     bbox.max_point_OBB.x + bbox.centroid.x(),
-//                     bbox.min_point_OBB.y + bbox.centroid.y(),
-//                     bbox.max_point_OBB.y + bbox.centroid.y(),
-//                     bbox.min_point_OBB.z + bbox.centroid.z(),
-//                     bbox.max_point_OBB.z + bbox.centroid.z(),
-//                     1.0,0,0,
-//                     boxName.str(),
-//                     viewport);
-
-          
-          
-          p->setRepresentationToWireframeForAllActors();
+          //p->setRepresentationToWireframeForAllActors();
           
           MomentOfInertiaEstimation<PointXYZ> feature_extractor;
           feature_extractor.setInputCloud (pipeline.getConvexHull());
@@ -622,13 +601,19 @@ main (int argc, char** argv)
           
           
           feature_extractor.getOBB (min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
-//          position = Vector3f(position_OBB.x,
-//                   position_OBB.y,
-//                   position_OBB.z);
-          objOrientation = Quaternionf (rotational_matrix_OBB);
-          
+          Vector3f position(position_OBB.x,
+                   position_OBB.y,
+                   position_OBB.z);
+          Quaternionf hullOrientation(rotational_matrix_OBB);
+          boxName.clear();
           boxName << "convex hull" << m << ", " << j;
-
+          p->addCube(position,
+                     hullOrientation,
+                     max_point_OBB.x - min_point_OBB.x,
+                     max_point_OBB.y - min_point_OBB.y,
+                     max_point_OBB.z - min_point_OBB.z,
+                     boxName.str(),
+                     viewport);
 
           if (mview){
             std::stringstream s;
@@ -658,7 +643,6 @@ main (int argc, char** argv)
       }
 
       p->addPointCloud (cloud, geometry_handler, color_handler, origin, orientation, cloud_name.str (), viewport);
-      
       
       
       // Add every dimension as a possible color
