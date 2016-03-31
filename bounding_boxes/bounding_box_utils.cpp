@@ -22,7 +22,7 @@ BoundingBox::BoundingBox(Cloud3D::Ptr cloud){
   feature_extractor.getMassCenter (centroid);
 }
 
-AccuracyComponents BoundingBox::accuracyWRT(const BoundingBox& rhs) const{
+AccuracyReport BoundingBox::accuracyWRT(const BoundingBox& rhs) const{
   
   Vector3f translation(centroid.x(),centroid.y(),centroid.z());
   Vector3f rhsTranslation(rhs.centroid.x(),rhs.centroid.y(),rhs.centroid.z());
@@ -107,7 +107,7 @@ AccuracyComponents BoundingBox::accuracyWRT(const BoundingBox& rhs) const{
   
   auto scaleAccuracy = 1 - spread(scaleComponents, rhsScaleComponents);
   
-  AccuracyComponents ret = {
+  AccuracyReport ret = {
     translationAccuracy,
     orientationAccuracy,
     scaleAccuracy
@@ -115,6 +115,46 @@ AccuracyComponents BoundingBox::accuracyWRT(const BoundingBox& rhs) const{
   return ret;
 }
 
+std::vector<PointXYZ> BoundingBox::getCorners() const{
+  std::vector<Vector3f> _corners;
+  std::vector<PointXYZ> corners;
+  _corners.push_back(Vector3f(min_point_OBB.x,
+                             min_point_OBB.y,
+                             min_point_OBB.z));
+  _corners.push_back(Vector3f(max_point_OBB.x,
+                             min_point_OBB.y,
+                             min_point_OBB.z));
+  _corners.push_back(Vector3f(max_point_OBB.x,
+                             max_point_OBB.y,
+                             min_point_OBB.z));
+  _corners.push_back(Vector3f(min_point_OBB.x,
+                             max_point_OBB.y,
+                             min_point_OBB.z));
+  _corners.push_back(Vector3f(min_point_OBB.x,
+                             min_point_OBB.y,
+                             max_point_OBB.z));
+  _corners.push_back(Vector3f(max_point_OBB.x,
+                             min_point_OBB.y,
+                             max_point_OBB.z));
+  _corners.push_back(Vector3f(max_point_OBB.x,
+                             max_point_OBB.y,
+                             max_point_OBB.z));
+  _corners.push_back(Vector3f(min_point_OBB.x,
+                             max_point_OBB.y,
+                             max_point_OBB.z));
+  
+  Eigen::Translation3f translation(centroid.x(),
+                                   centroid.y(),
+                                   centroid.z());
+
+  for (auto corner : _corners){
+    auto transformedCorner = translation * rotational_matrix_OBB * corner;
+    corners.push_back(PointXYZ(transformedCorner.x(),
+                               transformedCorner.y(),
+                               transformedCorner.z()));
+  }
+  return corners;
+}
 
 
 

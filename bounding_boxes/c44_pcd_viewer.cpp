@@ -483,7 +483,7 @@ main (int argc, char** argv)
         for (int i = 0; i < pipeline.graspableObjects.size(); i++){
           auto obj = pipeline.graspableObjects[i];
           
-          AccuracyComponents accuracy;
+          AccuracyReport accuracy;
           const auto bbox = obj.getBoundingBox();
           if (goldenModel == nullptr){
             goldenModel = new BoundingBox(obj.pointCloud);
@@ -503,89 +503,48 @@ main (int argc, char** argv)
           
           boxName << "oriented bounding box" << m << ", " << j;
           
-          
-          
-          //generate the corners for the bounding box, i.e., the format
-          //desired by the other team
-          std::vector<Vector3f> corners;
-          corners.push_back(Vector3f(bbox.min_point_OBB.x,
-                                     bbox.min_point_OBB.y,
-                                     bbox.min_point_OBB.z));
-          corners.push_back(Vector3f(bbox.max_point_OBB.x,
-                                     bbox.min_point_OBB.y,
-                                     bbox.min_point_OBB.z));
-          corners.push_back(Vector3f(bbox.max_point_OBB.x,
-                                     bbox.max_point_OBB.y,
-                                     bbox.min_point_OBB.z));
-          corners.push_back(Vector3f(bbox.min_point_OBB.x,
-                                     bbox.max_point_OBB.y,
-                                     bbox.min_point_OBB.z));
-          corners.push_back(Vector3f(bbox.min_point_OBB.x,
-                                     bbox.min_point_OBB.y,
-                                     bbox.max_point_OBB.z));
-          corners.push_back(Vector3f(bbox.max_point_OBB.x,
-                                     bbox.min_point_OBB.y,
-                                     bbox.max_point_OBB.z));
-          corners.push_back(Vector3f(bbox.max_point_OBB.x,
-                                     bbox.max_point_OBB.y,
-                                     bbox.max_point_OBB.z));
-          corners.push_back(Vector3f(bbox.min_point_OBB.x,
-                                     bbox.max_point_OBB.y,
-                                     bbox.max_point_OBB.z));
-          vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-          for (int i = 0; i < corners.size(); i++){
-            corners[i] = translation * rotation * corners[i];
-          }
-          
+
           //manually draw the lines for the bounding box
           {
             int i;
             std::stringstream lineName;
             PointXYZ p0, p1;
+            auto corners = bbox.getCorners();
             
             for (i = 0; i < 3; i++){
               lineName << "line_" << m << "_" << j << "_" <<
                           i << "_to_" << (i+1);
               
-              p1 = PointXYZ(corners[i+1].x(), corners[i+1].y(), corners[i+1].z());
-              p0 = PointXYZ(corners[i].x(), corners[i].y(), corners[i].z());
-              p->addLine(p0, p1, 1.0, 0.0, 0.0,lineName.str(),viewport);
+              p->addLine(corners[i],
+                         corners[i+1], 1.0, 0.0, 0.0,lineName.str(),viewport);
               lineName.clear();
             }
             
             lineName << "line_" << m << "_" << j << "_3_to_0";
-            p1 = PointXYZ(corners[3].x(), corners[3].y(), corners[3].z());
-            p0 = PointXYZ(corners[0].x(), corners[0].y(), corners[0].z());
-            p->addLine(p0, p1, 1.0, 0.0, 0.0,lineName.str(),viewport);
+            p->addLine(corners[3],
+                       corners[0], 1.0, 0.0, 0.0,lineName.str(),viewport);
             
             for (i = 4; i < 7; i++){
               lineName << "line_" << m << "_" << j << "_" <<
               i << "_to_" << (i+1);
-              p1 = PointXYZ(corners[i+1].x(), corners[i+1].y(), corners[i+1].z());
-              p0 = PointXYZ(corners[i].x(), corners[i].y(), corners[i].z());
-              p->addLine(p0, p1, 1.0, 0.0, 0.0,lineName.str(),viewport);
+              p->addLine(corners[i],
+                         corners[i+1], 1.0, 0.0, 0.0,lineName.str(),viewport);
               lineName.clear();
             }
             lineName << "line_" << m << "_" << j << "_7_to_4";
-            p1 = PointXYZ(corners[7].x(), corners[7].y(), corners[7].z());
-            p0 = PointXYZ(corners[4].x(), corners[4].y(), corners[4].z());
-            p->addLine(p0, p1, 1.0, 0.0, 0.0,lineName.str(),viewport);
+            p->addLine(corners[7],
+                       corners[4], 1.0, 0.0, 0.0,lineName.str(),viewport);
             
             for (i = 0; i < 4; i++){
               lineName << "line_" << m << "_" << j << "_" <<
               i << "_to_" << (i+4);            
-              p1 = PointXYZ(corners[i+4].x(), corners[i+4].y(), corners[i+4].z());
-              p0 = PointXYZ(corners[i].x(), corners[i].y(), corners[i].z());
-              p->addLine(p0, p1, 1.0, 0.0, 0.0,lineName.str(),viewport);
+              p->addLine(corners[i],
+                         corners[i+4], 1.0, 0.0, 0.0,lineName.str(),viewport);
               lineName.clear();
             }
 
 
           }
-          
-          
-
-
           
           //p->setRepresentationToWireframeForAllActors();
           

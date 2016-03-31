@@ -28,7 +28,16 @@ namespace c44{
   using namespace Eigen;
   typedef PointCloud<PointXYZ> Cloud3D;
 
-  struct AccuracyComponents{
+  struct SegmentationConfig{
+  public:
+    float voxelSize = 0.015;
+    float sampleSize = 50;
+    float stdDev = 1.0;
+    float iterationDivisor = 1.0;
+  };
+
+  
+  struct AccuracyReport{
   public:
     float translational, orientational, scalar;
   };
@@ -51,7 +60,8 @@ namespace c44{
     Vector3f centroid;
     
     //returns the accuracy of this bounding box with respect to `other`
-    AccuracyComponents accuracyWRT(const BoundingBox& rhs) const;
+    AccuracyReport accuracyWRT(const BoundingBox& rhs) const;
+    std::vector<PointXYZ> getCorners() const;
   };
   
 
