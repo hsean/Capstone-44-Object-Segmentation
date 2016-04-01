@@ -1,28 +1,36 @@
 last updated: 1 April 2016
 
-[Sprint 1: Hand Segmentation Marker, Object Segmentation Marker] (Due 15 April)
-  * ROS PCL dummy node
-  * Marker recognition    {chris}
-  * Make arm "Marker"     
-  * Make segmented object "Marker"
-  * Make program 
-  * Research arm recognition in general
-  * See how long arm recognition takes (in milliseconds)
-  * Look into color recognition of arm
-  * Get reference PCD images of arm            
-  * Get reference PCD images of arm in a scene 
+[Sprint 1: Hand Segmentation Marker, 
+           Object Segmentation Marker] (Due 15 April)
+  * ROS PCL dummy node                                    {James}
+  * Marker recognition                                    {Chris}
+  * Make arm "Marker"                                     {}
+  * Make segmented object "Marker"                        {}
+  * Research arm recognition in general                   {Sean, Saroj}
+  * See how long arm recognition takes (in milliseconds)  {Chris}
+  * Look into color recognition of arm                    {Chris}
+  * Get reference PCD images of arm                       {James}   
+  * Get reference PCD images of arm in a scene            {James}
+  * Continue to improve bounding boxes                    {Matt}
+  * Convert bounding boxes to world space                 {Matt}
   NOTES: "Markers" in ROS can be many things (e.g. lines, boxes)
          wiki.ros.org/rviz/DisplayTypes/Marker
   
 [Sprint 2: ] (Due 29 April)
   * task
   * task
-[Sprint 3: ] (Due 13 May)
+  
+[Sprint 3: Poster Rough Draft Due] (Due 13 May)
   * task
   * task  
+  [MILESTONE: PDF of Poster] (Due 25 May @ 8am)
+
 [Sprint 4: ] (Due 27 May)
   * task
   * task
+  [MILESTONE: Poster Pick-up] (Due 31 May)
+  [MILESTONE: Poster Session] (Due 3 June)
+  
 [Sprint 5: ] (Due 10 June) NOTE: end of term
   * task
   * task
