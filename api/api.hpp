@@ -33,7 +33,7 @@ namespace c44{
     //provided by Sean's segmentation code
     //the name of this function is open to suggestions
     static bool segmentCloud(PointCloud<PointXYZ>::Ptr src,
-                             PointCloud<PointXYZ>::Ptr dest);
+                             PointCloud<PointXYZ>::Ptr objCloud);
 
 
   public:

@@ -59,8 +59,20 @@ namespace c44{
     Vector3f major_vector, middle_vector, minor_vector;
     Vector3f centroid;
     
-    //returns the accuracy of this bounding box with respect to `other`
-    AccuracyReport accuracyWRT(const BoundingBox& rhs) const;
+    /*------------------------------------------------------------------------*/
+    /**
+     * desc: computes the accuracy of a bounding box with respect to some other
+     *       bounding box which is considered the 'golden model', by finding a
+     *       a best fit of the corners, and then taking a decaying exponential
+     *       of the distance between the corresponding corners, and taking the
+     *       product of all accuracy these individual, per-corner accuracy
+     *       values of each corner.
+     *
+     * param: (rhs) the bounding box to be compared
+     *
+     * ret: a value between zero and one; 1 corresponds to 100% accuracy.
+     */
+    float accuracyWRT(const BoundingBox& rhs) const;
     std::vector<PointXYZ> getCorners() const;
   };
   
@@ -87,70 +99,22 @@ namespace c44{
             Cloud3D::Ptr points,
             PointCloud<Normal>::Ptr normals,
             PointIndices::Ptr _inliers) :
-      GeometricObject(mc,points,normals), inliers(_inliers){}
-      
+      GeometricObject(mc,points,normals), inliers(_inliers){}      
   };
 
 
 
   struct GraspableObject : GeometricObject{
   public:
-      
       GraspableObject(ModelCoefficients mc,
                       Cloud3D::Ptr points,
                       PointCloud<Normal>::Ptr normals) :
       GeometricObject(mc,points,normals){}
       
       BoundingBox getBoundingBox() const;
-      
-      
+    
   };
   
-  
-  /**
-   * desc: Measures the projective 'distance' between 2 matrices;
-   *       arguments are symmetric, in other words the order doesn't matter
-   * param: (lhs) the left matrix in the measurement
-   *        (rhs) the right matrix in the measurement
-   * ret: 0 if lhs and rhs are identical, 1 if they are 'perpendicular', i.e.,
-   *      as far apart as possible
-   */
-  template<int rows, int cols>
-  float spread(const Eigen::Matrix<float, rows, cols>& lhs,
-               const Eigen::Matrix<float, rows, cols>& rhs)
-  {
-    float lhsQuadrance, rhsQuadrance, dotProd;
-    lhsQuadrance = rhsQuadrance = dotProd = 0.0;
-    for (unsigned i = 0; i < rows; i++){
-      for (unsigned j = 0; j < cols; j++){
-        lhsQuadrance += lhs(i,j)*lhs(i,j);
-        rhsQuadrance += rhs(i,j)*rhs(i,j);
-        dotProd += lhs(i,j)*rhs(i,j);
-      }
-    }
-    auto numerator = dotProd * dotProd;
-    auto denominator = lhsQuadrance * rhsQuadrance;
-    return 1 - numerator/denominator;
-  }
-  
 
-  /**
-   * desc: Measures the 'distance' between 2 quaternions, aka, orientations,
-   *       arguments are symmetric, in other words the order doesn't matter
-   * param: (lhs) the left quaternion in the measurement
-   *        (rhs) the right quaternion in the measurement
-   * pre-cond: the quaternions squared norm is equal to 1.
-   * ret: 0 if lhs and rhs are identical, 1 if they are 'perpendicular', i.e.,
-   *      as far apart as possible
-   */
-  float spread(const Eigen::Quaternion<float>& lhs,
-               const Eigen::Quaternion<float>& rhs);
-  
-//  PointXYZ operator +(const PointXYZ& lhs, const Vector3f& rhs){
-//    PointXYZ ret(lhs.x + rhs.x(),
-//                 lhs.y + rhs.y(),
-//                 lhs.z + rhs.z());
-//    return ret;
-//  }
 }
 #endif /* Geometries_hpp */

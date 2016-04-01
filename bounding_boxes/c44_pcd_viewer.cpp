@@ -304,8 +304,8 @@ main (int argc, char** argv)
     if (use_immediate_rendering)
       print_highlight ("Using immediate mode rendering.\n");
   }
-  const unsigned numRows = 2;
-  const unsigned numCols = 2;
+  const unsigned numRows = 4;
+  const unsigned numCols = 4;
   const unsigned numIterations = numRows * numCols;
   // Multiview enabled?
   int y_s = 0, x_s = 0;
@@ -483,7 +483,7 @@ main (int argc, char** argv)
         for (int i = 0; i < pipeline.graspableObjects.size(); i++){
           auto obj = pipeline.graspableObjects[i];
           
-          AccuracyReport accuracy;
+          float accuracy;
           const auto bbox = obj.getBoundingBox();
           if (goldenModel == nullptr){
             goldenModel = new BoundingBox(obj.pointCloud);
@@ -579,9 +579,7 @@ main (int argc, char** argv)
             //s << "Voxel size = " << voxelSize;
             //        s << ", iterationDivisor = " << iterationDivisor;
             s << "time: " << runTime << endl;
-            s << "posn. accuracy: " << accuracy.translational << endl;
-            s << "rot. accuracy: " << accuracy.orientational << endl;
-            s << "scale accuracy: " << accuracy.scalar << endl;
+            s << "accuracy: " << accuracy << endl;
             p->addText (s.str(), 5, 30, 10, 1.0, 1.0, 1.0,
                         s.str(), viewport);
           }

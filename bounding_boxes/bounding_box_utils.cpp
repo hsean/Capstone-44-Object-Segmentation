@@ -22,97 +22,39 @@ BoundingBox::BoundingBox(Cloud3D::Ptr cloud){
   feature_extractor.getMassCenter (centroid);
 }
 
-AccuracyReport BoundingBox::accuracyWRT(const BoundingBox& rhs) const{
-  
-  Vector3f translation(centroid.x(),centroid.y(),centroid.z());
-  Vector3f rhsTranslation(rhs.centroid.x(),rhs.centroid.y(),rhs.centroid.z());
-  
-  
-  auto distance = sqrtf(powf(position_OBB.x - rhs.position_OBB.x,2) +
-                        powf(position_OBB.y - rhs.position_OBB.y,2) +
-                        powf(position_OBB.z - rhs.position_OBB.z,2));
 
-  //float translationAccuracy = 1 - spread(translation,rhsTranslation);
-   float translationAccuracy = powf(2,-2.0*distance);
-  auto bestFitRHSRotor = Quaternion<float>(rhs.rotational_matrix_OBB).
-                                          normalized();
-  auto lhsRotor = Quaternion<float>(rotational_matrix_OBB).normalized();
-//  float orientationAccuracy = 1 - spread(lhsRotor.normalized(),
-//                                         bestFitRHSRotor.normalized());
-  Quaternionf reversedRHSRotor = Quaternionf(-bestFitRHSRotor.x(),
-                                             -bestFitRHSRotor.y(),
-                                             -bestFitRHSRotor.z(),
-                                             -bestFitRHSRotor.w());
-  float orientationAccuracy = fmaxf(powf(lhsRotor.dot(bestFitRHSRotor),2.0),
-                                    powf(lhsRotor.dot(reversedRHSRotor),2.0));
-/*
-  for (unsigned i = 1; i < 7; i++){
-    //auto shift = sizeof(float);
-    auto rhsRotationMatrix = rhs.rotational_matrix_OBB;
-    for (int signBitPosn = 0; signBitPosn < 3; signBitPosn++){
-      int signBit = (i >> signBitPosn) & 0x1;
-      if (signBit){
-        for (int j = 0; j < 3; j++){
-          rhsRotationMatrix(j,signBitPosn) *= -1.0;
-        }
+
+float BoundingBox::accuracyWRT(const BoundingBox& rhs) const{
+  auto lhsCorners = this->getCorners();
+  auto rhsCorners = rhs.getCorners();
+
+  std::vector<int> cornersToCheck = {0,1,2,3,4,5,6,7};
+  std::vector<int> possibleMatches = cornersToCheck;
+  float cumulativeAccuracy = 1.0;
+  for (auto i : cornersToCheck){
+    float shortestDistance = FLT_MAX;
+    int bestMatchingCorner = -1;
+    for (auto j : possibleMatches){
+      float distance = sqrtf(powf(lhsCorners[i].x - rhsCorners[j].x,2) +
+                             powf(lhsCorners[i].y - rhsCorners[j].y,2) +
+                             powf(lhsCorners[i].z - rhsCorners[j].z,2));
+      if (distance < shortestDistance){
+        shortestDistance = distance;
+        bestMatchingCorner = j;
       }
     }
-    auto rhsRotor = Quaternion<float>(rhsRotationMatrix).normalized();
     
-    float _orientationAccuracy = 1 - spread(lhsRotor.normalized(),
-                                            rhsRotor.normalized());
-    if (_orientationAccuracy > orientationAccuracy){
-      orientationAccuracy = _orientationAccuracy;
-      bestFitRHSRotor = rhsRotor;
-    }
-                                            
+    
+    
+    auto it = std::find(possibleMatches.begin(),
+                        possibleMatches.end(),
+                        bestMatchingCorner);
+    if(it != possibleMatches.end())
+      possibleMatches.erase(it);
+    
+    cumulativeAccuracy *= powf(2,-2.0*shortestDistance);
   }
-*/
-  
-  auto unshiftedMinPoint = Vector3f(min_point_OBB.x - centroid.x(),
-                                    min_point_OBB.y - centroid.y(),
-                                    min_point_OBB.z - centroid.z());
-  auto unshiftedMaxPoint = Vector3f(max_point_OBB.x - centroid.x(),
-                                    max_point_OBB.y - centroid.y(),
-                                    max_point_OBB.z - centroid.z());
-  
-  auto rhs_unshiftedMinPoint = Vector3f(rhs.min_point_OBB.x - rhs.centroid.x(),
-                                        rhs.min_point_OBB.y - rhs.centroid.y(),
-                                        rhs.min_point_OBB.z - rhs.centroid.z());
-  
-  auto rhs_unshiftedMaxPoint = Vector3f(rhs.max_point_OBB.x - rhs.centroid.x(),
-                                        rhs.max_point_OBB.y - rhs.centroid.y(),
-                                        rhs.max_point_OBB.z - rhs.centroid.z());
-  
-  Quaternion<float> invRotation = lhsRotor.inverse();
-  Quaternion<float> rhsInvRotation = bestFitRHSRotor.inverse();
-  
-  unshiftedMinPoint = invRotation * unshiftedMinPoint;
-  unshiftedMaxPoint = invRotation * unshiftedMaxPoint;
-  
-  rhs_unshiftedMinPoint = rhsInvRotation * rhs_unshiftedMinPoint;
-  rhs_unshiftedMaxPoint = rhsInvRotation * rhs_unshiftedMaxPoint;
-
-  Vector3f scaleComponents(unshiftedMaxPoint.x() - unshiftedMinPoint.x(),
-                           unshiftedMaxPoint.y() - unshiftedMinPoint.y(),
-                           unshiftedMaxPoint.z() - unshiftedMinPoint.z());
-  
-  Vector3f rhsScaleComponents(rhs_unshiftedMaxPoint.x() -
-                              rhs_unshiftedMinPoint.x(),
-                              rhs_unshiftedMaxPoint.y() -
-                              rhs_unshiftedMinPoint.y(),
-                              rhs_unshiftedMaxPoint.z() -
-                              rhs_unshiftedMinPoint.z());
-  
-  
-  auto scaleAccuracy = 1 - spread(scaleComponents, rhsScaleComponents);
-  
-  AccuracyReport ret = {
-    translationAccuracy,
-    orientationAccuracy,
-    scaleAccuracy
-  };
-  return ret;
+  return cumulativeAccuracy;
 }
 
 std::vector<PointXYZ> BoundingBox::getCorners() const{
