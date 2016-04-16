@@ -7,22 +7,23 @@ last updated: 1 April 2016
   * See how long arm recognition takes (in milliseconds)  {Chris}
   * Color recognition performance tests completed.        {Chris}
   * Color recognition of arm algorithm researched.        {Chris}
-  * Algorithm complete for determing realworld Y   		  {Saroj?}
+  * Algorithm complete for determing realworld Y   	  {Saroj?}
   * Make segmented object ROS "Marker"                    {James}
   * ROS PCL dummy node ouputing ROS "Marker"              {James}
-  * Object Segmentation Node inputs determined    		  {James}
-  * Object Segmentation Node in ROS Configurable		  {James}
+  * Object Segmentation Node inputs determined    	  {James}
+  * Object Segmentation Node in ROS Configurable	  {James}
   * Get reference 3D scan PCD images of arm               {James}   
   * Get reference PCD images of arm in a scene            {James}
   * Continue to improve bounding boxes                    {Matt}
   * Convert bounding boxes to world space                 {Matt}
   * Choose either Object Recognition or 
      Color Segmentation for arm                           {Whole Team}
+  * Start on Genetic Algorithms for research purposes 	  {Sean} 
 	 ------ EXTRA CREDIT ------
   * Topic for Research Paper Complete 
     (e.g Segmenation Methods Compared)                    {?} 
   * Choose between ROS RVIZ and QT + PCL Visualizer 
-	 for Research Assistant GUI                           {?}
+	 for Research Assistant GUI                       {?}
   * PCD file functionality for Research Asst. Implemented {?}
   * PCD Visualization for Research Asst. Implemented 	  {?}
   * Algorithm Pipeline organziation for Research Asst. 
@@ -31,16 +32,24 @@ last updated: 1 April 2016
          wiki.ros.org/rviz/DisplayTypes/Marker
   
 [Sprint 2: Main Functionality Push] (Due 29 April)
-  * Arm Segmentation can output bounding box (accuracy not determined).
-  * Measured Accuracy of output bounding box (both arm and object).
-  * Desired Accuracy of output bounding box determined (both arm and object).
-  * Desired Accuracy of output bounding box aquired started.
-  * Constraints on input PointCloud data aquired. 
-  * Constraints on usable depth cameras determined.
-  * Constraints on placement of depth cameras determined.
-  * Constraints on compatible robot arms determined.
-  * RVIZ can view PointCloud2 and Marker simulatenously.
-  * ROS Launch file completed for object segmenation with arm recognition.
+  * Arm Segmentation can output bounding box 
+	(accuracy not determined).			{}
+  * Measured Accuracy of output bounding box 
+	(both arm and object).				{}
+  * Desired Accuracy of output bounding box determined 
+	(both arm and object).				{}
+  * Desired Accuracy of output bounding box aquired 
+	started.					{}
+  * Constraints on input PointCloud data aquired. 	{}
+  * Constraints on usable depth cameras determined.	{}
+  * Constraints on placement of depth cameras 
+	determined.					{}
+  * Constraints on compatible robot arms determined.	{}j
+  * Start Collecting Sample PCD images 			{Chris}
+  * RVIZ can view PointCloud2 and Marker 
+    simulatenously.					{James}	
+  * ROS Launch file completed for object segmenation 
+    with arm recognition.				{James}	
 	 ------ EXTRA CREDIT ------
   * Algorithm GUI List for Research Asst. Implemented.
   * ROS Integration for Research Asst. Implemented (Optional).
