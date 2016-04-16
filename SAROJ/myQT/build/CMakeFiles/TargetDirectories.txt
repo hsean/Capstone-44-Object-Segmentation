@@ -1,0 +1,1 @@
+/home/saroj/Capstone/Capstone-44-Object-Segmentation/SAROJ/myQT/build/CMakeFiles/colorize_cloud.dir

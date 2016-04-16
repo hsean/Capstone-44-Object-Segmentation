@@ -304,8 +304,8 @@ main (int argc, char** argv)
     if (use_immediate_rendering)
       print_highlight ("Using immediate mode rendering.\n");
   }
-  const unsigned numRows = 4;
-  const unsigned numCols = 4;
+  const unsigned numRows = 1;
+  const unsigned numCols = 1;
   const unsigned numIterations = numRows * numCols;
   // Multiview enabled?
   int y_s = 0, x_s = 0;
@@ -491,11 +491,12 @@ main (int argc, char** argv)
           } else{
             accuracy = bbox.accuracyWRT(*goldenModel);
           }
+          auto centroid = bbox.centroid;
           
           
-          Eigen::Translation3f translation(bbox.centroid.x(),
-                                           bbox.centroid.y(),
-                                           bbox.centroid.z());
+          Eigen::Translation3f translation(centroid.x(),
+                                           centroid.y(),
+                                           centroid.z());
           Eigen::AngleAxisf rotation(bbox.rotational_matrix_OBB);
 
           
@@ -507,6 +508,19 @@ main (int argc, char** argv)
           //manually draw the lines for the bounding box
           {
             int i;
+            float r = 1.0, g = 0.0, b = 0.0;
+            /*
+            if (m % 2 == 0){
+              r = 1.0;
+              g = 0.0;
+              b = 0.0;
+            } else {
+              r = 1.0;
+              g = 0.0;
+              b = 0.0;
+            }
+            */
+            
             std::stringstream lineName;
             PointXYZ p0, p1;
             auto corners = bbox.getCorners();
@@ -516,36 +530,94 @@ main (int argc, char** argv)
                           i << "_to_" << (i+1);
               
               p->addLine(corners[i],
-                         corners[i+1], 1.0, 0.0, 0.0,lineName.str(),viewport);
+                         corners[i+1], r,g,b,lineName.str(),viewport);
               lineName.clear();
             }
             
             lineName << "line_" << m << "_" << j << "_3_to_0";
             p->addLine(corners[3],
-                       corners[0], 1.0, 0.0, 0.0,lineName.str(),viewport);
+                       corners[0], r,g,b,lineName.str(),viewport);
             
             for (i = 4; i < 7; i++){
               lineName << "line_" << m << "_" << j << "_" <<
               i << "_to_" << (i+1);
               p->addLine(corners[i],
-                         corners[i+1], 1.0, 0.0, 0.0,lineName.str(),viewport);
+                         corners[i+1], r,g,b,lineName.str(),viewport);
               lineName.clear();
             }
             lineName << "line_" << m << "_" << j << "_7_to_4";
             p->addLine(corners[7],
-                       corners[4], 1.0, 0.0, 0.0,lineName.str(),viewport);
+                       corners[4], r,g,b,lineName.str(),viewport);
             
             for (i = 0; i < 4; i++){
               lineName << "line_" << m << "_" << j << "_" <<
               i << "_to_" << (i+4);            
               p->addLine(corners[i],
-                         corners[i+4], 1.0, 0.0, 0.0,lineName.str(),viewport);
+                         corners[i+4], r,g,b,lineName.str(),viewport);
               lineName.clear();
             }
 
 
           }
           
+          Vector3f normal = -pipeline.getPlaneNormal();
+          float nDotV = normal.dot(normal);
+          float t = (pipeline.getPlaneOffset() - normal.dot(centroid))/nDotV;
+          PointXYZ centroidProjectedOntoPlane(
+            centroid.x() + normal.x()*t,
+            centroid.y() + normal.y()*t,
+            centroid.z() + normal.z()*t
+          );
+          
+          Vector3f reverseLOS = Vector3f(
+            -centroidProjectedOntoPlane.x,
+            -centroidProjectedOntoPlane.y,
+            -centroidProjectedOntoPlane.z
+          );
+          
+          
+          auto Θ = acosf(reverseLOS.normalized().dot(-normal));
+          auto height = -reverseLOS.norm() * cosf(Θ);
+          auto heightVec = height*normal;
+          PointXYZ cameraHeightAbovePlane(
+            centroidProjectedOntoPlane.x + heightVec.x(),
+            centroidProjectedOntoPlane.y + heightVec.y(),
+            centroidProjectedOntoPlane.z + heightVec.z()
+          );
+          std::stringstream lineName;
+          lineName << "normal_" << m << "_" << j;
+          
+          p->addLine(centroidProjectedOntoPlane,
+                     cameraHeightAbovePlane, 0.0,0.0,1.0,
+                     lineName.str(),viewport);
+          lineName.clear();
+          lineName << "line_of_sight_" << m << "_" << j;
+          p->addLine(PointXYZ(0,0,0),
+                     PointXYZ(centroid.x(),centroid.y(),centroid.z()),
+                     0.0,1.0,0.0,
+                     lineName.str(),viewport);
+          lineName.clear();
+          lineName << "eye_to_plane" << m << "_" << j;
+
+          p->addLine(PointXYZ(0,0,0),
+                     centroidProjectedOntoPlane,
+                     1.0,1.0,0.0,
+                     lineName.str(),viewport);
+          lineName.clear();
+          lineName << "eye_to_height" << m << "_" << j;
+          
+          p->addLine(PointXYZ(0,0,0),
+                     cameraHeightAbovePlane,
+                     0.0,1.0,1.0,
+                     lineName.str(),viewport);
+          
+//          auto u_axis = Vector3f(1,0,0);
+//          auto v_axis = -normal;
+//          auto w_axis = -normal.cross(u_axis);
+//          Vector3f shift = height*normal;
+//          Eigen::Matrix4f worldSpaceFrame;
+          //worldSpaceFrame(0,0) =
+
           //p->setRepresentationToWireframeForAllActors();
           
           MomentOfInertiaEstimation<PointXYZ> feature_extractor;

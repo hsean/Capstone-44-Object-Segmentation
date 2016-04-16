@@ -37,11 +37,6 @@ namespace c44{
   };
 
   
-  struct AccuracyReport{
-  public:
-    float translational, orientational, scalar;
-  };
-
   
   struct BoundingBox{
   public:

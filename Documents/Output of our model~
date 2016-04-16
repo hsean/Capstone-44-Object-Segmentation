@@ -1,0 +1,12 @@
+The results of the meeting with the other capstone team:
+
+They would like to receive points as 3 floats. They need 1 for the center of mass of the object. They want 8 points to be the form of the bounding box data.
+
+They will be using 3 colored markers for the hand to determine orientation, they also need 1 marker for the elbow so that we can send them data about the presence of the elbow.
+
+They need the distance between the hand and the object.
+
+They need 1 flag for the arm within the camera's view and 1 flag for the elbow being in the camera's view.
+
+They would like to know the angle and height of the plane. Apparently a vector starting at the surface of the plane and normal to the plane is sufficient.
+

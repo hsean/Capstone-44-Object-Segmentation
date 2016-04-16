@@ -52,10 +52,12 @@ float BoundingBox::accuracyWRT(const BoundingBox& rhs) const{
     if(it != possibleMatches.end())
       possibleMatches.erase(it);
     
-    cumulativeAccuracy *= powf(2,-2.0*shortestDistance);
+    cumulativeAccuracy *= powf(2,-4.0*shortestDistance);
   }
-  return cumulativeAccuracy;
+  return powf(cumulativeAccuracy,1.0/8.0);
 }
+
+
 
 std::vector<PointXYZ> BoundingBox::getCorners() const{
   std::vector<Vector3f> _corners;
@@ -104,26 +106,3 @@ std::vector<PointXYZ> BoundingBox::getCorners() const{
 BoundingBox GraspableObject::getBoundingBox() const{
   return BoundingBox(this->pointCloud);
 }
-
-
-float c44::spread(const Eigen::Quaternion<float>& lhs,
-                  const Eigen::Quaternion<float>& rhs)
-{
-  float lhsQuadrance, rhsQuadrance, dotProd;
-    lhsQuadrance = lhs.x()*lhs.x() + lhs.y()*lhs.y() + lhs.z()*lhs.z() +
-  lhs.w()*lhs.w();
-  rhsQuadrance = rhs.x()*rhs.x() + rhs.y()*rhs.y() + rhs.z()*rhs.z() +
-  rhs.w()*rhs.w();
-  dotProd      = lhs.x()*rhs.x() + lhs.y()*rhs.y() + lhs.z()*rhs.z() +
-  lhs.w()*rhs.w();
-  
-  
-  auto numerator = dotProd * dotProd;
-  auto denominator = lhsQuadrance * rhsQuadrance;
-  return 1 - numerator/denominator;
-  
-  
-}
-
-
-
