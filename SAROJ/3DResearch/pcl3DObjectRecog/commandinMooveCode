@@ -1,0 +1,4 @@
+This at least detects the arm:
+
+Smaller cluster size
+./correspondence_grouping milk.pcd milk_cartoon_all_small_clorox.pcd --algorithm Hough -c --scence_ss 0.03 --cg_size 0.005
