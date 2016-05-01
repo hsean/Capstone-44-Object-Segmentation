@@ -16,16 +16,22 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
-#include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/common/transforms.h>
 #include <pcl/common/common.h>
 #include <pcl/features/moment_of_inertia_estimation.h>
-
+#include <pcl/features/vfh.h>
 #include <stdio.h>
+#include <pcl/features/cvfh.h>
+#include <pcl/surface/mls.h>
+#include <pcl/features/our_cvfh.h>
+#include <pcl/features/grsd.h>
+#include <pcl/features/esf.h>
+
 
 namespace c44{
   using namespace pcl;
   using namespace Eigen;
+  using namespace std;
   typedef PointCloud<PointXYZ> Cloud3D;
 
   struct SegmentationConfig{
@@ -73,42 +79,6 @@ namespace c44{
   
 
 
-  //struct which wraps a point cloud with a bit of extra functionality
-  struct GeometricObject{
-  public:
-      const ModelCoefficients coefficients;
-      const Cloud3D::Ptr pointCloud;
-      const PointCloud<Normal>::Ptr normalCloud;
-    
-      GeometricObject(ModelCoefficients mc,
-                      Cloud3D::Ptr cloud,
-                      PointCloud<Normal>::Ptr normals) :
-      coefficients(mc), pointCloud(cloud), normalCloud(normals) {};
-      
-  };
-
-  struct Plane : public GeometricObject{
-  public:
-      const PointIndices::Ptr inliers;
-      Plane(ModelCoefficients mc,
-            Cloud3D::Ptr points,
-            PointCloud<Normal>::Ptr normals,
-            PointIndices::Ptr _inliers) :
-      GeometricObject(mc,points,normals), inliers(_inliers){}      
-  };
-
-
-
-  struct GraspableObject : GeometricObject{
-  public:
-      GraspableObject(ModelCoefficients mc,
-                      Cloud3D::Ptr points,
-                      PointCloud<Normal>::Ptr normals) :
-      GeometricObject(mc,points,normals){}
-      
-      BoundingBox getBoundingBox() const;
-    
-  };
   
 
 }

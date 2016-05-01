@@ -5,9 +5,13 @@
 //  Created on 2/10/16.
 //
 
-#include "bounding_box_utils.hpp"
+#include "../include/bounding_box_utils.hpp"
+#include <pcl/features/crh.h>
+#include <pcl/recognition/crh_alignment.h>
+
 #define TARGET_OBJ_DIAMETER 4.0
 using namespace c44;
+using namespace search;
 
 BoundingBox::BoundingBox(Cloud3D::Ptr cloud){
   MomentOfInertiaEstimation<PointXYZ> feature_extractor;
@@ -103,6 +107,7 @@ std::vector<PointXYZ> BoundingBox::getCorners() const{
 
 
 
-BoundingBox GraspableObject::getBoundingBox() const{
-  return BoundingBox(this->pointCloud);
-}
+
+
+
+
