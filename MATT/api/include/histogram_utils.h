@@ -50,7 +50,7 @@ bool loadHist (const boost::filesystem::path &path, vfh_model &vfh)
     r.readHeader (path.string (), cloud, origin, orientation, version, type, idx);
     
     field_idx = pcl::getFieldIndex (cloud,
-                                    c44::RigidBodyWithHistogram<histogram_t>::getExtension());
+                                    c44::RigidBodyWithHistogram<histogram_t>::fieldName);
     if (field_idx == -1)
       return (false);
     if ((int)cloud.width * cloud.height != 1)
@@ -68,7 +68,7 @@ bool loadHist (const boost::filesystem::path &path, vfh_model &vfh)
   
   std::vector <pcl::PCLPointField> fields;
   pcl::getFieldIndex (point,
-                      c44::RigidBodyWithHistogram<histogram_t>::getExtension(),
+                      c44::RigidBodyWithHistogram<histogram_t>::fieldName,
                       fields);
   
   for (size_t i = 0; i < fields[field_idx].count; ++i)
@@ -84,7 +84,7 @@ template<HistogramType histogram_t>
 void loadHistograms (const boost::filesystem::path &base_dir,
                      std::vector<vfh_model> &models)
 {
-  std::string extension = ".pcd";
+  std::string extension = c44::RigidBodyWithHistogram<histogram_t>::fileExt;
   if (!boost::filesystem::exists (base_dir) && !boost::filesystem::is_directory (base_dir))
     return;
   
@@ -97,11 +97,14 @@ void loadHistograms (const boost::filesystem::path &base_dir,
       pcl::console::print_highlight ("Loading %s (%lu models loaded so far).\n", ss.str ().c_str (), (unsigned long)models.size ());
       loadHistograms<histogram_t>(it->path (), models);
     }
-    if (boost::filesystem::is_regular_file (it->status ()) && boost::filesystem::extension (it->path ()) == extension)
+    auto currFileExt = boost::filesystem::extension (it->path ());
+    if (boost::filesystem::is_regular_file (it->status ()) && currFileExt == extension)
     {
       vfh_model m;
       if (loadHist<histogram_t>(base_dir / it->path ().filename (), m))
         models.push_back (m);
+    } else{
+      pcl::console::print_highlight ("what.....");
     }
   }
 }

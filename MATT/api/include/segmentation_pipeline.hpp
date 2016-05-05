@@ -14,7 +14,7 @@ SegmentationPipeline<histogram_t>::index = nullptr;
 template<HistogramType histogram_t>
 void SegmentationPipeline<histogram_t>::init(const std::string& model_src_dir){
 
-  loadHistograms<histogram_t>(MODEL_DIR, models);
+  loadHistograms<histogram_t>(model_src_dir, models);
   if (models.size() == 0){
     pcl::console::print_error("no model files found");
     exit(-1);

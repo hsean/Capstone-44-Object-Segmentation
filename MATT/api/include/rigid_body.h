@@ -43,6 +43,7 @@ enum HistogramType{
 namespace c44{
   using namespace pcl;
   
+  static const HistogramType default_est_method = HistogramType::GRSD;
   struct RigidBody{
     
   public:
@@ -59,13 +60,14 @@ namespace c44{
     
   };
 
-  template <HistogramType H = GRSD>
+  template <HistogramType H = default_est_method>
   struct RigidBodyWithHistogram;
   
   template<>
   struct RigidBodyWithHistogram<VFH> : public RigidBody{
     typedef VFHSignature308 signature_t;
-    
+    static const string fieldName;
+    static const string fileExt;
     #include <rigid_body_shared_template.h>
     
     PointCloud<signature_t>::Ptr computeDescriptor() const{
@@ -102,9 +104,6 @@ namespace c44{
       return descriptor;
     }
     
-    static std::string getExtension(){
-      return "vfh";
-    }
     
     
   };
@@ -112,7 +111,9 @@ namespace c44{
   template<>
   struct RigidBodyWithHistogram<CVFH> : public RigidBody{
     typedef VFHSignature308 signature_t;
-    
+    static const string fieldName;
+    static const string fileExt;
+
     #include <rigid_body_shared_template.h>
     
     PointCloud<signature_t>::Ptr computeDescriptor() const{
@@ -154,15 +155,15 @@ namespace c44{
       return descriptor;
     }
     
-    static std::string getExtension(){
-      return "vfh";
-    }
   };
   
   template<>
   struct RigidBodyWithHistogram<ESF> : public RigidBody{
   public:
     typedef ESFSignature640 signature_t;
+    static const string fieldName;
+    static const string fileExt;
+
     
     #include <rigid_body_shared_template.h>
     
@@ -182,13 +183,6 @@ namespace c44{
       return descriptor;
     }
     
-    static std::string getExtension(){
-      return "esf";
-    }
-    
-    
-    
-    
     
   };
   
@@ -197,6 +191,9 @@ namespace c44{
   public:
     
     typedef GRSDSignature21 signature_t;
+    static const string fieldName;
+    static const string fileExt;
+
     
     #include <rigid_body_shared_template.h>
     PointCloud<signature_t>::Ptr
@@ -230,12 +227,6 @@ namespace c44{
       return descriptors;
       
     }
-    
-    static std::string getExtension(){
-      return "grsd";
-    }
-    
-
     
     
   };

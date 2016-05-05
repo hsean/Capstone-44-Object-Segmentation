@@ -218,7 +218,7 @@ main (int argc, char** argv)
   
   int subdiv_level = 1;
   double scan_dist = 3;
-  std::string fname, vfh_fname, base;
+  std::string fname, hist_fname, base;
   char seq[256];
   
   // Compute start/stop for vertical and horizontal
@@ -486,9 +486,9 @@ main (int argc, char** argv)
     }
     c44::RigidBodyWithHistogram<> model(xyz_cloud);
  
-    vfh_fname = ss.str () + "/" + seq + "_vfh.pcd";
+    hist_fname = ss.str () + "/" + seq + ".pcd" + c44::RigidBodyWithHistogram<>::fileExt;
     auto descriptor = model.computeDescriptor();
-    saveCloud<c44::RigidBodyWithHistogram<>::signature_t>(vfh_fname, *descriptor);
+    saveCloud<c44::RigidBodyWithHistogram<>::signature_t>(hist_fname, *descriptor);
     cout << "hey pal" << endl;
 
 

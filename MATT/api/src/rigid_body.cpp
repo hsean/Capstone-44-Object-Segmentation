@@ -17,6 +17,18 @@ BoundingBox GraspableObject::getBoundingBox() const{
   return BoundingBox(this->point_cloud);
 }
 
+const string RigidBodyWithHistogram<VFH>::fieldName = "vfh";
+const string RigidBodyWithHistogram<VFH>::fileExt = ".vfh";
+
+const string RigidBodyWithHistogram<CVFH>::fieldName = "vfh";
+const string RigidBodyWithHistogram<CVFH>::fileExt = ".cvfh";
+
+const string RigidBodyWithHistogram<ESF>::fieldName = "esf";
+const string RigidBodyWithHistogram<ESF>::fileExt = ".esf";
+
+const string RigidBodyWithHistogram<GRSD>::fieldName = "grsd";
+const string RigidBodyWithHistogram<GRSD>::fileExt = ".grsd";
+
 
 
 

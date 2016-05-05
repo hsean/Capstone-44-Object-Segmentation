@@ -14,7 +14,7 @@
 
 using namespace pcl;
 
-static const HistogramType histogram_t = GRSD;
+static const HistogramType est_method = c44::default_est_method;
 
 int
 main (int argc, char** argv)
@@ -22,11 +22,9 @@ main (int argc, char** argv)
   int k = 6;
   
   double thresh = DBL_MAX;     // No threshold, disabled by default
-  
-  std::string extension (".pcd");
-  transform (extension.begin (), extension.end (), extension.begin (), (int(*)(int))tolower);
-  
-  c44::SegmentationPipeline<histogram_t>::init(argv[1]);
+
+  std::string extension (RigidBodyWithHistogram<>::fileExt);
+  c44::SegmentationPipeline<est_method>::init(argv[1]);
   
   if (argc < 2)
   {
@@ -39,9 +37,9 @@ main (int argc, char** argv)
     return (-1);
   }
   
-  
-  transform (extension.begin (), extension.end (), extension.begin (), (int(*)(int))tolower);
-  
+//  
+//  transform (extension.begin (), extension.end (), extension.begin (), (int(*)(int))tolower);
+//  
   // Load the test histogram
   std::vector<int> pcd_indices = pcl::console::parse_file_extension_argument (argc, argv, ".pcd");
   vfh_model histogram;
@@ -58,7 +56,7 @@ main (int argc, char** argv)
   
   
   int hand = 0;
-  c44::RigidBodyWithHistogram<histogram_t>* hand_ptr = nullptr;
+  c44::RigidBodyWithHistogram<>* hand_ptr = nullptr;
   pcl::console::parse_argument(argc, argv, "-hand", hand);
 
   
@@ -73,17 +71,17 @@ main (int argc, char** argv)
     return (-1);
   fromPCLPointCloud2 (*hand_scene_2d, *hand_scene);
 
-  c44::SegmentationPipeline<histogram_t> pipeline(hand_scene,
+  c44::SegmentationPipeline<est_method> pipeline(hand_scene,
                                 voxelSize,
                                 sampleSize,
                                 stdDev,
                                 iterationDivisor);
   //c44::RigidBodyWithHistogram<histogram_t> _hand2 = {pipeline.getObjects()[1].point_cloud};
   if (pipeline.performSegmentation()){
-    hand_ptr = new c44::RigidBodyWithHistogram<histogram_t>(pipeline.getObjects()[0].point_cloud);
+    hand_ptr = new c44::RigidBodyWithHistogram<>(pipeline.getObjects()[0].point_cloud);
     histogram.first = "hand";
     auto data = hand_ptr->computeDescriptor()->points[0].histogram;
-    for (unsigned i = 0; i < RigidBodyWithHistogram<histogram_t>::descriptorSize(); i++){
+    for (unsigned i = 0; i < RigidBodyWithHistogram<>::descriptorSize(); i++){
       histogram.second.push_back(data[i]);
     }
     
@@ -107,7 +105,7 @@ main (int argc, char** argv)
   pcl::console::print_highlight ("The closest %d neighbors for %s are:\n", k, argv[pcd_indices[0]]);
   for (int i = 0; i < k; ++i)
     pcl::console::print_info ("    %d - %s (%d) with a distance of: %f\n",
-                              i, SegmentationPipeline<histogram_t>::getModels().at (k_indices[0][i]).first.c_str (), k_indices[0][i], k_distances[0][i]);
+                              i, SegmentationPipeline<est_method>::getModels().at (k_indices[0][i]).first.c_str (), k_indices[0][i], k_distances[0][i]);
   
   // Load the results
   int n_cells = k;
@@ -134,8 +132,8 @@ main (int argc, char** argv)
   int viewport = 0, l = 0, m = 0;
   for (int i = 0; i < k; ++i)
   {
-    std::string cloud_name = SegmentationPipeline<histogram_t>::getModels().at (k_indices[0][i]).first;
-    boost::replace_last (cloud_name, "_vfh", "");
+    std::string cloud_name = SegmentationPipeline<est_method>::getModels().at (k_indices[0][i]).first;
+    boost::replace_last (cloud_name, extension, "");
     
     p.createViewPort (l * x_step, m * y_step, (l + 1) * x_step, (m + 1) * y_step, viewport);
     l++;

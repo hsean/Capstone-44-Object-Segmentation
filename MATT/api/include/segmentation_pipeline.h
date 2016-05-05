@@ -10,13 +10,10 @@
 #include <flann/io/hdf5.h>
 #include <bounding_box_utils.hpp>
 #include <rigid_body.h>
-//#include "c44_filters.hpp"
 #include <realsense_toolkit.h>
 #include <histogram_utils.h>
-#ifndef MODEL_DIR
-#define MODEL_DIR "/Users/matt/code/cpp/pcl-stuff/cap44/xcode-build/c44/demos/Debug/3DScanOfInmoovHand.ply_output/"
-#endif
-const boost::filesystem::path base_dir(MODEL_DIR);
+
+
 
 namespace c44{
   using namespace pcl;
@@ -37,8 +34,6 @@ namespace c44{
             planeCloud;
     ModelCoefficients::Ptr planeCoefficients;
     SACSegmentationFromNormals<PointXYZ, Normal> seg;
-    //search::KdTree<PointXYZ>::Ptr tree;
-    //std::vector<Cloud3D::Ptr> clusters;
     PointCloud<Normal>::Ptr normals;
     const float stdDev, sampleSize;
     vector<RigidBodyWithHistogram<histogram_t>> objects;
