@@ -18,7 +18,7 @@
 #include <pcl/io/pcd_io.h>
 #include <rigid_body.h>
 
-
+//using namespace c44;
 
 
 typedef std::pair<std::string, std::vector<float> > vfh_model;
@@ -26,13 +26,13 @@ typedef std::pair<std::string, std::vector<float> > vfh_model;
 using namespace pcl;
 
 //forward declaration
-template<class histogram_t>
+template<HistogramType histogram_t>
 void loadHistograms (const boost::filesystem::path &base_dir,
                      std::vector<vfh_model> &models);
 
 
 
-template<class histogram_t>
+template<HistogramType histogram_t>
 bool loadHist (const boost::filesystem::path &path, vfh_model &vfh)
 {
   int field_idx;
@@ -62,9 +62,9 @@ bool loadHist (const boost::filesystem::path &path, vfh_model &vfh)
   }
   
   // Treat the VFH signature as a single Point Cloud
-  pcl::PointCloud <histogram_t> point;
+  pcl::PointCloud<typename c44::RigidBodyWithHistogram<histogram_t>::signature_t> point;
   pcl::io::loadPCDFile (path.string (), point);
-  vfh.second.resize (histogram_t::descriptorSize());
+  vfh.second.resize (c44::RigidBodyWithHistogram<histogram_t>::descriptorSize());
   
   std::vector <pcl::PCLPointField> fields;
   pcl::getFieldIndex (point,
@@ -80,7 +80,7 @@ bool loadHist (const boost::filesystem::path &path, vfh_model &vfh)
 }
 
 
-template<class histogram_t>
+template<HistogramType histogram_t>
 void loadHistograms (const boost::filesystem::path &base_dir,
                      std::vector<vfh_model> &models)
 {

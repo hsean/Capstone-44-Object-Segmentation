@@ -23,7 +23,7 @@ namespace c44{
   using namespace Eigen;
   
   
-  template <class histogram_t>
+  template <HistogramType histogram_t>
   class SegmentationPipeline{
     
     static vector<vfh_model> models;

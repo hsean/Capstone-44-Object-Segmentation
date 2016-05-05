@@ -6,12 +6,12 @@
 
 
 using namespace c44;
-template<typename histogram_t>
+template<HistogramType histogram_t>
 vector<vfh_model> SegmentationPipeline<histogram_t>::models = vector<vfh_model>();
-template<typename histogram_t> flann::Index<flann::ChiSquareDistance<float>>*
+template<HistogramType histogram_t> flann::Index<flann::ChiSquareDistance<float>>*
 SegmentationPipeline<histogram_t>::index = nullptr;
 
-template<class histogram_t>
+template<HistogramType histogram_t>
 void SegmentationPipeline<histogram_t>::init(const std::string& model_src_dir){
 
   loadHistograms<histogram_t>(MODEL_DIR, models);
@@ -37,7 +37,7 @@ void SegmentationPipeline<histogram_t>::init(const std::string& model_src_dir){
 }
 
 
-template<class histogram_t>
+template<HistogramType histogram_t>
 SegmentationPipeline<histogram_t>::SegmentationPipeline(Cloud3D::Ptr rawCloud,
                                            float voxelSize,
                                            float sampleSize,
@@ -80,7 +80,7 @@ SegmentationPipeline<histogram_t>::SegmentationPipeline(Cloud3D::Ptr rawCloud,
 
 }
 
-template<class histogram_t>
+template<HistogramType histogram_t>
 bool SegmentationPipeline<histogram_t>::performSegmentation(){
     if (extractPrism()){
         int max = 1;
@@ -96,7 +96,7 @@ bool SegmentationPipeline<histogram_t>::performSegmentation(){
 }
 
 
-template<class histogram_t>
+template<HistogramType histogram_t>
 bool SegmentationPipeline<histogram_t>::extractPlane()
 {
     planeCoefficients = ModelCoefficients::Ptr(new ModelCoefficients);
@@ -129,7 +129,7 @@ bool SegmentationPipeline<histogram_t>::extractPlane()
     return planeCloud->points.size() > 0;
 }
 
-template<class histogram_t>
+template<HistogramType histogram_t>
 bool SegmentationPipeline<histogram_t>::extractPrism()
 {
 
@@ -168,7 +168,7 @@ bool SegmentationPipeline<histogram_t>::extractPrism()
 }
 
 
-template<class histogram_t>
+template<HistogramType histogram_t>
 bool SegmentationPipeline<histogram_t>::extractGraspableObject(SacModel model)
 {
   
@@ -240,7 +240,7 @@ bool SegmentationPipeline<histogram_t>::extractGraspableObject(SacModel model)
 
 }
 
-template<class histogram_t>
+template<HistogramType histogram_t>
 void SegmentationPipeline<histogram_t>::clusterize(){
   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
   tree->setInputCloud (objectCloud);
@@ -280,7 +280,7 @@ void SegmentationPipeline<histogram_t>::clusterize(){
   
 }
 
-template<class histogram_t>
+template<HistogramType histogram_t>
 void SegmentationPipeline<histogram_t>::findModel(const vfh_model &model,
                int k, flann::Matrix<int> &indices,
                flann::Matrix<float> &distances)
@@ -299,7 +299,7 @@ void SegmentationPipeline<histogram_t>::findModel(const vfh_model &model,
 
 }
 
-template<class histogram_t>
+template<HistogramType histogram_t>
 bool SegmentationPipeline<histogram_t>::findHand() const
 {
   int k = 16;//number of nearest neighbors to search

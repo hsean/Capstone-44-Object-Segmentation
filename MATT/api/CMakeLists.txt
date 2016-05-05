@@ -18,7 +18,6 @@ if(build)
     src/bounding_box_utils.cpp
     src/realsense_toolkit.cpp    
     src/rigid_body.cpp
-    src/histogram_utils.cpp
   )
 
   set(LIB_NAME "${SUBSUBSYS_NAME}")
@@ -55,7 +54,9 @@ if(build)
     "${CMAKE_CURRENT_SOURCE_DIR}/include/segmentation_pipeline.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/rigid_body.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/histogram_utils.h"
-  )
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/rigid_body_shared_template.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/c44_virtual_scanner.hpp"
+)
   PCL_ADD_LIBRARY("${LIB_NAME}" "${SUBSUBSYS_NAME}" ${srcs} ${incs} ${impl_incs} ${headers})
   target_link_libraries("${LIB_NAME}"
     pcl_search

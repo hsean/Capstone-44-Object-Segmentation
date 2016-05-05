@@ -48,36 +48,18 @@ loadCloud (const std::string &filename, PointCloud<PointXYZ> &cloud)
 {
   TicToc tt;
   print_highlight ("Loading "); print_value ("%s ", filename.c_str ());
-
+  
   tt.tic ();
   if (loadPCDFile<PointXYZ> (filename, cloud) < 0)
     return (false);
   print_info ("[done, "); print_value ("%g", tt.toc ()); print_info (" ms : ");
   print_value ("%d", cloud.width * cloud.height); print_info (" points]\n");
   print_info ("Available dimensions: "); print_value ("%s\n", getFieldsList (cloud).c_str ());
-
+  
   return (true);
 }
 
-void
-compute (const PointCloud<PointNormal>::Ptr &input, PointCloud<VFHSignature308> &output)
-{
-  // Estimate
-  TicToc tt;
-  tt.tic ();
-  
-  print_highlight (stderr, "Computing ");
 
-  VFHEstimation<PointNormal, PointNormal, VFHSignature308> ne;
-  ne.setSearchMethod (search::KdTree<PointNormal>::Ptr (new search::KdTree<PointNormal>));
-  ne.setInputCloud (input);
-  ne.setInputNormals (input);
-  
-  ne.compute (output);
-
-  print_info ("[done, "); print_value ("%g", tt.toc ()); print_info (" ms : ");
-  print_value ("%d", output.width * output.height); print_info (" points]\n");
-}
 
 template<typename PointT>
 void saveCloud (const std::string &filename,
@@ -85,7 +67,7 @@ void saveCloud (const std::string &filename,
 {
   TicToc tt;
   tt.tic ();
-
+  
   print_highlight ("Saving "); print_value ("%s ", filename.c_str ());
   
   io::savePCDFile (filename, output, false);
@@ -441,16 +423,16 @@ main (int argc, char** argv)
     pcl::PointCloud<pcl::PointWithViewpoint> cloud_downsampled;
     grid.setInputCloud (boost::make_shared<pcl::PointCloud<pcl::PointWithViewpoint> > (cloud));
     //grid.filter (cloud_downsampled);
-
+    
     // Saves the point cloud data to disk
     sprintf (seq, "%d", i);
     boost::trim (filename);
     boost::split (st, filename, boost::is_any_of ("/\\"), boost::token_compress_on);
-
+    
     std::stringstream ss;
     std::string output_dir = st.at (st.size () - 1);
     ss << output_dir << "_output";
-
+    
     boost::filesystem::path outpath (ss.str ());
     if (!boost::filesystem::exists (outpath))
     {
@@ -462,7 +444,7 @@ main (int argc, char** argv)
       PCL_INFO ("Creating directory %s\n", ss.str ().c_str ());
     }
     fname = ss.str () + "/" + seq + ".pcd";
-
+    
     if (organized)
     {
       cloud.height = 1 + static_cast<uint32_t> ((vert_end - vert_start) / sp.vert_res);
@@ -473,25 +455,25 @@ main (int argc, char** argv)
       cloud.width = static_cast<uint32_t> (cloud.points.size ());
       cloud.height = 1;
     }
-
+    
     pcl::PCDWriter writer;
     PCL_INFO ("Wrote %lu points (%d x %d) to %s\n", cloud.points.size (), cloud.width, cloud.height, fname.c_str ());
     writer.writeASCII(fname, cloud);
     cloud.clear();
-
+    
     PointCloud<PointXYZ>::Ptr xyz_cloud(new PointCloud<PointXYZ>);
     if (!loadCloud (fname, *xyz_cloud)){
       PCL_ERROR ("Couldnt read the file we just wrote!\n");
       return (-1);
     }
-    c44::RigidBodyWithHistogram<> model(xyz_cloud);
- 
+    c44::RigidBodyWithHistogram<GRSD> model(xyz_cloud);
+    
     vfh_fname = ss.str () + "/" + seq + "_vfh.pcd";
     auto descriptor = model.computeDescriptor();
-    saveCloud<c44::RigidBodyWithHistogram<>::signature_t>(vfh_fname, *descriptor);
+    saveCloud<c44::RigidBodyWithHistogram<GRSD>::signature_t>(vfh_fname, *descriptor);
     cout << "hey pal" << endl;
-
-
+    
+    
   }
   
   return (0);

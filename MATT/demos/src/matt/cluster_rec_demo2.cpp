@@ -14,7 +14,7 @@
 
 using namespace pcl;
 
-typedef GRSDSignature21 histogram_t;
+static const HistogramType histogram_t = GRSD;
 
 int
 main (int argc, char** argv)
@@ -26,7 +26,7 @@ main (int argc, char** argv)
   std::string extension (".pcd");
   transform (extension.begin (), extension.end (), extension.begin (), (int(*)(int))tolower);
   
-  c44::SegmentationPipeline<GRSDSignature21>::init(argv[1]);
+  c44::SegmentationPipeline<histogram_t>::init(argv[1]);
   
   if (argc < 2)
   {
@@ -78,12 +78,12 @@ main (int argc, char** argv)
                                 sampleSize,
                                 stdDev,
                                 iterationDivisor);
-  
+  //c44::RigidBodyWithHistogram<histogram_t> _hand2 = {pipeline.getObjects()[1].point_cloud};
   if (pipeline.performSegmentation()){
     hand_ptr = new c44::RigidBodyWithHistogram<histogram_t>(pipeline.getObjects()[0].point_cloud);
     histogram.first = "hand";
     auto data = hand_ptr->computeDescriptor()->points[0].histogram;
-    for (unsigned i = 0; i < histogram_t::descriptorSize(); i++){
+    for (unsigned i = 0; i < RigidBodyWithHistogram<histogram_t>::descriptorSize(); i++){
       histogram.second.push_back(data[i]);
     }
     

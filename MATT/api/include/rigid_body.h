@@ -31,6 +31,14 @@
 typedef pcl::Histogram<90> CRH90;
 
 
+enum HistogramType{
+  VFH,
+  CVFH,
+  OURCVFH,
+  ESF,
+  GRSD
+};
+
 //struct which wraps a point cloud with a bit of extra functionality
 namespace c44{
   using namespace pcl;
@@ -51,22 +59,14 @@ namespace c44{
     
   };
 
-  template <typename histogram_t>
-  struct RigidBodyWithHistogram : public RigidBody{
-  public:
-    
-    typename PointCloud<histogram_t>::Ptr computeDescriptor() const;
-    static std::string getExtension();
-    static size_t descriptorSize();
-    RigidBodyWithHistogram(Cloud3D::Ptr cloud) : RigidBody(cloud){};
-  };
+  template <HistogramType H = GRSD>
+  struct RigidBodyWithHistogram;
   
   template<>
-  struct RigidBodyWithHistogram<VFHSignature308> : public RigidBody{
+  struct RigidBodyWithHistogram<VFH> : public RigidBody{
     typedef VFHSignature308 signature_t;
     
-    //no way out of copying-and-pasting this, i guess, :-|
-    RigidBodyWithHistogram(Cloud3D::Ptr cloud) : RigidBody(cloud){};
+    #include <rigid_body_shared_template.h>
     
     PointCloud<signature_t>::Ptr computeDescriptor() const{
       // Object for storing the normals.
@@ -106,19 +106,65 @@ namespace c44{
       return "vfh";
     }
     
-    static size_t descriptorSize(){
-      return VFHSignature308::descriptorSize();
+    
+  };
+  
+  template<>
+  struct RigidBodyWithHistogram<CVFH> : public RigidBody{
+    typedef VFHSignature308 signature_t;
+    
+    #include <rigid_body_shared_template.h>
+    
+    PointCloud<signature_t>::Ptr computeDescriptor() const{
+      
+      // Object for storing the normals.
+      pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
+      // Object for storing the CVFH descriptors.
+      pcl::PointCloud<pcl::VFHSignature308>::Ptr descriptor(new pcl::PointCloud<pcl::VFHSignature308>);
+      
+      // Note: you should have performed preprocessing to cluster out the object
+      // from the cloud, and save it to this individual file.
+      
+      
+      // Estimate the normals.
+      pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normalEstimation;
+      normalEstimation.setInputCloud(point_cloud);
+      normalEstimation.setRadiusSearch(0.03);
+      pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
+      normalEstimation.setSearchMethod(kdtree);
+      normalEstimation.compute(*normals);
+      
+      // CVFH estimation object.
+      pcl::CVFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> cvfh;
+      cvfh.setInputCloud(point_cloud);
+      cvfh.setInputNormals(normals);
+      cvfh.setSearchMethod(kdtree);
+      // Set the maximum allowable deviation of the normals,
+      // for the region segmentation step.
+      cvfh.setEPSAngleThreshold(5.0 / 180.0 * M_PI); // 5 degrees.
+                                                     // Set the curvature threshold (maximum disparity between curvatures),
+                                                     // for the region segmentation step.
+      cvfh.setCurvatureThreshold(1.0);
+      // Set to true to normalize the bins of the resulting histogram,
+      // using the total number of points. Note: enabling it will make CVFH
+      // invariant to scale just like VFH, but the authors encourage the opposite.
+      cvfh.setNormalizeBins(true);
+      
+      cvfh.compute(*descriptor);
+      return descriptor;
+    }
+    
+    static std::string getExtension(){
+      return "vfh";
     }
   };
   
   template<>
-  struct RigidBodyWithHistogram<ESFSignature640> : public RigidBody{
+  struct RigidBodyWithHistogram<ESF> : public RigidBody{
   public:
     typedef ESFSignature640 signature_t;
     
-    //no way out of copying-and-pasting this, i guess, :-|
-    RigidBodyWithHistogram(Cloud3D::Ptr cloud) : RigidBody(cloud){};
-
+    #include <rigid_body_shared_template.h>
     
     PointCloud<signature_t>::Ptr computeDescriptor() const{
       pcl::PointCloud<signature_t>::Ptr descriptor(new PointCloud<signature_t>);
@@ -140,25 +186,20 @@ namespace c44{
       return "esf";
     }
     
-    static size_t descriptorSize(){
-      return ESFSignature640::descriptorSize();
-    }
+    
     
     
     
   };
   
   template<>
-  struct RigidBodyWithHistogram<GRSDSignature21> : public RigidBody{
+  struct RigidBodyWithHistogram<GRSD> : public RigidBody{
   public:
     
     typedef GRSDSignature21 signature_t;
     
-    //no way out of copying-and-pasting this, i guess, :-|
-    RigidBodyWithHistogram(Cloud3D::Ptr cloud) : RigidBody(cloud){};
-
-    
-    PointCloud<GRSDSignature21>::Ptr
+    #include <rigid_body_shared_template.h>
+    PointCloud<signature_t>::Ptr
     computeDescriptor() const{
       pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
       // Object for storing the GRSD descriptors for each point.
@@ -194,9 +235,7 @@ namespace c44{
       return "grsd";
     }
     
-    static size_t descriptorSize(){
-      return GRSDSignature21::descriptorSize();
-    }
+
     
     
   };
