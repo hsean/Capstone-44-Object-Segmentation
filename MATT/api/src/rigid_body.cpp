@@ -29,6 +29,8 @@ const string RigidBodyWithHistogram<ESF>::fileExt = ".esf";
 const string RigidBodyWithHistogram<GRSD>::fieldName = "grsd";
 const string RigidBodyWithHistogram<GRSD>::fileExt = ".grsd";
 
+const string RigidBodyWithHistogram<OURCVFH>::fieldName = "vfh";
+const string RigidBodyWithHistogram<OURCVFH>::fileExt = ".ourcvfh";
 
 
 

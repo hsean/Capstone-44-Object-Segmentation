@@ -6,13 +6,14 @@
 
 
 using namespace c44;
-template<HistogramType histogram_t>
-vector<vfh_model> SegmentationPipeline<histogram_t>::models = vector<vfh_model>();
-template<HistogramType histogram_t> flann::Index<flann::ChiSquareDistance<float>>*
-SegmentationPipeline<histogram_t>::index = nullptr;
+template<HistogramType histogram_t, typename dist_metric_t>
+vector<vfh_model> SegmentationPipeline<histogram_t,dist_metric_t>::models = vector<vfh_model>();
+template<HistogramType histogram_t, typename dist_metric_t>
+flann::Index<dist_metric_t>*
+SegmentationPipeline<histogram_t,dist_metric_t>::index = nullptr;
 
-template<HistogramType histogram_t>
-void SegmentationPipeline<histogram_t>::init(const std::string& model_src_dir){
+template<HistogramType histogram_t, typename dist_metric_t>
+void SegmentationPipeline<histogram_t, dist_metric_t>::init(const std::string& model_src_dir){
 
   loadHistograms<histogram_t>(model_src_dir, models);
   if (models.size() == 0){
@@ -29,7 +30,7 @@ void SegmentationPipeline<histogram_t>::init(const std::string& model_src_dir){
         flann_data[i][j] = models[i].second[j];
     
     
-    index = new flann::Index<flann::ChiSquareDistance<float>>(flann_data, flann::LinearIndexParams ());
+    index = new flann::Index<dist_metric_t>(flann_data, flann::LinearIndexParams ());
     index->buildIndex ();
 
 
@@ -37,8 +38,8 @@ void SegmentationPipeline<histogram_t>::init(const std::string& model_src_dir){
 }
 
 
-template<HistogramType histogram_t>
-SegmentationPipeline<histogram_t>::SegmentationPipeline(Cloud3D::Ptr rawCloud,
+template<HistogramType histogram_t, typename dist_metric_t>
+SegmentationPipeline<histogram_t,dist_metric_t>::SegmentationPipeline(Cloud3D::Ptr rawCloud,
                                            float voxelSize,
                                            float sampleSize,
                                            float stdDev,
@@ -80,8 +81,8 @@ SegmentationPipeline<histogram_t>::SegmentationPipeline(Cloud3D::Ptr rawCloud,
 
 }
 
-template<HistogramType histogram_t>
-bool SegmentationPipeline<histogram_t>::performSegmentation(){
+template<HistogramType histogram_t, typename dist_metric_t>
+bool SegmentationPipeline<histogram_t, dist_metric_t>::performSegmentation(){
     if (extractPrism()){
         int max = 1;
         bool stillFindingStuff = true;
@@ -96,8 +97,8 @@ bool SegmentationPipeline<histogram_t>::performSegmentation(){
 }
 
 
-template<HistogramType histogram_t>
-bool SegmentationPipeline<histogram_t>::extractPlane()
+template<HistogramType histogram_t, typename dist_metric_t>
+bool SegmentationPipeline<histogram_t, dist_metric_t>::extractPlane()
 {
     planeCoefficients = ModelCoefficients::Ptr(new ModelCoefficients);
     PointIndices::Ptr plane_indices(new PointIndices);
@@ -129,8 +130,8 @@ bool SegmentationPipeline<histogram_t>::extractPlane()
     return planeCloud->points.size() > 0;
 }
 
-template<HistogramType histogram_t>
-bool SegmentationPipeline<histogram_t>::extractPrism()
+template<HistogramType histogram_t, typename dist_metric_t>
+bool SegmentationPipeline<histogram_t,dist_metric_t>::extractPrism()
 {
 
     if (extractPlane()){
@@ -168,8 +169,8 @@ bool SegmentationPipeline<histogram_t>::extractPrism()
 }
 
 
-template<HistogramType histogram_t>
-bool SegmentationPipeline<histogram_t>::extractGraspableObject(SacModel model)
+template<HistogramType histogram_t, typename dist_metric_t>
+bool SegmentationPipeline<histogram_t, dist_metric_t>::extractGraspableObject(SacModel model)
 {
   
   ModelCoefficients::Ptr objectCoefficients(new ModelCoefficients);
@@ -240,8 +241,8 @@ bool SegmentationPipeline<histogram_t>::extractGraspableObject(SacModel model)
 
 }
 
-template<HistogramType histogram_t>
-void SegmentationPipeline<histogram_t>::clusterize(){
+template<HistogramType histogram_t, typename dist_metric_t>
+void SegmentationPipeline<histogram_t, dist_metric_t>::clusterize(){
   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
   tree->setInputCloud (objectCloud);
   
@@ -280,8 +281,9 @@ void SegmentationPipeline<histogram_t>::clusterize(){
   
 }
 
-template<HistogramType histogram_t>
-void SegmentationPipeline<histogram_t>::findModel(const vfh_model &model,
+template<HistogramType histogram_t, typename dist_metric_t>
+
+void SegmentationPipeline<histogram_t, dist_metric_t>::findModel(const vfh_model &model,
                int k, flann::Matrix<int> &indices,
                flann::Matrix<float> &distances)
 {
@@ -292,40 +294,14 @@ void SegmentationPipeline<histogram_t>::findModel(const vfh_model &model,
   
   indices = flann::Matrix<int>(new int[k], 1, k);
   distances = flann::Matrix<float>(new float[k], 1, k);
-  SegmentationPipeline<histogram_t>::index->knnSearch (p, indices,
+  SegmentationPipeline<histogram_t,dist_metric_t>::index->knnSearch (p, indices,
                                                       distances, k,
                                                       flann::SearchParams (512));
   delete[] p.ptr ();
 
 }
 
-template<HistogramType histogram_t>
-bool SegmentationPipeline<histogram_t>::findHand() const
-{
-  int k = 16;//number of nearest neighbors to search
-  for (unsigned i = 0; i < objects.size(); i++){
-    auto histogram = objects[i].computeDescriptor()->points[0].histogram;
-    //auto vfh_descriptor = SegmentationPipeline::models[0];
-    // Query point
-    flann::Matrix<float> p = flann::Matrix<float>(
-      new float[VFHSignature308::descriptorSize()], 1,
-      VFHSignature308::descriptorSize()
-    );
-    memcpy (&p.ptr ()[0], &histogram[0], p.cols * p.rows * sizeof (float));
-    
-    flann::Matrix<int> indices = flann::Matrix<int>(new int[k], 1, k);
-    flann::Matrix<float> distances = flann::Matrix<float>(new float[k], 1, k);
-    index->knnSearch (p, indices, distances, k, flann::SearchParams (512));
-    for (int j = 0; j < distances.cols; j++){
-      std::cout << "distance for obj " << i << " = " << *distances[j] << std::endl;
-    }
-    delete[] p.ptr ();
-    delete[] indices.ptr();
-    delete[] distances.ptr();
-    
-  }
-  return true;
-}
+
 
 
 

@@ -51,7 +51,7 @@ namespace c44{
     const ModelCoefficients coefficients;
     Cloud3D::Ptr point_cloud;
     PointCloud<Normal>::Ptr normal_cloud;
-    
+      
     RigidBody(ModelCoefficients mc,
               Cloud3D::Ptr cloud,
               PointCloud<Normal>::Ptr normals) :
@@ -158,6 +158,47 @@ namespace c44{
   };
   
   template<>
+  struct RigidBodyWithHistogram<OURCVFH> : public RigidBody{
+    typedef VFHSignature308 signature_t;
+    static const string fieldName;
+    static const string fileExt;
+    
+#include <rigid_body_shared_template.h>
+    
+    PointCloud<signature_t>::Ptr computeDescriptor() const{
+      
+      pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
+
+      pcl::PointCloud<pcl::VFHSignature308>::Ptr descriptor(new pcl::PointCloud<pcl::VFHSignature308>);
+      
+
+      
+      // Estimate the normals.
+      pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normalEstimation;
+      normalEstimation.setInputCloud(point_cloud);
+      normalEstimation.setRadiusSearch(0.03);
+      pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
+      normalEstimation.setSearchMethod(kdtree);
+      normalEstimation.compute(*normals);
+      
+      
+      // OUR-CVFH estimation object.
+      pcl::OURCVFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> ourcvfh;
+      ourcvfh.setInputCloud(point_cloud);
+      ourcvfh.setInputNormals(normals);
+      ourcvfh.setSearchMethod(kdtree);
+      ourcvfh.setEPSAngleThreshold(5.0 / 180.0 * M_PI); // 5 degrees.
+      ourcvfh.setCurvatureThreshold(1.0);
+      ourcvfh.setNormalizeBins(true);
+      ourcvfh.setAxisRatio(0.8);
+      
+      ourcvfh.compute(*descriptor);
+      return descriptor;
+    }
+    
+  };
+  
+  template<>
   struct RigidBodyWithHistogram<ESF> : public RigidBody{
   public:
     typedef ESFSignature640 signature_t;
@@ -170,12 +211,6 @@ namespace c44{
     PointCloud<signature_t>::Ptr computeDescriptor() const{
       pcl::PointCloud<signature_t>::Ptr descriptor(new PointCloud<signature_t>);
       
-      // Note: you should have performed preprocessing to cluster out the object
-      // from the cloud, and save it to this individual file.
-      
-      // Read a PCD file from disk.
-      
-      // ESF estimation object.
       pcl::ESFEstimation<PointXYZ, ESFSignature640> esf;
       esf.setInputCloud(point_cloud);
       
@@ -199,13 +234,9 @@ namespace c44{
     PointCloud<signature_t>::Ptr
     computeDescriptor() const{
       pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-      // Object for storing the GRSD descriptors for each point.
+      
       pcl::PointCloud<pcl::GRSDSignature21>::Ptr descriptors(new pcl::PointCloud<pcl::GRSDSignature21>());
-      
-      
-      // Note: you would usually perform downsampling now. It has been omitted here
-      // for simplicity, but be aware that computation can take a long time.
-      
+          
       // Estimate the normals.
       pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normalEstimation;
       normalEstimation.setInputCloud(point_cloud);
@@ -214,7 +245,6 @@ namespace c44{
       normalEstimation.setSearchMethod(kdtree);
       normalEstimation.compute(*normals);
       
-      // GRSD estimation object.
       GRSDEstimation<pcl::PointXYZ, pcl::Normal, pcl::GRSDSignature21> grsd;
       grsd.setInputCloud(RigidBody::point_cloud);
       grsd.setInputNormals(normals);

@@ -19,12 +19,12 @@ namespace c44{
   using namespace pcl;
   using namespace Eigen;
   
-  
-  template <HistogramType histogram_t>
+  //typedef typename flann::ChiSquareDistance<float> dist_type;
+  template <HistogramType histogram_t, typename dist_metric_t = flann::ChiSquareDistance<float>>
   class SegmentationPipeline{
     
     static vector<vfh_model> models;
-    static flann::Index<flann::ChiSquareDistance<float>> *index;
+    static flann::Index<dist_metric_t> *index;
     
     
     
@@ -45,7 +45,9 @@ namespace c44{
     float iterationDivisor;
 
   public:
+    
     static void init(const std::string& model_src_dr);
+    
     static const vector<vfh_model>& getModels(){
       return models;
     }
@@ -76,7 +78,6 @@ namespace c44{
       return objects;
     }
     
-    bool findHand() const;
     
     void findModel(const vfh_model &model,
                    int k,

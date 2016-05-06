@@ -15,7 +15,6 @@
 using namespace pcl;
 
 static const HistogramType est_method = c44::default_est_method;
-
 int
 main (int argc, char** argv)
 {
