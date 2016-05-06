@@ -35,6 +35,10 @@ pcl/common/transforms.h
 -
 pcl/console/parse.h
 -
+pcl/point_types.h
+-
+pcl/features/fpfh.h
+-
 
 /usr/include/eigen3/Eigen/Cholesky
 Core
@@ -2140,6 +2144,14 @@ pcl/search/search.h
 pcl/features/impl/feature.hpp
 -
 
+/usr/local/include/pcl-1.8/pcl/features/fpfh.h
+pcl/features/feature.h
+-
+set
+-
+pcl/features/impl/fpfh.hpp
+-
+
 /usr/local/include/pcl-1.8/pcl/features/impl/board.hpp
 pcl/features/board.h
 -
@@ -2150,6 +2162,12 @@ pcl/common/transforms.h
 
 /usr/local/include/pcl-1.8/pcl/features/impl/feature.hpp
 pcl/search/pcl_search.h
+-
+
+/usr/local/include/pcl-1.8/pcl/features/impl/fpfh.hpp
+pcl/features/fpfh.h
+-
+pcl/features/pfh_tools.h
 -
 
 /usr/local/include/pcl-1.8/pcl/features/impl/normal_3d.hpp
@@ -2202,6 +2220,12 @@ pcl/features/impl/normal_3d.hpp
 pcl/features/normal_3d.h
 -
 pcl/features/impl/normal_3d_omp.hpp
+-
+
+/usr/local/include/pcl-1.8/pcl/features/pfh_tools.h
+pcl/pcl_exports.h
+-
+Eigen/Core
 -
 
 /usr/local/include/pcl-1.8/pcl/features/shot.h
