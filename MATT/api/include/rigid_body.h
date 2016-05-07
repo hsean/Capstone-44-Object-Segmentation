@@ -39,11 +39,13 @@ enum HistogramType{
   GRSD
 };
 
-//struct which wraps a point cloud with a bit of extra functionality
+
 namespace c44{
   using namespace pcl;
   
-  static const HistogramType default_est_method = HistogramType::GRSD;
+  static const HistogramType default_est_method = HistogramType::OURCVFH;
+  
+  //struct which wraps a point cloud with a bit of extra functionality
   struct RigidBody{
     
   public:
@@ -149,7 +151,7 @@ namespace c44{
       // Set to true to normalize the bins of the resulting histogram,
       // using the total number of points. Note: enabling it will make CVFH
       // invariant to scale just like VFH, but the authors encourage the opposite.
-      cvfh.setNormalizeBins(true);
+      cvfh.setNormalizeBins(false);
       
       cvfh.compute(*descriptor);
       return descriptor;
@@ -189,7 +191,7 @@ namespace c44{
       ourcvfh.setSearchMethod(kdtree);
       ourcvfh.setEPSAngleThreshold(5.0 / 180.0 * M_PI); // 5 degrees.
       ourcvfh.setCurvatureThreshold(1.0);
-      ourcvfh.setNormalizeBins(true);
+      ourcvfh.setNormalizeBins(false);
       ourcvfh.setAxisRatio(0.8);
       
       ourcvfh.compute(*descriptor);

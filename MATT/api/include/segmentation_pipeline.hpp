@@ -186,7 +186,7 @@ bool SegmentationPipeline<histogram_t, dist_metric_t>::extractGraspableObject(Sa
               denoisedObjectCloud,
               sampleSize, stdDev);
   clusterize();
-  //findHand();
+  
   normals.reset(new PointCloud<Normal>);
 
   NormalEstimation<PointXYZ, Normal> ne;

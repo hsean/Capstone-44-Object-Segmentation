@@ -484,7 +484,19 @@ main (int argc, char** argv)
       PCL_ERROR ("Couldnt read the file we just wrote!\n");
       return (-1);
     }
-    c44::RigidBodyWithHistogram<> model(xyz_cloud);
+    
+    MovingLeastSquares<PointXYZ, PointXYZ> mls;
+    mls.setInputCloud (xyz_cloud);
+    mls.setSearchRadius (0.03);
+    mls.setPolynomialFit (true);
+    mls.setPolynomialOrder (2);
+    mls.setUpsamplingMethod (MovingLeastSquares<PointXYZ, PointXYZ>::SAMPLE_LOCAL_PLANE);
+    mls.setUpsamplingRadius (0.006);
+    mls.setUpsamplingStepSize (0.0015);
+    PointCloud<PointXYZ>::Ptr cloud_smoothed (new PointCloud<PointXYZ> ());
+    mls.process (*cloud_smoothed);
+    
+    c44::RigidBodyWithHistogram<> model(cloud_smoothed);
  
     hist_fname = ss.str () + "/" + seq + ".pcd" + c44::RigidBodyWithHistogram<>::fileExt;
     auto descriptor = model.computeDescriptor();

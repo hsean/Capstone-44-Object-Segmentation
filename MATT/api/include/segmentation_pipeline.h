@@ -12,6 +12,59 @@
 #include <rigid_body.h>
 #include <realsense_toolkit.h>
 #include <histogram_utils.h>
+#include <algorithm>
+
+template<class T>
+struct CVFHDistMetric
+{
+  typedef bool is_kdtree_distance;
+  
+  typedef T ElementType;
+  typedef typename Accumulator<T>::Type ResultType;
+  
+  /**
+   *  Compute the chi-square distance
+   */
+  template <typename Iterator1, typename Iterator2>
+  ResultType operator()(Iterator1 a, Iterator2 b, size_t size, ResultType worst_dist = -1) const
+  {
+    ResultType numerator, denominator;
+    Iterator1 last = a + size;
+    numerator = ResultType();
+    denominator = ResultType();
+    while (a < last) {
+      T a_ = *a;
+      T b_ = *b;
+      numerator += (ResultType)(std::min<T>(a_,b_));
+      denominator += (ResultType)(std::max<T>(a_,b_));
+      ++a;
+      ++b;
+//      if ((worst_dist>0)&&(result>worst_dist)) {
+//        return result;
+//      }
+
+    }
+    return 1 - (1 + numerator)/(1 + denominator);
+  }
+  
+  /**
+   * Partial distance, used by the kd-tree.
+   */
+  template <typename U, typename V>
+  inline ResultType accum_dist(const U& a, const V& b, int) const
+  {
+//    ResultType result = ResultType();
+//    ResultType sum, diff;
+//    
+//    sum = (ResultType)(a+b);
+//    if (sum>0) {
+//      diff = (ResultType)(a-b);
+//      result = diff*diff/sum;
+//    }
+//    return result;
+    throw "needs implementation.";
+  }
+};
 
 
 
@@ -20,7 +73,8 @@ namespace c44{
   using namespace Eigen;
   
   //typedef typename flann::ChiSquareDistance<float> dist_type;
-  template <HistogramType histogram_t, typename dist_metric_t = flann::ChiSquareDistance<float>>
+  typedef CVFHDistMetric<float> dist_type;
+  template <HistogramType histogram_t, typename dist_metric_t = dist_type>
   class SegmentationPipeline{
     
     static vector<vfh_model> models;
@@ -62,6 +116,7 @@ namespace c44{
     Cloud3D::Ptr getConvexHull() const{
       return convexHull;
     }
+    
     Vector3f getPlaneNormal() const{
         Vector3f ret(
                 (*planeCoefficients).values[0],
