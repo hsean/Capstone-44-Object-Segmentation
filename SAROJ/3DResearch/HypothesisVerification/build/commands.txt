@@ -1,0 +1,6 @@
+
+// Shows how the object looks like also shows the execution time
+
+./global_hypothesis_verification milk.pcd milk_cartoon_all_small_clorox.pcd
+
+./global_hypothesis_verification --algorithm Hough inMooveModel.pcd inMoovScene.pcd --cgsize 0.005 --hv_rad_clutter 0.01

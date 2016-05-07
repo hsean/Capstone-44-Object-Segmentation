@@ -12,11 +12,17 @@
 #include <pcl/kdtree/impl/kdtree_flann.hpp>
 #include <pcl/common/transforms.h>
 #include <pcl/console/parse.h>
+//Test FPFH
+#include <pcl/point_types.h>
+#include <pcl/features/fpfh.h>
 
-typedef pcl::PointXYZRGB PointType;
+
+#define SHOT_FEATURES
+//#define FPFH_FEATURES
+typedef pcl::PointXYZ PointType;
 typedef pcl::Normal NormalType;
 typedef pcl::ReferenceFrame RFType;
-typedef pcl::SHOT352 DescriptorType;
+typedef pcl::FPFHSignature33 DescriptorType;
 
 std::string model_filename_;
 std::string scene_filename_;
@@ -232,27 +238,29 @@ main (int argc, char *argv[])
   uniform_sampling.setRadiusSearch (scene_ss_);
   uniform_sampling.filter (*scene_keypoints);
   std::cout << "Scene total points: " << scene->size () << "; Selected Keypoints: " << scene_keypoints->size () << std::endl;
-
-
   //
   //  Compute Descriptor for keypoints
   //
-  pcl::SHOTEstimationOMP<PointType, NormalType, DescriptorType> descr_est;
-  descr_est.setRadiusSearch (descr_rad_);
 
-  descr_est.setInputCloud (model_keypoints);
-  descr_est.setInputNormals (model_normals);
-  descr_est.setSearchSurface (model);
-  descr_est.compute (*model_descriptors);
+#ifdef SHOT_FEATURES
+  pcl::SHOTEstimationOMP<PointType, NormalType, DescriptorType> fpfh;
+  fpfh.setRadiusSearch (descr_rad_);
 
-  descr_est.setInputCloud (scene_keypoints);
-  descr_est.setInputNormals (scene_normals);
-  descr_est.setSearchSurface (scene);
-  descr_est.compute (*scene_descriptors);
+  fpfh.setInputCloud (model_keypoints);
+  fpfh.setInputNormals (model_normals);
+  fpfh.setSearchSurface (model);
+  fpfh.compute (*model_descriptors);
 
-  //
+  fpfh.setInputCloud (scene_keypoints);
+  fpfh.setInputNormals (scene_normals);
+  fpfh.setSearchSurface (scene);
+  fpfh.compute (*scene_descriptors);
+#endif
+
+//----------------------------------------------------//
+
   //  Find Model-Scene Correspondences with KdTree
-  //
+  
   pcl::CorrespondencesPtr model_scene_corrs (new pcl::Correspondences ());
 
   pcl::KdTreeFLANN<DescriptorType> match_search;

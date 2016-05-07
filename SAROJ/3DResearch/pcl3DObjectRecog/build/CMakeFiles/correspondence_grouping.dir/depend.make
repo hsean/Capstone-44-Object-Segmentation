@@ -375,8 +375,10 @@ CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local
 CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/exceptions.h
 CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/board.h
 CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/feature.h
+CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/fpfh.h
 CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/board.hpp
 CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/feature.hpp
+CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/fpfh.hpp
 CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/normal_3d.hpp
 CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/normal_3d_omp.hpp
 CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/shot.hpp
@@ -385,6 +387,7 @@ CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local
 CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/shot_omp.hpp
 CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/normal_3d.h
 CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/normal_3d_omp.h
+CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/pfh_tools.h
 CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/shot.h
 CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/shot_lrf.h
 CMakeFiles/correspondence_grouping.dir/correspondence_grouping.cpp.o: /usr/local/include/pcl-1.8/pcl/features/shot_lrf_omp.h
