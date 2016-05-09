@@ -6,40 +6,9 @@
 
 
 using namespace c44;
-template<HistogramType histogram_t, typename dist_metric_t>
-vector<vfh_model> SegmentationPipeline<histogram_t,dist_metric_t>::models = vector<vfh_model>();
-template<HistogramType histogram_t, typename dist_metric_t>
-flann::Index<dist_metric_t>*
-SegmentationPipeline<histogram_t,dist_metric_t>::index = nullptr;
-
-template<HistogramType histogram_t, typename dist_metric_t>
-void SegmentationPipeline<histogram_t, dist_metric_t>::init(const std::string& model_src_dir){
-
-  loadHistograms<histogram_t>(model_src_dir, models);
-  if (models.size() == 0){
-    pcl::console::print_error("no model files found");
-    exit(-1);
-  } else{
-    flann::Matrix<float> flann_data (
-                                     new float[models.size () * models[0].second.size ()],
-                                     models.size (), models[0].second.size ()
-                                     );
-    
-    for (size_t i = 0; i < flann_data.rows; ++i)
-      for (size_t j = 0; j < flann_data.cols; ++j)
-        flann_data[i][j] = models[i].second[j];
-    
-    
-    index = new flann::Index<dist_metric_t>(flann_data, flann::LinearIndexParams ());
-    index->buildIndex ();
 
 
-  }
-}
-
-
-template<HistogramType histogram_t, typename dist_metric_t>
-SegmentationPipeline<histogram_t,dist_metric_t>::SegmentationPipeline(Cloud3D::Ptr rawCloud,
+SegmentationPipeline::SegmentationPipeline(Cloud3D::Ptr rawCloud,
                                            float voxelSize,
                                            float sampleSize,
                                            float stdDev,
@@ -81,8 +50,8 @@ SegmentationPipeline<histogram_t,dist_metric_t>::SegmentationPipeline(Cloud3D::P
 
 }
 
-template<HistogramType histogram_t, typename dist_metric_t>
-bool SegmentationPipeline<histogram_t, dist_metric_t>::performSegmentation(){
+
+bool SegmentationPipeline::performSegmentation(){
     if (extractPrism()){
         int max = 1;
         bool stillFindingStuff = true;
@@ -97,8 +66,8 @@ bool SegmentationPipeline<histogram_t, dist_metric_t>::performSegmentation(){
 }
 
 
-template<HistogramType histogram_t, typename dist_metric_t>
-bool SegmentationPipeline<histogram_t, dist_metric_t>::extractPlane()
+
+bool SegmentationPipeline::extractPlane()
 {
     planeCoefficients = ModelCoefficients::Ptr(new ModelCoefficients);
     PointIndices::Ptr plane_indices(new PointIndices);
@@ -130,8 +99,7 @@ bool SegmentationPipeline<histogram_t, dist_metric_t>::extractPlane()
     return planeCloud->points.size() > 0;
 }
 
-template<HistogramType histogram_t, typename dist_metric_t>
-bool SegmentationPipeline<histogram_t,dist_metric_t>::extractPrism()
+bool SegmentationPipeline::extractPrism()
 {
 
     if (extractPlane()){
@@ -169,8 +137,8 @@ bool SegmentationPipeline<histogram_t,dist_metric_t>::extractPrism()
 }
 
 
-template<HistogramType histogram_t, typename dist_metric_t>
-bool SegmentationPipeline<histogram_t, dist_metric_t>::extractGraspableObject(SacModel model)
+
+bool SegmentationPipeline::extractGraspableObject(SacModel model)
 {
   
   ModelCoefficients::Ptr objectCoefficients(new ModelCoefficients);
@@ -241,8 +209,8 @@ bool SegmentationPipeline<histogram_t, dist_metric_t>::extractGraspableObject(Sa
 
 }
 
-template<HistogramType histogram_t, typename dist_metric_t>
-void SegmentationPipeline<histogram_t, dist_metric_t>::clusterize(){
+
+void SegmentationPipeline::clusterize(){
   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
   tree->setInputCloud (objectCloud);
   
@@ -272,39 +240,14 @@ void SegmentationPipeline<histogram_t, dist_metric_t>::clusterize(){
     std::cout << "PointCloud representing the Cluster: " << cloud_cluster->points.size () << " data points." << std::endl;
     std::stringstream ss;
     ss << "cloud_cluster_" << j << ".pcd";
-    auto rbh = RigidBodyWithHistogram<histogram_t>(cloud_cluster);
-    objects.push_back(rbh);
+    auto rb = RigidBody(cloud_cluster);
+    objects.push_back(rb);
     
     j++;
   }
   
   
 }
-
-template<HistogramType histogram_t, typename dist_metric_t>
-
-void SegmentationPipeline<histogram_t, dist_metric_t>::findModel(const vfh_model &model,
-               int k, flann::Matrix<int> &indices,
-               flann::Matrix<float> &distances)
-{
-  // Query point
-  flann::Matrix<float> p = flann::Matrix<float>(new float[model.second.size ()],
-                                                1, model.second.size ());
-  memcpy (&p.ptr ()[0], &model.second[0], p.cols * p.rows * sizeof (float));
-  
-  indices = flann::Matrix<int>(new int[k], 1, k);
-  distances = flann::Matrix<float>(new float[k], 1, k);
-  SegmentationPipeline<histogram_t,dist_metric_t>::index->knnSearch (p, indices,
-                                                      distances, k,
-                                                      flann::SearchParams (512));
-  delete[] p.ptr ();
-
-}
-
-
-
-
-
 
 
 

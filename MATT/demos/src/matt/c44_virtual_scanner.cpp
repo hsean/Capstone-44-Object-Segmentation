@@ -27,15 +27,18 @@
 #include <boost/filesystem.hpp>
 #include <flann/flann.h>
 #include <flann/io/hdf5.h>
-#include <bounding_box_utils.hpp>
+#include <bounding_box_utils.h>
 #include <rigid_body.h>
+#include <c44_types.h>
+#include <histogram_utils.h>
 
 
 #include <sstream>
 using namespace pcl;
 using namespace pcl::io;
 using namespace pcl::console;
-typedef std::pair<std::string, std::vector<float>> vfh_model;
+using namespace c44;
+const bool upsample = true;
 
 void
 printHelp (int, char **argv)
@@ -59,25 +62,7 @@ loadCloud (const std::string &filename, PointCloud<PointXYZ> &cloud)
   return (true);
 }
 
-void
-compute (const PointCloud<PointNormal>::Ptr &input, PointCloud<VFHSignature308> &output)
-{
-  // Estimate
-  TicToc tt;
-  tt.tic ();
-  
-  print_highlight (stderr, "Computing ");
 
-  VFHEstimation<PointNormal, PointNormal, VFHSignature308> ne;
-  ne.setSearchMethod (search::KdTree<PointNormal>::Ptr (new search::KdTree<PointNormal>));
-  ne.setInputCloud (input);
-  ne.setInputNormals (input);
-  
-  ne.compute (output);
-
-  print_info ("[done, "); print_value ("%g", tt.toc ()); print_info (" ms : ");
-  print_value ("%d", output.width * output.height); print_info (" points]\n");
-}
 
 template<typename PointT>
 void saveCloud (const std::string &filename,
@@ -88,7 +73,7 @@ void saveCloud (const std::string &filename,
 
   print_highlight ("Saving "); print_value ("%s ", filename.c_str ());
   
-  io::savePCDFile (filename, output, false);
+  pcl::io::savePCDFile (filename, output, false);
   
   print_info ("[done, "); print_value ("%g", tt.toc ()); print_info (" ms : ");
   print_value ("%d", output.width * output.height); print_info (" points]\n");
@@ -157,7 +142,7 @@ main (int argc, char** argv)
   }
   std::string filename;
   //vector to hold the vfh models temporarily
-  std::vector<vfh_model> models;
+  std::vector<histogram_t> models;
   // Parse the command line arguments for .vtk or .ply files
   std::vector<int> p_file_indices_vtk = console::parse_file_extension_argument (argc, argv, ".vtk");
   std::vector<int> p_file_indices_ply = console::parse_file_extension_argument (argc, argv, ".ply");
@@ -450,6 +435,11 @@ main (int argc, char** argv)
     std::stringstream ss;
     std::string output_dir = st.at (st.size () - 1);
     ss << output_dir << "_output";
+    if (upsample){
+      ss << "/upsampled";
+    } else{
+      ss << "/not-upsampled";
+    }
 
     boost::filesystem::path outpath (ss.str ());
     if (!boost::filesystem::exists (outpath))
@@ -484,26 +474,26 @@ main (int argc, char** argv)
       PCL_ERROR ("Couldnt read the file we just wrote!\n");
       return (-1);
     }
-    
-    MovingLeastSquares<PointXYZ, PointXYZ> mls;
-    mls.setInputCloud (xyz_cloud);
-    mls.setSearchRadius (0.03);
-    mls.setPolynomialFit (true);
-    mls.setPolynomialOrder (2);
-    mls.setUpsamplingMethod (MovingLeastSquares<PointXYZ, PointXYZ>::SAMPLE_LOCAL_PLANE);
-    mls.setUpsamplingRadius (0.006);
-    mls.setUpsamplingStepSize (0.0015);
-    PointCloud<PointXYZ>::Ptr cloud_smoothed (new PointCloud<PointXYZ> ());
-    mls.process (*cloud_smoothed);
-    
-    c44::RigidBodyWithHistogram<> model(cloud_smoothed);
- 
-    hist_fname = ss.str () + "/" + seq + ".pcd" + c44::RigidBodyWithHistogram<>::fileExt;
-    auto descriptor = model.computeDescriptor();
-    saveCloud<c44::RigidBodyWithHistogram<>::signature_t>(hist_fname, *descriptor);
-    cout << "hey pal" << endl;
-
-
+    PointCloud<dflt_hist_type>::Ptr descriptor;
+    if (upsample){
+      MovingLeastSquares<PointXYZ, PointXYZ> mls;
+      mls.setInputCloud (xyz_cloud);
+      mls.setSearchRadius (0.03);
+      mls.setPolynomialFit (true);
+      mls.setPolynomialOrder (2);
+      mls.setUpsamplingMethod (MovingLeastSquares<PointXYZ, PointXYZ>::SAMPLE_LOCAL_PLANE);
+      mls.setUpsamplingRadius (0.006);
+      mls.setUpsamplingStepSize (0.0015);
+      PointCloud<PointXYZ>::Ptr cloud_smoothed (new PointCloud<PointXYZ> ());
+      mls.process (*cloud_smoothed);
+      c44::RigidBody model(cloud_smoothed);
+      descriptor = model.computeDescriptor<dflt_est_method>();
+    } else {
+      c44::RigidBody model(xyz_cloud);
+      descriptor = model.computeDescriptor<dflt_est_method>();
+    }
+    hist_fname = ss.str () + "/" + seq + ".pcd" + fileExt<dflt_est_method>();
+    saveCloud<dflt_hist_type>(hist_fname, *descriptor);
   }
   
   return (0);

@@ -9,21 +9,23 @@
 #include <iostream>
 
 #include <segmentation_pipeline.h>
-#include <segmentation_pipeline.hpp>
+#include <model_index.h>
+#include <histogram_utils.h>
+
+using namespace c44;
 
 
-using namespace pcl;
 
-static const HistogramType est_method = c44::default_est_method;
 int
 main (int argc, char** argv)
 {
   int k = 6;
-  
   double thresh = DBL_MAX;     // No threshold, disabled by default
 
-  std::string extension (RigidBodyWithHistogram<>::fileExt);
-  c44::SegmentationPipeline<est_method>::init(argv[1]);
+  ModelIndex<dflt_est_method, default_metric> grsd_idx(argv[1]);
+
+  std::string extension(c44::fileExt<dflt_est_method>());
+  
   
   if (argc < 2)
   {
@@ -41,7 +43,7 @@ main (int argc, char** argv)
 //  
   // Load the test histogram
   std::vector<int> pcd_indices = pcl::console::parse_file_extension_argument (argc, argv, ".pcd");
-  vfh_model histogram;
+  c44::histogram_t histogram;
   
   float voxelSize = 0.0025;
   float sampleSize = 100 - 2 * 25;
@@ -55,32 +57,32 @@ main (int argc, char** argv)
   
   
   int hand = 0;
-  c44::RigidBodyWithHistogram<>* hand_ptr = nullptr;
+  c44::RigidBody* hand_ptr = nullptr;
   pcl::console::parse_argument(argc, argv, "-hand", hand);
 
   
   PointCloud<PointXYZ>::Ptr hand_scene(new PointCloud<PointXYZ>);
-  PCLPointCloud2::Ptr hand_scene_2d(new PCLPointCloud2);
+  pcl::PCLPointCloud2::Ptr hand_scene_2d(new PCLPointCloud2);
 
   Eigen::Vector4f origin;
   Eigen::Quaternionf orientation;
   int version;
-  pcl::PCDReader pcd;
+  PCDReader pcd;
   if (pcd.read (argv[pcd_indices.at (0)], *hand_scene_2d, origin, orientation, version) < 0)
     return (-1);
   fromPCLPointCloud2 (*hand_scene_2d, *hand_scene);
 
-  c44::SegmentationPipeline<est_method> pipeline(hand_scene,
+  c44::SegmentationPipeline pipeline(hand_scene,
                                 voxelSize,
                                 sampleSize,
                                 stdDev,
                                 iterationDivisor);
-  //c44::RigidBodyWithHistogram<histogram_t> _hand2 = {pipeline.getObjects()[1].point_cloud};
+  
   if (pipeline.performSegmentation()){
-    hand_ptr = new c44::RigidBodyWithHistogram<>(pipeline.getObjects()[0].point_cloud);
+    hand_ptr = new c44::RigidBody(pipeline.getObjectAtIndex(0).point_cloud);
     histogram.first = "hand";
-    auto data = hand_ptr->computeDescriptor()->points[0].histogram;
-    for (unsigned i = 0; i < RigidBodyWithHistogram<>::descriptorSize(); i++){
+    auto data = hand_ptr->computeDescriptor<dflt_est_method>()->points[0].histogram;
+    for (unsigned i = 0; i < RigidBody::descriptorSize<dflt_est_method>(); i++){
       histogram.second.push_back(data[i]);
     }
     
@@ -98,13 +100,13 @@ main (int argc, char** argv)
   flann::Matrix<int> k_indices;
   flann::Matrix<float> k_distances;
   
-  pipeline.findModel(histogram, k, k_indices, k_distances);
+  grsd_idx.match(histogram, k, k_indices, k_distances);
   
   // Output the results on screen
   pcl::console::print_highlight ("The closest %d neighbors for %s are:\n", k, argv[pcd_indices[0]]);
   for (int i = 0; i < k; ++i)
     pcl::console::print_info ("    %d - %s (%d) with a distance of: %f\n",
-                              i, SegmentationPipeline<est_method>::getModels().at (k_indices[0][i]).first.c_str (), k_indices[0][i], k_distances[0][i]);
+                              i, grsd_idx.getModelAtIndex(k_indices[0][i]).first.c_str (), k_indices[0][i], k_distances[0][i]);
   
   // Load the results
   int n_cells = k;
@@ -112,6 +114,7 @@ main (int argc, char** argv)
     n_cells *= 2;
   }
   pcl::visualization::PCLVisualizer p (argc, argv, "VFH Cluster Classifier");
+  
   int y_s = (int)floor (sqrt ((double)n_cells));
   int x_s = y_s + (int)ceil ((n_cells / (double)y_s) - y_s);
   double x_step = (double)(1 / (double)x_s);
@@ -131,7 +134,7 @@ main (int argc, char** argv)
   int viewport = 0, l = 0, m = 0;
   for (int i = 0; i < k; ++i)
   {
-    std::string cloud_name = SegmentationPipeline<est_method>::getModels().at (k_indices[0][i]).first;
+    std::string cloud_name = grsd_idx.getModelAtIndex(k_indices[0][i]).first;
     boost::replace_last (cloud_name, extension, "");
     
     p.createViewPort (l * x_step, m * y_step, (l + 1) * x_step, (m + 1) * y_step, viewport);
@@ -205,6 +208,7 @@ main (int argc, char** argv)
     p.addPointCloud (hand_ptr->point_cloud, ss.str(),  viewport);
     
   }
+  
   // Add coordianate systems to all viewports
   p.addCoordinateSystem (0.1, "global", 0);
   

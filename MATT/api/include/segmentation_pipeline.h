@@ -6,9 +6,7 @@
 #define CAPSTONE44_PLANAR_SCENE_H
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/statistical_outlier_removal.h>
-#include <flann/flann.h>
-#include <flann/io/hdf5.h>
-#include <bounding_box_utils.hpp>
+#include <bounding_box_utils.h>
 #include <rigid_body.h>
 #include <realsense_toolkit.h>
 #include <histogram_utils.h>
@@ -20,7 +18,7 @@ struct CVFHDistMetric
   typedef bool is_kdtree_distance;
   
   typedef T ElementType;
-  typedef typename Accumulator<T>::Type ResultType;
+  typedef typename flann::Accumulator<T>::Type ResultType;
   
   /**
    *  Compute the chi-square distance
@@ -72,14 +70,9 @@ namespace c44{
   using namespace pcl;
   using namespace Eigen;
   
-  //typedef typename flann::ChiSquareDistance<float> dist_type;
-  typedef CVFHDistMetric<float> dist_type;
-  template <HistogramType histogram_t, typename dist_metric_t = dist_type>
+  
   class SegmentationPipeline{
-    
-    static vector<vfh_model> models;
-    static flann::Index<dist_metric_t> *index;
-    
+
     
     
     Cloud3D::Ptr objectCloud,
@@ -90,7 +83,7 @@ namespace c44{
     SACSegmentationFromNormals<PointXYZ, Normal> seg;
     PointCloud<Normal>::Ptr normals;
     const float stdDev, sampleSize;
-    vector<RigidBodyWithHistogram<histogram_t>> objects;
+    vector<RigidBody> objects;
 
     bool extractPlane();
     bool extractPrism();
@@ -100,11 +93,8 @@ namespace c44{
 
   public:
     
-    static void init(const std::string& model_src_dr);
     
-    static const vector<vfh_model>& getModels(){
-      return models;
-    }
+    
     SegmentationPipeline(Cloud3D::Ptr rawCloud,
                          float voxelSize,
                          float sampleSize,
@@ -129,16 +119,11 @@ namespace c44{
         return (*planeCoefficients).values[3];
     }
     
-    std::vector<RigidBodyWithHistogram<histogram_t>>& getObjects(){
-      return objects;
+    RigidBody& getObjectAtIndex(const int index){
+      return objects[index];
     }
     
     
-    void findModel(const vfh_model &model,
-                   int k,
-                   flann::Matrix<int> &indices,
-                   flann::Matrix<float> &distances);
-
   };
 
 

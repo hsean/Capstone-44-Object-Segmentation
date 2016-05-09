@@ -8,7 +8,7 @@
 #include <flann/io/hdf5.h>
 #include <fstream>
 
-typedef std::pair<std::string, std::vector<float> > vfh_model;
+
 
 /** \brief Loads an n-D histogram file as a VFH signature
  * \param path the input file name
@@ -64,7 +64,7 @@ loadHist (const boost::filesystem::path &path, vfh_model &vfh)
  */
 void
 loadFeatureModels (const boost::filesystem::path &base_dir, const std::string &extension,
-                   std::vector<vfh_model> &models)
+                   std::vector<histogram_t>& models)
 {
   if (!boost::filesystem::exists (base_dir) && !boost::filesystem::is_directory (base_dir))
     return;
@@ -80,7 +80,7 @@ loadFeatureModels (const boost::filesystem::path &base_dir, const std::string &e
     }
     if (boost::filesystem::is_regular_file (it->status ()) && boost::filesystem::extension (it->path ()) == extension)
     {
-      vfh_model m;
+      histogram_t m;
       if (loadHist (base_dir / it->path ().filename (), m))
         models.push_back (m);
     }
@@ -104,7 +104,7 @@ main (int argc, char** argv)
   std::string training_data_h5_file_name = "training_data.h5";
   std::string training_data_list_file_name = "training_data.list";
   
-  std::vector<vfh_model> models;
+  std::vector<histogram_t> models;
   
   // Load the model histograms
   loadFeatureModels (argv[1], extension, models);

@@ -18,6 +18,8 @@ if(build)
     src/bounding_box_utils.cpp
     src/realsense_toolkit.cpp    
     src/rigid_body.cpp
+    src/segmentation_pipeline.cpp
+    src/histogram_utils.cpp
   )
 
   set(LIB_NAME "${SUBSUBSYS_NAME}")
@@ -48,14 +50,13 @@ if(build)
 
   MESSAGE("pcl binary dir = ${CMAKE_CURRENT_BINARY_DIR}")
   set(headers 
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/bounding_box_utils.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/bounding_box_utils.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/realsense_toolkit.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/segmentation_pipeline.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/segmentation_pipeline.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/rigid_body.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/histogram_utils.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/rigid_body_shared_template.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/c44_virtual_scanner.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/model_index.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/c44_types.h"
 )
   PCL_ADD_LIBRARY("${LIB_NAME}" "${SUBSUBSYS_NAME}" ${srcs} ${incs} ${impl_incs} ${headers})
   target_link_libraries("${LIB_NAME}"

@@ -5,7 +5,7 @@
 //  Created on 2/10/16.
 //
 
-#include "../include/bounding_box_utils.hpp"
+#include <bounding_box_utils.h>
 #include <pcl/features/crh.h>
 #include <pcl/recognition/crh_alignment.h>
 

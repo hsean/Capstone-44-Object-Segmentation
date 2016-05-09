@@ -1,9 +1,4 @@
 //
-//  Geometries.hpp
-//  PCLTestbench
-//
-//  Created on 2/10/16.
-//
 
 #ifndef RigidBody_h
 #define RigidBody_h
@@ -26,12 +21,14 @@
 #include <pcl/features/our_cvfh.h>
 #include <pcl/features/grsd.h>
 #include <pcl/features/esf.h>
-#include <bounding_box_utils.hpp>
+#include <bounding_box_utils.h>
+#include <boost/fusion/sequence/intrinsic/value_at.hpp>
+#include <boost/fusion/include/value_at.hpp>
 
-typedef pcl::Histogram<90> CRH90;
 
+using namespace boost;
 
-enum HistogramType{
+enum EstimationMethod{
   VFH,
   CVFH,
   OURCVFH,
@@ -42,14 +39,29 @@ enum HistogramType{
 
 namespace c44{
   using namespace pcl;
+  using namespace boost;
   
-  static const HistogramType default_est_method = HistogramType::OURCVFH;
+  typedef fusion::vector
+  <
+    VFHSignature308,
+    VFHSignature308,
+    VFHSignature308,
+    ESFSignature640,
+    GRSDSignature21
+  > type_vec;
   
-  //struct which wraps a point cloud with a bit of extra functionality
+
   struct RigidBody{
     
   public:
-        
+    
+    template <EstimationMethod E>
+    static size_t descriptorSize()
+    {
+      return fusion::result_of::value_at<c44::type_vec, boost::mpl::int_<E>>::type::descriptorSize();
+    }
+
+    
     const ModelCoefficients coefficients;
     Cloud3D::Ptr point_cloud;
     PointCloud<Normal>::Ptr normal_cloud;
@@ -59,211 +71,14 @@ namespace c44{
               PointCloud<Normal>::Ptr normals) :
     coefficients(mc), point_cloud(cloud), normal_cloud(normals) {};
     RigidBody(PointCloud<PointXYZ>::Ptr cloud) : point_cloud(cloud){};
-    
+
+    template<EstimationMethod E>
+    typename PointCloud<typename fusion::result_of::value_at<type_vec, mpl::int_<E>>::type>::Ptr
+    computeDescriptor() const;
+
   };
 
-  template <HistogramType H = default_est_method>
-  struct RigidBodyWithHistogram;
   
-  template<>
-  struct RigidBodyWithHistogram<VFH> : public RigidBody{
-    typedef VFHSignature308 signature_t;
-    static const string fieldName;
-    static const string fileExt;
-    #include <rigid_body_shared_template.h>
-    
-    PointCloud<signature_t>::Ptr computeDescriptor() const{
-      // Object for storing the normals.
-      pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-      // Object for storing the VFH descriptor.
-      pcl::PointCloud<pcl::VFHSignature308>::Ptr descriptor(new pcl::PointCloud<pcl::VFHSignature308>);
-      
-      // Note: you should have performed preprocessing to cluster out the object
-      // from the cloud, and save it to this individual file.
-      
-      // Estimate the normals.
-      pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normalEstimation;
-      normalEstimation.setInputCloud(point_cloud);
-      normalEstimation.setRadiusSearch(0.03);
-      pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
-      normalEstimation.setSearchMethod(kdtree);
-      normalEstimation.compute(*normals);
-      
-      // VFH estimation object.
-      pcl::VFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> vfh;
-      vfh.setInputCloud(point_cloud);
-      vfh.setInputNormals(normals);
-      vfh.setSearchMethod(kdtree);
-      // Optionally, we can normalize the bins of the resulting histogram,
-      // using the total number of points.
-      vfh.setNormalizeBins(true);
-      // Also, we can normalize the SDC with the maximum size found between
-      // the centroid and any of the cluster's points.
-      vfh.setNormalizeDistance(false);
-      
-      vfh.compute(*descriptor);
-      
-      return descriptor;
-    }
-    
-    
-    
-  };
-  
-  template<>
-  struct RigidBodyWithHistogram<CVFH> : public RigidBody{
-    typedef VFHSignature308 signature_t;
-    static const string fieldName;
-    static const string fileExt;
-
-    #include <rigid_body_shared_template.h>
-    
-    PointCloud<signature_t>::Ptr computeDescriptor() const{
-      
-      // Object for storing the normals.
-      pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-      // Object for storing the CVFH descriptors.
-      pcl::PointCloud<pcl::VFHSignature308>::Ptr descriptor(new pcl::PointCloud<pcl::VFHSignature308>);
-      
-      // Note: you should have performed preprocessing to cluster out the object
-      // from the cloud, and save it to this individual file.
-      
-      
-      // Estimate the normals.
-      pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normalEstimation;
-      normalEstimation.setInputCloud(point_cloud);
-      normalEstimation.setRadiusSearch(0.03);
-      pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
-      normalEstimation.setSearchMethod(kdtree);
-      normalEstimation.compute(*normals);
-      
-      // CVFH estimation object.
-      pcl::CVFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> cvfh;
-      cvfh.setInputCloud(point_cloud);
-      cvfh.setInputNormals(normals);
-      cvfh.setSearchMethod(kdtree);
-      // Set the maximum allowable deviation of the normals,
-      // for the region segmentation step.
-      cvfh.setEPSAngleThreshold(5.0 / 180.0 * M_PI); // 5 degrees.
-                                                     // Set the curvature threshold (maximum disparity between curvatures),
-                                                     // for the region segmentation step.
-      cvfh.setCurvatureThreshold(1.0);
-      // Set to true to normalize the bins of the resulting histogram,
-      // using the total number of points. Note: enabling it will make CVFH
-      // invariant to scale just like VFH, but the authors encourage the opposite.
-      cvfh.setNormalizeBins(false);
-      
-      cvfh.compute(*descriptor);
-      return descriptor;
-    }
-    
-  };
-  
-  template<>
-  struct RigidBodyWithHistogram<OURCVFH> : public RigidBody{
-    typedef VFHSignature308 signature_t;
-    static const string fieldName;
-    static const string fileExt;
-    
-#include <rigid_body_shared_template.h>
-    
-    PointCloud<signature_t>::Ptr computeDescriptor() const{
-      
-      pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-
-      pcl::PointCloud<pcl::VFHSignature308>::Ptr descriptor(new pcl::PointCloud<pcl::VFHSignature308>);
-      
-
-      
-      // Estimate the normals.
-      pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normalEstimation;
-      normalEstimation.setInputCloud(point_cloud);
-      normalEstimation.setRadiusSearch(0.03);
-      pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
-      normalEstimation.setSearchMethod(kdtree);
-      normalEstimation.compute(*normals);
-      
-      
-      // OUR-CVFH estimation object.
-      pcl::OURCVFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> ourcvfh;
-      ourcvfh.setInputCloud(point_cloud);
-      ourcvfh.setInputNormals(normals);
-      ourcvfh.setSearchMethod(kdtree);
-      ourcvfh.setEPSAngleThreshold(5.0 / 180.0 * M_PI); // 5 degrees.
-      ourcvfh.setCurvatureThreshold(1.0);
-      ourcvfh.setNormalizeBins(false);
-      ourcvfh.setAxisRatio(0.8);
-      
-      ourcvfh.compute(*descriptor);
-      return descriptor;
-    }
-    
-  };
-  
-  template<>
-  struct RigidBodyWithHistogram<ESF> : public RigidBody{
-  public:
-    typedef ESFSignature640 signature_t;
-    static const string fieldName;
-    static const string fileExt;
-
-    
-    #include <rigid_body_shared_template.h>
-    
-    PointCloud<signature_t>::Ptr computeDescriptor() const{
-      pcl::PointCloud<signature_t>::Ptr descriptor(new PointCloud<signature_t>);
-      
-      pcl::ESFEstimation<PointXYZ, ESFSignature640> esf;
-      esf.setInputCloud(point_cloud);
-      
-      esf.compute(*descriptor);
-      return descriptor;
-    }
-    
-    
-  };
-  
-  template<>
-  struct RigidBodyWithHistogram<GRSD> : public RigidBody{
-  public:
-    
-    typedef GRSDSignature21 signature_t;
-    static const string fieldName;
-    static const string fileExt;
-
-    
-    #include <rigid_body_shared_template.h>
-    PointCloud<signature_t>::Ptr
-    computeDescriptor() const{
-      pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-      
-      pcl::PointCloud<pcl::GRSDSignature21>::Ptr descriptors(new pcl::PointCloud<pcl::GRSDSignature21>());
-          
-      // Estimate the normals.
-      pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normalEstimation;
-      normalEstimation.setInputCloud(point_cloud);
-      normalEstimation.setRadiusSearch(0.03);
-      pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
-      normalEstimation.setSearchMethod(kdtree);
-      normalEstimation.compute(*normals);
-      
-      GRSDEstimation<pcl::PointXYZ, pcl::Normal, pcl::GRSDSignature21> grsd;
-      grsd.setInputCloud(RigidBody::point_cloud);
-      grsd.setInputNormals(normals);
-      grsd.setSearchMethod(kdtree);
-      // Search radius, to look for neighbors. Note: the value given here has to be
-      // larger than the radius used to estimate the normals.
-      grsd.setRadiusSearch(0.05);
-      
-      grsd.compute(*descriptors);
-      return descriptors;
-      
-    }
-    
-    
-  };
-
-
   struct Plane : public RigidBody{
   public:
     const PointIndices::Ptr inliers;
@@ -273,8 +88,7 @@ namespace c44{
           PointIndices::Ptr _inliers) :
     RigidBody(mc,points,normals), inliers(_inliers){}
   };
-
-
+  
 
   struct GraspableObject : RigidBody{
   public:
@@ -287,4 +101,5 @@ namespace c44{
     
   };
 }
+
 #endif
