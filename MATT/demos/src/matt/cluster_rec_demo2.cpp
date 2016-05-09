@@ -14,7 +14,7 @@
 
 using namespace c44;
 
-
+const int hand_index = 1;
 
 int
 main (int argc, char** argv)
@@ -55,12 +55,6 @@ main (int argc, char** argv)
   auto startTime = boost::posix_time::microsec_clock::local_time();
 
   
-  
-  int hand = 0;
-  c44::RigidBody* hand_ptr = nullptr;
-  pcl::console::parse_argument(argc, argv, "-hand", hand);
-
-  
   PointCloud<PointXYZ>::Ptr hand_scene(new PointCloud<PointXYZ>);
   pcl::PCLPointCloud2::Ptr hand_scene_2d(new PCLPointCloud2);
 
@@ -79,9 +73,8 @@ main (int argc, char** argv)
                                 iterationDivisor);
   
   if (pipeline.performSegmentation()){
-    hand_ptr = new c44::RigidBody(pipeline.getObjectAtIndex(0).point_cloud);
     histogram.first = "hand";
-    auto data = hand_ptr->computeDescriptor<dflt_est_method>()->points[0].histogram;
+    auto data = pipeline.getObjectAtIndex(hand_index).computeDescriptor<dflt_est_method>()->points[0].histogram;
     for (unsigned i = 0; i < RigidBody::descriptorSize<dflt_est_method>(); i++){
       histogram.second.push_back(data[i]);
     }
@@ -109,10 +102,7 @@ main (int argc, char** argv)
                               i, grsd_idx.getModelAtIndex(k_indices[0][i]).first.c_str (), k_indices[0][i], k_distances[0][i]);
   
   // Load the results
-  int n_cells = k;
-  if (hand){
-    n_cells *= 2;
-  }
+  int n_cells = 2*k;
   pcl::visualization::PCLVisualizer p (argc, argv, "VFH Cluster Classifier");
   
   int y_s = (int)floor (sqrt ((double)n_cells));
@@ -205,7 +195,7 @@ main (int argc, char** argv)
     
     ss.clear();
     ss << "hand " << viewport;
-    p.addPointCloud (hand_ptr->point_cloud, ss.str(),  viewport);
+    p.addPointCloud (pipeline.getObjectAtIndex(hand_index).point_cloud, ss.str(),  viewport);
     
   }
   

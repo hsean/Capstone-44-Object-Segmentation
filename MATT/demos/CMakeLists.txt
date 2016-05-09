@@ -38,18 +38,6 @@ if(build)
     )
 
 
-    PCL_ADD_EXECUTABLE(matt_cluster_demo "${SUBSUBSYS_NAME}" ${moc_srcs}
-      src/matt/cluster_experiments.cpp
-      ${incs}
-      ${impl_incs}
-    )
-    target_link_libraries(matt_cluster_demo
-      c44api
-      pcl_segmentation
-      pcl_visualization
-      ${Boost_SYSTEM_LIBRARY}
-      ${Boost_FILESYSTEM_LIBRARY}
-    )
 
 
     PCL_ADD_EXECUTABLE(correspondence_grouping_demo
@@ -120,16 +108,6 @@ if(build)
       pcl_segmentation
     )
 
-    PCL_ADD_EXECUTABLE(build_sample_vfh_data
-      "${SUBSUBSYS_NAME}"
-      ${moc_srcs}
-      src/matt/build_vfh_data.cpp
-      ${incs}
-      ${impl_incs}
-    )
 
-    target_link_libraries(build_sample_vfh_data
-      c44api
-    )
 endif(build)
 
