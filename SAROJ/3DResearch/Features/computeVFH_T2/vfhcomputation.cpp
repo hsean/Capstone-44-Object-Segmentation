@@ -10,9 +10,9 @@
 #include <pcl/filters/voxel_grid.h>  //For voxel grid
 #include <pcl/filters/passthrough.h> // For passthrough filter
 
+#define PASSTHROUGH_FILTER
 #define VOXEL_FILTER
 //#define NORMAL_COMPUTE
-#define PASSTHROUGH_FILTER
 //#define VFH_DESCRIPTOR
 
 int main()
@@ -21,6 +21,38 @@ int main()
 	// The file should be in the same folder
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::io::loadPCDFile("milk_cartoon_all_small_clorox.pcd", *cloud);
+//================================================================================//
+	 // It is very important to run pass through filter. it cuts off values 
+	 // that are either inside or outside a given user range.
+	 // I could not computer Normals directly from Voxal Filter.. As was suggested
+	// in community post, this step was essential.
+	 //POINT CLOUD---> Flitering---> Pass through filter   
+      //a) 
+//===============================================================================//
+	#ifdef PASSTHROUGH_FILTER	
+		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_pass_filtered (new pcl::PointCloud<pcl::PointXYZ>);
+
+  	// we create the PassThrough filter object, and set its parameters.
+	 	pcl::PassThrough<pcl::PointXYZ> pass;
+ 	 //	pass.setInputCloud (cloud_voxal_filtered);
+	 	pass.setInputCloud (cloud);
+ 		pass.setFilterFieldName ("z");
+  		pass.setFilterLimits (0.0, 2.0);
+ 	    pass.setFilterLimitsNegative (false);
+ 		pass.filter (*cloud_pass_filtered);
+
+		cloud = cloud_pass_filtered;   // Set the new cloud 
+/*
+		//visualize Filtered Data
+		pcl::visualization::CloudViewer viewer("PCL Viewer");
+		
+		viewer.showCloud(cloud);
+		while(!viewer.wasStopped())
+		{
+			
+		} */
+    #endif
+ 	
 
 //==========================================================================
       //POINT CLOUD---> Flitering    
@@ -43,43 +75,26 @@ int main()
 		std::cerr << "PointCloud after filtering: " << cloud_voxal_filtered->width * cloud_voxal_filtered->height 
       	 << " data points (" << pcl::getFieldsList (*cloud_voxal_filtered) << ").";
       	
+      	// Set cloud = new cloud voxal filtered
+      	 cloud = cloud_voxal_filtered;
       	// Save to a file
       //	 pcl::io::savePCDFileASCII ("milk_cartoon_downsampled.pcd",*cloud_voxal_filtered);
 	/*	 pcl::PCDWriter writer;
  		 writer.write ("milk_cartoon_downsampled.pcd", *cloud_filtered,Eigen::Vector4f::Zero (), Eigen::Quaternionf::Identity (), false);
-*/
-/*
+	*/
+	/*
 		//visualize Filtered Data
 		pcl::visualization::CloudViewer viewer("PCL Viewer");
 		
-		viewer.showCloud(cloud_filtered);
+		viewer.showCloud(cloud);
 		while(!viewer.wasStopped())
 		{
 			
-		}
-*/
+		} */
+
 	#endif	
 
-//================================================================================//
-	 // It is very important to run pass through filter. it cuts off values 
-	 // that are either inside or outside a given user range.
-	 // I could not computer Normals directly from Voxal Filter.. As was suggested
-	// in community post, this step was essential.
-	 //POINT CLOUD---> Flitering---> Pass through filter   
-      //a) 
-//===============================================================================//
-	#ifdef PASSTHROUGH_FILTER	
-		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_pass_filtered (new pcl::PointCloud<pcl::PointXYZ>);
 
-  	// we create the PassThrough filter object, and set its parameters.
-	 	pcl::PassThrough<pcl::PointXYZ> pass;
- 	 	pass.setInputCloud (cloud_voxal_filtered);
- 		pass.setFilterFieldName ("z");
-  		pass.setFilterLimits (0.0, 1.0);
- 	    pass.setFilterLimitsNegative (true);
- 		pass.filter (*cloud_pass_filtered);
-
-    #endif
      //================================================================================//
 	 //POINT CLOUD---> Flitering---> Normals    
       //a) 
@@ -99,16 +114,16 @@ int main()
              ne.setNormalEstimationMethod (ne.AVERAGE_3D_GRADIENT);
              ne.setMaxDepthChangeFactor(0.02f);
              ne.setNormalSmoothingSize(10.0f);
-             ne.setInputCloud(cloud_pass_filtered);   		// Load the cloud
+             ne.setInputCloud(cloud);   		// Load the cloud
              ne.compute(*normals);				// Compute Normal
-         //visualize normals
+    /*     //visualize normals
 		pcl::visualization::PCLVisualizer viewer("PCL Viewer");
 		viewer.setBackgroundColor(0.0,0.0,0.5);
 		viewer.addPointCloudNormals<pcl::PointXYZ,pcl::Normal>(cloud,normals);
 		while(!viewer.wasStopped())
 		{
 			viewer.spinOnce();
-		} 
+		}  */
     #endif
     //=====================================================================================//  
       //POINT CLOUD---> Flitering---> Normals----> VFH Extraction    
@@ -117,7 +132,7 @@ int main()
      #ifdef VFH_DESCRIPTOR
    		 // Now the normal is computed, we are ready to use VFH
     	 pcl::VFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> vfh;
-   		 vfh.setInputCloud(cloud);
+   		 vfh.setInputCloud(cloud_pass_filtered);
      	 vfh.setInputNormals(normals);
 
     	 // Create an empty kdtree representation, and pass it to the FPFH
@@ -136,14 +151,16 @@ int main()
     	vfh.setNormalizeDistance(false);
     	// Compute the features
      	 vfh.compute(*vfhs);
-     /*
+     
      	//VFH Visualization.
 		pcl::visualization::PCLHistogramVisualizer viewer;
 
 		// Set the size of the descriptor beforehand
 		viewer.addFeatureHistogram(*vfhs, 308);
 
-		viewer.spin(); */
+		viewer.spin(); 
 	#endif
+	//===============================================================================//
+
 	return 0;
 }
