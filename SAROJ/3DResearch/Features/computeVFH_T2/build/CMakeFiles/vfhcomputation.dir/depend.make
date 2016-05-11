@@ -348,6 +348,7 @@ CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/p
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/common/point_tests.h
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/common/projection_matrix.h
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/common/time.h
+CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/console/parse.h
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/console/print.h
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/conversions.h
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/correspondence.h
@@ -356,9 +357,11 @@ CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/p
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/feature.hpp
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/integral_image2D.hpp
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/integral_image_normal.hpp
+CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/normal_3d.hpp
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/vfh.hpp
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/features/integral_image2D.h
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/features/integral_image_normal.h
+CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/features/normal_3d.h
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/features/pfh_tools.h
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/features/vfh.h
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/filters/boost.h
@@ -367,8 +370,10 @@ CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/p
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/filters/impl/filter.hpp
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/filters/impl/filter_indices.hpp
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/filters/impl/passthrough.hpp
+CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/filters/impl/statistical_outlier_removal.hpp
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/filters/impl/voxel_grid.hpp
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/filters/passthrough.h
+CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/filters/statistical_outlier_removal.h
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/filters/voxel_grid.h
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/for_each_type.h
 CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o: /usr/local/include/pcl-1.8/pcl/geometry/planar_polygon.h

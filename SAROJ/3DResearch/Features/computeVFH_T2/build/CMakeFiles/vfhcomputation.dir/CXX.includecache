@@ -29,6 +29,12 @@ pcl/filters/voxel_grid.h
 -
 pcl/filters/passthrough.h
 -
+pcl/console/parse.h
+-
+pcl/filters/statistical_outlier_removal.h
+-
+pcl/features/normal_3d.h
+-
 
 /usr/include/eigen3/Eigen/Cholesky
 Core
@@ -1958,6 +1964,14 @@ string
 boost/date_time/posix_time/posix_time.hpp
 -
 
+/usr/local/include/pcl-1.8/pcl/console/parse.h
+vector
+-
+sstream
+-
+pcl/pcl_macros.h
+-
+
 /usr/local/include/pcl-1.8/pcl/console/print.h
 stdio.h
 -
@@ -2032,6 +2046,10 @@ cstddef
 pcl/features/integral_image_normal.h
 -
 
+/usr/local/include/pcl-1.8/pcl/features/impl/normal_3d.hpp
+pcl/features/normal_3d.h
+-
+
 /usr/local/include/pcl-1.8/pcl/features/impl/vfh.hpp
 pcl/features/vfh.h
 -
@@ -2058,6 +2076,14 @@ pcl/features/feature.h
 pcl/features/integral_image2D.h
 -
 pcl/features/impl/integral_image_normal.hpp
+-
+
+/usr/local/include/pcl-1.8/pcl/features/normal_3d.h
+pcl/features/feature.h
+-
+pcl/common/centroid.h
+-
+pcl/features/impl/normal_3d.hpp
 -
 
 /usr/local/include/pcl-1.8/pcl/features/pfh_tools.h
@@ -2138,6 +2164,12 @@ pcl/filters/passthrough.h
 pcl/common/io.h
 -
 
+/usr/local/include/pcl-1.8/pcl/filters/impl/statistical_outlier_removal.hpp
+pcl/filters/statistical_outlier_removal.h
+-
+pcl/common/io.h
+-
+
 /usr/local/include/pcl-1.8/pcl/filters/impl/voxel_grid.hpp
 pcl/common/centroid.h
 -
@@ -2152,6 +2184,14 @@ pcl/filters/voxel_grid.h
 pcl/filters/filter_indices.h
 -
 pcl/filters/impl/passthrough.hpp
+-
+
+/usr/local/include/pcl-1.8/pcl/filters/statistical_outlier_removal.h
+pcl/filters/filter_indices.h
+-
+pcl/search/pcl_search.h
+-
+pcl/filters/impl/statistical_outlier_removal.hpp
 -
 
 /usr/local/include/pcl-1.8/pcl/filters/voxel_grid.h

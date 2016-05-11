@@ -349,6 +349,7 @@ CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o
  /usr/local/include/pcl-1.8/pcl/common/point_tests.h
  /usr/local/include/pcl-1.8/pcl/common/projection_matrix.h
  /usr/local/include/pcl-1.8/pcl/common/time.h
+ /usr/local/include/pcl-1.8/pcl/console/parse.h
  /usr/local/include/pcl-1.8/pcl/console/print.h
  /usr/local/include/pcl-1.8/pcl/conversions.h
  /usr/local/include/pcl-1.8/pcl/correspondence.h
@@ -357,9 +358,11 @@ CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o
  /usr/local/include/pcl-1.8/pcl/features/impl/feature.hpp
  /usr/local/include/pcl-1.8/pcl/features/impl/integral_image2D.hpp
  /usr/local/include/pcl-1.8/pcl/features/impl/integral_image_normal.hpp
+ /usr/local/include/pcl-1.8/pcl/features/impl/normal_3d.hpp
  /usr/local/include/pcl-1.8/pcl/features/impl/vfh.hpp
  /usr/local/include/pcl-1.8/pcl/features/integral_image2D.h
  /usr/local/include/pcl-1.8/pcl/features/integral_image_normal.h
+ /usr/local/include/pcl-1.8/pcl/features/normal_3d.h
  /usr/local/include/pcl-1.8/pcl/features/pfh_tools.h
  /usr/local/include/pcl-1.8/pcl/features/vfh.h
  /usr/local/include/pcl-1.8/pcl/filters/boost.h
@@ -368,8 +371,10 @@ CMakeFiles/vfhcomputation.dir/vfhcomputation.cpp.o
  /usr/local/include/pcl-1.8/pcl/filters/impl/filter.hpp
  /usr/local/include/pcl-1.8/pcl/filters/impl/filter_indices.hpp
  /usr/local/include/pcl-1.8/pcl/filters/impl/passthrough.hpp
+ /usr/local/include/pcl-1.8/pcl/filters/impl/statistical_outlier_removal.hpp
  /usr/local/include/pcl-1.8/pcl/filters/impl/voxel_grid.hpp
  /usr/local/include/pcl-1.8/pcl/filters/passthrough.h
+ /usr/local/include/pcl-1.8/pcl/filters/statistical_outlier_removal.h
  /usr/local/include/pcl-1.8/pcl/filters/voxel_grid.h
  /usr/local/include/pcl-1.8/pcl/for_each_type.h
  /usr/local/include/pcl-1.8/pcl/geometry/planar_polygon.h
