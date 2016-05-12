@@ -25,7 +25,6 @@
 #include <boost/fusion/sequence/intrinsic/value_at.hpp>
 #include <boost/fusion/include/value_at.hpp>
 
-
 using namespace boost;
 
 enum EstimationMethod{
@@ -52,7 +51,8 @@ namespace c44{
   
 
   struct RigidBody{
-    
+  private:
+    const float normal_search_radius;
   public:
     
     template <EstimationMethod E>
@@ -68,9 +68,16 @@ namespace c44{
       
     RigidBody(ModelCoefficients mc,
               Cloud3D::Ptr cloud,
-              PointCloud<Normal>::Ptr normals) :
-    coefficients(mc), point_cloud(cloud), normal_cloud(normals) {};
-    RigidBody(PointCloud<PointXYZ>::Ptr cloud) : point_cloud(cloud){};
+              PointCloud<Normal>::Ptr normals,
+              float normal_search_radius) :
+    coefficients(mc), point_cloud(cloud), normal_cloud(normals),
+    normal_search_radius(normal_search_radius){};
+    RigidBody(PointCloud<PointXYZ>::Ptr cloud,
+              PointCloud<Normal>::Ptr normals,
+              float normal_search_radius) :
+                point_cloud(cloud), normal_cloud(normals),
+                normal_search_radius(normal_search_radius)
+    {};
 
     template<EstimationMethod E>
     typename PointCloud<typename fusion::result_of::value_at<type_vec, mpl::int_<E>>::type>::Ptr
@@ -86,7 +93,7 @@ namespace c44{
           Cloud3D::Ptr points,
           PointCloud<Normal>::Ptr normals,
           PointIndices::Ptr _inliers) :
-    RigidBody(mc,points,normals), inliers(_inliers){}
+    RigidBody(mc,points,normals,0.03), inliers(_inliers){}
   };
   
 
@@ -95,7 +102,7 @@ namespace c44{
     GraspableObject(ModelCoefficients mc,
                     Cloud3D::Ptr points,
                     PointCloud<Normal>::Ptr normals) :
-    RigidBody(mc,points,normals){}
+    RigidBody(mc,points,normals,0.03){}
     
     BoundingBox getBoundingBox() const;
     

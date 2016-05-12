@@ -14,7 +14,7 @@
 
 using namespace c44;
 
-const int hand_index = 1;
+const int hand_index = 0;
 
 int
 main (int argc, char** argv)
@@ -22,7 +22,7 @@ main (int argc, char** argv)
   int k = 6;
   double thresh = DBL_MAX;     // No threshold, disabled by default
 
-  ModelIndex<dflt_est_method, default_metric> grsd_idx(argv[1]);
+  ModelIndex<dflt_est_method, default_metric> model_index(argv[1]);
 
   std::string extension(c44::fileExt<dflt_est_method>());
   
@@ -38,22 +38,21 @@ main (int argc, char** argv)
     return (-1);
   }
   
-//  
+//
 //  transform (extension.begin (), extension.end (), extension.begin (), (int(*)(int))tolower);
 //  
   // Load the test histogram
   std::vector<int> pcd_indices = pcl::console::parse_file_extension_argument (argc, argv, ".pcd");
   c44::histogram_t histogram;
   
-  float voxelSize = 0.0025;
+  float voxelSize = 0.012;
   float sampleSize = 100 - 2 * 25;
   
   float stdDev = 1.0;
   float iterationDivisor = 1 + 1.0;
   //float iterationDivisor = 1.0;
   boost::posix_time::time_duration runTime;
-  auto startTime = boost::posix_time::microsec_clock::local_time();
-
+  
   
   PointCloud<PointXYZ>::Ptr hand_scene(new PointCloud<PointXYZ>);
   pcl::PCLPointCloud2::Ptr hand_scene_2d(new PCLPointCloud2);
@@ -78,7 +77,6 @@ main (int argc, char** argv)
     for (unsigned i = 0; i < RigidBody::descriptorSize<dflt_est_method>(); i++){
       histogram.second.push_back(data[i]);
     }
-    
   } else{
     return (-1);
   }
@@ -93,16 +91,16 @@ main (int argc, char** argv)
   flann::Matrix<int> k_indices;
   flann::Matrix<float> k_distances;
   
-  grsd_idx.match(histogram, k, k_indices, k_distances);
+  model_index.match(histogram, k, k_indices, k_distances);
   
   // Output the results on screen
   pcl::console::print_highlight ("The closest %d neighbors for %s are:\n", k, argv[pcd_indices[0]]);
   for (int i = 0; i < k; ++i)
     pcl::console::print_info ("    %d - %s (%d) with a distance of: %f\n",
-                              i, grsd_idx.getModelAtIndex(k_indices[0][i]).first.c_str (), k_indices[0][i], k_distances[0][i]);
+                              i, model_index.getModelAtIndex(k_indices[0][i]).first.c_str (), k_indices[0][i], k_distances[0][i]);
   
   // Load the results
-  int n_cells = 2*k;
+  int n_cells = k + 1;
   pcl::visualization::PCLVisualizer p (argc, argv, "VFH Cluster Classifier");
   
   int y_s = (int)floor (sqrt ((double)n_cells));
@@ -122,10 +120,8 @@ main (int argc, char** argv)
   pcl::console::print_info (")\n");
   
   int viewport = 0, l = 0, m = 0;
-  for (int i = 0; i < k; ++i)
+  for (int i = 0; i < n_cells; ++i)
   {
-    std::string cloud_name = grsd_idx.getModelAtIndex(k_indices[0][i]).first;
-    boost::replace_last (cloud_name, extension, "");
     
     p.createViewPort (l * x_step, m * y_step, (l + 1) * x_step, (m + 1) * y_step, viewport);
     l++;
@@ -134,68 +130,69 @@ main (int argc, char** argv)
       l = 0;
       m++;
     }
-    
-    pcl::PCLPointCloud2 cloud;
-    pcl::console::print_highlight (stderr, "Loading "); pcl::console::print_value (stderr, "%s ", cloud_name.c_str ());
-    if (pcl::io::loadPCDFile (cloud_name, cloud) == -1)
-      break;
-    
-    // Convert from blob to PointCloud
-    pcl::PointCloud<pcl::PointXYZ> cloud_xyz;
-    pcl::fromPCLPointCloud2 (cloud, cloud_xyz);
-    
-    if (cloud_xyz.points.size () == 0)
-      break;
-    
-    pcl::console::print_info ("[done, ");
-    pcl::console::print_value ("%d", (int)cloud_xyz.points.size ());
-    pcl::console::print_info (" points]\n");
-    pcl::console::print_info ("Available dimensions: ");
-    pcl::console::print_value ("%s\n", pcl::getFieldsList (cloud).c_str ());
-    
-    // Demean the cloud
-    Eigen::Vector4f centroid;
-    pcl::compute3DCentroid (cloud_xyz, centroid);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz_demean (new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::demeanPointCloud<pcl::PointXYZ> (cloud_xyz, centroid, *cloud_xyz_demean);
-    // Add to renderer*
-    p.addPointCloud (cloud_xyz_demean, cloud_name, viewport);
     std::stringstream ss;
-    ss << k_distances[0][i];
-    if (k_distances[0][i] > thresh)
-    {
-      p.addText (ss.str (), 20, 30, 1, 0, 0, ss.str (), viewport);  // display the text with red
+    
+    if (i == 0){
+      ss << "[original object]" << viewport;
+      p.addPointCloud (pipeline.getObjectAtIndex(hand_index).point_cloud, ss.str(),  viewport);
+      p.addText (ss.str(), 20, 10, ss.str(), viewport);
+    } else {
+      int j = i - 1;
+      std::string cloud_name = model_index.getModelAtIndex(k_indices[0][j]).first;
+      boost::replace_last (cloud_name, extension, "");
+      pcl::PCLPointCloud2 cloud;
+      pcl::console::print_highlight (stderr, "Loading "); pcl::console::print_value (stderr, "%s ", cloud_name.c_str ());
+      if (pcl::io::loadPCDFile (cloud_name, cloud) == -1)
+        break;
       
-      // Create a red line
-      pcl::PointXYZ min_p, max_p;
-      pcl::getMinMax3D (*cloud_xyz_demean, min_p, max_p);
-      std::stringstream line_name;
-      line_name << "line_" << i;
-      p.addLine (min_p, max_p, 1, 0, 0, line_name.str (), viewport);
-      p.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 5, line_name.str (), viewport);
+      // Convert from blob to PointCloud
+      pcl::PointCloud<pcl::PointXYZ> cloud_xyz;
+      pcl::fromPCLPointCloud2 (cloud, cloud_xyz);
+      
+      if (cloud_xyz.points.size () == 0)
+        break;
+      
+      pcl::console::print_info ("[done, ");
+      pcl::console::print_value ("%d", (int)cloud_xyz.points.size ());
+      pcl::console::print_info (" points]\n");
+      pcl::console::print_info ("Available dimensions: ");
+      pcl::console::print_value ("%s\n", pcl::getFieldsList (cloud).c_str ());
+      
+      ss << k_distances[0][j];
+      // Demean the cloud
+      Eigen::Vector4f centroid;
+      pcl::compute3DCentroid (cloud_xyz, centroid);
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz_demean (new pcl::PointCloud<pcl::PointXYZ>);
+      pcl::demeanPointCloud<pcl::PointXYZ> (cloud_xyz, centroid, *cloud_xyz_demean);
+      // Add to renderer*
+      p.addPointCloud (cloud_xyz_demean, cloud_name, viewport);
+      if (k_distances[0][j] > thresh)
+      {
+        p.addText (ss.str (), 20, 30, 1, 0, 0, ss.str (), viewport);  // display the text with red
+        
+        // Create a red line
+//        pcl::PointXYZ min_p, max_p;
+//        pcl::getMinMax3D (*cloud_xyz_demean, min_p, max_p);
+//        std::stringstream line_name;
+//        line_name << "line_" << i;
+//        p.addLine (min_p, max_p, 1, 0, 0, line_name.str (), viewport);
+//        p.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 5, line_name.str (), viewport);
+      }
+      else
+        p.addText (ss.str (), 20, 30, 0, 1, 0, ss.str (), viewport);
+      
+      // Increase the font size for the score*
+      p.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_FONT_SIZE, 18, ss.str (), viewport);
+      
+      // Add the cluster name
+      std::string label = cloud_name;
+      boost::replace_first(label, "/Users/matt/code/cpp/pcl-stuff/cap44/xcode-build/c44/demos/Debug/3DScanOfInmoovHand.ply_output/","");
+      p.addText (label, 20, 10, label, viewport);
+  
     }
-    else
-      p.addText (ss.str (), 20, 30, 0, 1, 0, ss.str (), viewport);
     
-    // Increase the font size for the score*
-    p.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_FONT_SIZE, 18, ss.str (), viewport);
-    
-    // Add the cluster name
-    p.addText (cloud_name, 20, 10, cloud_name, viewport);
-
     
     viewport++;
-    p.createViewPort (l * x_step, m * y_step, (l + 1) * x_step, (m + 1) * y_step, viewport);
-    l++;
-    if (l >= x_s)
-    {
-      l = 0;
-      m++;
-    }
-    
-    ss.clear();
-    ss << "hand " << viewport;
-    p.addPointCloud (pipeline.getObjectAtIndex(hand_index).point_cloud, ss.str(),  viewport);
     
   }
   

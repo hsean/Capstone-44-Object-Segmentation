@@ -74,7 +74,6 @@ namespace c44{
   class SegmentationPipeline{
 
     
-    
     Cloud3D::Ptr objectCloud,
             denoisedCloud,
             convexHull,
@@ -92,6 +91,7 @@ namespace c44{
     float iterationDivisor;
 
   public:
+    static const float normal_search_radius;
     
     
     

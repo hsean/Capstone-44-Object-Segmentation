@@ -7,6 +7,7 @@
 
 using namespace c44;
 
+const float SegmentationPipeline::normal_search_radius = 0.03;
 
 SegmentationPipeline::SegmentationPipeline(Cloud3D::Ptr rawCloud,
                                            float voxelSize,
@@ -41,7 +42,7 @@ SegmentationPipeline::SegmentationPipeline(Cloud3D::Ptr rawCloud,
     std::endl;
 
     search::KdTree<PointXYZ>::Ptr tree(new search::KdTree<PointXYZ>());
-
+    //ne.setRadiusSearch (SegmentationPipeline::normal_search_radius);
     ne.setSearchMethod(tree);
     ne.setInputCloud(denoisedCloud);
     ne.setKSearch(25);
@@ -53,15 +54,16 @@ SegmentationPipeline::SegmentationPipeline(Cloud3D::Ptr rawCloud,
 
 bool SegmentationPipeline::performSegmentation(){
     if (extractPrism()){
-        int max = 1;
-        bool stillFindingStuff = true;
+      clusterize();
         //this is to support extracting multiple objects
-        do {
-            stillFindingStuff = extractGraspableObject(SACMODEL_CYLINDER);
-        } while (stillFindingStuff && graspableObjects.size() < max);
-        return true;
+//      int max = 3;
+//      bool stillFindingStuff = true;
+//      do {
+//          stillFindingStuff = extractGraspableObject(SACMODEL_CYLINDER);
+//      } while (stillFindingStuff && graspableObjects.size() < max);
+      return true;
     } else {
-        return false;
+      return false;
     }
 }
 
@@ -216,7 +218,7 @@ void SegmentationPipeline::clusterize(){
   
   std::vector<pcl::PointIndices> cluster_indices;
   pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-  ec.setClusterTolerance (0.03); // 2cm
+  ec.setClusterTolerance (0.2);
   ec.setMinClusterSize (100);
   ec.setMaxClusterSize (125000);
   ec.setSearchMethod (tree);
@@ -228,9 +230,12 @@ void SegmentationPipeline::clusterize(){
   {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
     
-    for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); ++pit)
-      cloud_cluster->points.push_back (objectCloud->points[*pit]); //*
+    PointCloud<Normal>::Ptr normal_cluster(new PointCloud<Normal>);
     
+    for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); ++pit){
+      cloud_cluster->points.push_back (objectCloud->points[*pit]); //*
+      normal_cluster->points.push_back(normals->points[*pit]);
+    }
     cloud_cluster->width = cloud_cluster->points.size ();
     
     cloud_cluster->height = 1;
@@ -240,7 +245,8 @@ void SegmentationPipeline::clusterize(){
     std::cout << "PointCloud representing the Cluster: " << cloud_cluster->points.size () << " data points." << std::endl;
     std::stringstream ss;
     ss << "cloud_cluster_" << j << ".pcd";
-    auto rb = RigidBody(cloud_cluster);
+    
+    auto rb = RigidBody(cloud_cluster,normal_cluster,normal_search_radius);
     objects.push_back(rb);
     
     j++;

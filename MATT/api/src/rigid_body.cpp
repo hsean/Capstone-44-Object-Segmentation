@@ -18,117 +18,29 @@ BoundingBox GraspableObject::getBoundingBox() const{
   return BoundingBox(this->point_cloud);
 }
 
-//
-//std::string RigidBody::fileExt(EstimationMethod E){
-//  switch (E){
-//    case VFH:
-//      return "vfh";
-//    case CVFH:
-//      return "cvfh";
-//    case OURCVFH:
-//      return "ourcvfh";
-//    case ESF:
-//      return "esf";
-//    case GRSD:
-//      return "grsd";
-//  }
-//}
-//
-//std::string RigidBody::fieldName(EstimationMethod E){
-//  switch (E){
-//    case VFH:
-//      return "vfh";
-//    case CVFH:
-//      return "vfh";
-//    case OURCVFH:
-//      return "vfh";
-//    case ESF:
-//      return "esf";
-//    case GRSD:
-//      return "grsd";
-//  }
-//}
-
-//
-//template <>
-//std::string RigidBody::fieldName<VFH>(){
-//  return "vfh";
-//}
-//
-//
-//template <>
-//std::string RigidBody::fieldName<CVFH>(){
-//  return "vfh";
-//}
-//
-//template <>
-//std::string RigidBody::fieldName<OURCVFH>(){
-//  return "vfh";
-//}
-//
-//
-//template <>
-//std::string RigidBody::fieldName<ESF>(){
-//  return "esf";
-//}
-//
-//template <>
-//std::string RigidBody::fieldName<GRSD>(){
-//  return "grsd";
-//}
-//
-//template <>
-//std::string RigidBody::fileExt<VFH>(){
-//  return "vfh";
-//}
-//
-//
-//template <>
-//std::string RigidBody::fileExt<CVFH>(){
-//  return "cvfh";
-//}
-//
-//template <>
-//std::string RigidBody::fileExt<OURCVFH>(){
-//  return "ourcvfh";
-//}
-//
-//
-//template <>
-//std::string RigidBody::fileExt<ESF>(){
-//  return "esf";
-//}
-//
-//template <>
-//std::string RigidBody::fileExt<GRSD>(){
-//  return "grsd";
-//}
 
 
 template <>
 PointCloud<VFHSignature308>::Ptr
 RigidBody::computeDescriptor<VFH>() const
 {
-  // Object for storing the normals.
-  pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
+  boost::posix_time::ptime time_before_execution;
+  boost::posix_time::ptime time_after_execution;
+  boost::posix_time::time_duration difference;
+  time_before_execution = boost::posix_time::microsec_clock::local_time();
+  
   // Object for storing the VFH descriptor.
   pcl::PointCloud<pcl::VFHSignature308>::Ptr descriptor(new pcl::PointCloud<pcl::VFHSignature308>);
   
   // Note: you should have performed preprocessing to cluster out the object
   // from the cloud, and save it to this individual file.
   
-  // Estimate the normals.
-  pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normalEstimation;
-  normalEstimation.setInputCloud(point_cloud);
-  normalEstimation.setRadiusSearch(0.03);
   pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
-  normalEstimation.setSearchMethod(kdtree);
-  normalEstimation.compute(*normals);
   
   // VFH estimation object.
   pcl::VFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> vfh;
   vfh.setInputCloud(point_cloud);
-  vfh.setInputNormals(normals);
+  vfh.setInputNormals(normal_cloud);
   vfh.setSearchMethod(kdtree);
   // Optionally, we can normalize the bins of the resulting histogram,
   // using the total number of points.
@@ -138,7 +50,10 @@ RigidBody::computeDescriptor<VFH>() const
   vfh.setNormalizeDistance(false);
   
   vfh.compute(*descriptor);
-  
+  time_after_execution = boost::posix_time::microsec_clock::local_time();
+  difference = time_after_execution - time_before_execution;
+  std::cout << "GRSD time = " << std::setw(5) << difference.total_milliseconds() << " ms" << std::endl;
+
   return descriptor;
 }
 
@@ -148,26 +63,17 @@ template <>
 PointCloud<VFHSignature308>::Ptr
 RigidBody::computeDescriptor<CVFH>() const
 {
-  pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-  // Object for storing the CVFH descriptors.
   pcl::PointCloud<pcl::VFHSignature308>::Ptr descriptor(new pcl::PointCloud<pcl::VFHSignature308>);
   
   // Note: you should have performed preprocessing to cluster out the object
   // from the cloud, and save it to this individual file.
   
-  
-  // Estimate the normals.
-  pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normalEstimation;
-  normalEstimation.setInputCloud(point_cloud);
-  normalEstimation.setRadiusSearch(0.03);
   pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
-  normalEstimation.setSearchMethod(kdtree);
-  normalEstimation.compute(*normals);
   
   // CVFH estimation object.
   pcl::CVFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> cvfh;
   cvfh.setInputCloud(point_cloud);
-  cvfh.setInputNormals(normals);
+  cvfh.setInputNormals(normal_cloud);
   cvfh.setSearchMethod(kdtree);
   // Set the maximum allowable deviation of the normals,
   // for the region segmentation step.
@@ -188,25 +94,15 @@ template <>
 PointCloud<VFHSignature308>::Ptr
 RigidBody::computeDescriptor<OURCVFH>() const
 {
-  pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-  
   pcl::PointCloud<pcl::VFHSignature308>::Ptr descriptor(new pcl::PointCloud<pcl::VFHSignature308>);
   
   
-  
-  // Estimate the normals.
-  pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normalEstimation;
-  normalEstimation.setInputCloud(point_cloud);
-  normalEstimation.setRadiusSearch(0.03);
   pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
-  normalEstimation.setSearchMethod(kdtree);
-  normalEstimation.compute(*normals);
-  
   
   // OUR-CVFH estimation object.
   pcl::OURCVFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> ourcvfh;
   ourcvfh.setInputCloud(point_cloud);
-  ourcvfh.setInputNormals(normals);
+  ourcvfh.setInputNormals(normal_cloud);
   ourcvfh.setSearchMethod(kdtree);
   ourcvfh.setEPSAngleThreshold(5.0 / 180.0 * M_PI); // 5 degrees.
   ourcvfh.setCurvatureThreshold(1.0);
@@ -235,27 +131,31 @@ template <>
 PointCloud<GRSDSignature21>::Ptr
 RigidBody::computeDescriptor<GRSD>() const
 {
+  boost::posix_time::ptime time_before_execution;
+  boost::posix_time::ptime time_after_execution;
+  boost::posix_time::time_duration difference;
+  time_before_execution = boost::posix_time::microsec_clock::local_time();
   pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
   
   pcl::PointCloud<pcl::GRSDSignature21>::Ptr descriptors(new pcl::PointCloud<pcl::GRSDSignature21>());
   
   // Estimate the normals.
-  pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normalEstimation;
-  normalEstimation.setInputCloud(point_cloud);
-  normalEstimation.setRadiusSearch(0.03);
   pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
-  normalEstimation.setSearchMethod(kdtree);
-  normalEstimation.compute(*normals);
   
   GRSDEstimation<pcl::PointXYZ, pcl::Normal, pcl::GRSDSignature21> grsd;
-  grsd.setInputCloud(RigidBody::point_cloud);
-  grsd.setInputNormals(normals);
+  grsd.setInputCloud(this->point_cloud);
+  grsd.setInputNormals(this->normal_cloud);
   grsd.setSearchMethod(kdtree);
   // Search radius, to look for neighbors. Note: the value given here has to be
+  
   // larger than the radius used to estimate the normals.
-  grsd.setRadiusSearch(0.05);
+  grsd.setRadiusSearch(normal_search_radius + 0.02);
   
   grsd.compute(*descriptors);
+  time_after_execution = boost::posix_time::microsec_clock::local_time();
+  difference = time_after_execution - time_before_execution;
+  std::cout << "GRSD time = " << std::setw(5) << difference.total_milliseconds() << " ms" << std::endl;
+
   return descriptors;
 
 };

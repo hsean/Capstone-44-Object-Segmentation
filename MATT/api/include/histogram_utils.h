@@ -17,6 +17,7 @@
 #include <rigid_body.h>
 #include <c44_types.h>
 
+
 namespace c44{
 
   template<EstimationMethod E>

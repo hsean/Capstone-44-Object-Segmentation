@@ -38,7 +38,7 @@ using namespace pcl;
 using namespace pcl::io;
 using namespace pcl::console;
 using namespace c44;
-const bool upsample = true;
+const bool upsample = false;
 
 void
 printHelp (int, char **argv)
