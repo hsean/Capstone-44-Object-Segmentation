@@ -208,6 +208,20 @@ CMakeFiles/localPipeline.dir/localPipeline.cpp.o
  /usr/include/eigen3/Eigen/src/plugins/CommonCwiseUnaryOps.h
  /usr/include/eigen3/Eigen/src/plugins/MatrixCwiseBinaryOps.h
  /usr/include/eigen3/Eigen/src/plugins/MatrixCwiseUnaryOps.h
+ /usr/include/eigen3/unsupported/Eigen/NonLinearOptimization
+ /usr/include/eigen3/unsupported/Eigen/NumericalDiff
+ /usr/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/HybridNonLinearSolver.h
+ /usr/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/LevenbergMarquardt.h
+ /usr/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/chkder.h
+ /usr/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/covar.h
+ /usr/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/dogleg.h
+ /usr/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/fdjac1.h
+ /usr/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/lmpar.h
+ /usr/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/qrsolv.h
+ /usr/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/r1mpyq.h
+ /usr/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/r1updt.h
+ /usr/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/rwupdt.h
+ /usr/include/eigen3/unsupported/Eigen/src/NumericalDiff/NumericalDiff.h
  /usr/include/vtk-5.8/vtkABI.h
  /usr/include/vtk-5.8/vtkAbstractArray.h
  /usr/include/vtk-5.8/vtkAbstractMapper.h
@@ -337,6 +351,7 @@ CMakeFiles/localPipeline.dir/localPipeline.cpp.o
  /usr/local/include/pcl-1.8/pcl/common/common.h
  /usr/local/include/pcl-1.8/pcl/common/concatenate.h
  /usr/local/include/pcl-1.8/pcl/common/copy_point.h
+ /usr/local/include/pcl-1.8/pcl/common/distances.h
  /usr/local/include/pcl-1.8/pcl/common/eigen.h
  /usr/local/include/pcl-1.8/pcl/common/impl/accumulators.hpp
  /usr/local/include/pcl-1.8/pcl/common/impl/centroid.hpp
@@ -366,8 +381,10 @@ CMakeFiles/localPipeline.dir/localPipeline.cpp.o
  /usr/local/include/pcl-1.8/pcl/features/pfh_tools.h
  /usr/local/include/pcl-1.8/pcl/features/vfh.h
  /usr/local/include/pcl-1.8/pcl/filters/boost.h
+ /usr/local/include/pcl-1.8/pcl/filters/extract_indices.h
  /usr/local/include/pcl-1.8/pcl/filters/filter.h
  /usr/local/include/pcl-1.8/pcl/filters/filter_indices.h
+ /usr/local/include/pcl-1.8/pcl/filters/impl/extract_indices.hpp
  /usr/local/include/pcl-1.8/pcl/filters/impl/filter.hpp
  /usr/local/include/pcl-1.8/pcl/filters/impl/filter_indices.hpp
  /usr/local/include/pcl-1.8/pcl/filters/impl/passthrough.hpp
@@ -409,6 +426,54 @@ CMakeFiles/localPipeline.dir/localPipeline.cpp.o
  /usr/local/include/pcl-1.8/pcl/point_traits.h
  /usr/local/include/pcl-1.8/pcl/point_types.h
  /usr/local/include/pcl-1.8/pcl/register_point_struct.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/boost.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/eigen.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/lmeds.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/mlesac.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/msac.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/prosac.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/ransac.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/rmsac.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/rransac.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_circle.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_circle3d.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_cone.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_cylinder.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_line.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_normal_parallel_plane.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_normal_plane.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_normal_sphere.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_parallel_line.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_parallel_plane.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_perpendicular_plane.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_plane.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_sphere.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_stick.hpp
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/lmeds.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/method_types.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/mlesac.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/model_types.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/msac.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/prosac.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/ransac.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/rmsac.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/rransac.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac_model.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac_model_circle.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac_model_circle3d.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac_model_cone.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac_model_cylinder.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac_model_line.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac_model_normal_parallel_plane.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac_model_normal_plane.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac_model_normal_sphere.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac_model_parallel_line.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac_model_parallel_plane.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac_model_perpendicular_plane.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac_model_plane.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac_model_sphere.h
+ /usr/local/include/pcl-1.8/pcl/sample_consensus/sac_model_stick.h
  /usr/local/include/pcl-1.8/pcl/search/impl/kdtree.hpp
  /usr/local/include/pcl-1.8/pcl/search/impl/organized.hpp
  /usr/local/include/pcl-1.8/pcl/search/impl/search.hpp
@@ -417,6 +482,10 @@ CMakeFiles/localPipeline.dir/localPipeline.cpp.o
  /usr/local/include/pcl-1.8/pcl/search/organized.h
  /usr/local/include/pcl-1.8/pcl/search/pcl_search.h
  /usr/local/include/pcl-1.8/pcl/search/search.h
+ /usr/local/include/pcl-1.8/pcl/segmentation/extract_clusters.h
+ /usr/local/include/pcl-1.8/pcl/segmentation/impl/extract_clusters.hpp
+ /usr/local/include/pcl-1.8/pcl/segmentation/impl/sac_segmentation.hpp
+ /usr/local/include/pcl-1.8/pcl/segmentation/sac_segmentation.h
  /usr/local/include/pcl-1.8/pcl/visualization/area_picking_event.h
  /usr/local/include/pcl-1.8/pcl/visualization/boost.h
  /usr/local/include/pcl-1.8/pcl/visualization/cloud_viewer.h
