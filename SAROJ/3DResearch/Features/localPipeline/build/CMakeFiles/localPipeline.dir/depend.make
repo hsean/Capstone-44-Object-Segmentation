@@ -369,7 +369,9 @@ CMakeFiles/localPipeline.dir/localPipeline.cpp.o: /usr/local/include/pcl-1.8/pcl
 CMakeFiles/localPipeline.dir/localPipeline.cpp.o: /usr/local/include/pcl-1.8/pcl/correspondence.h
 CMakeFiles/localPipeline.dir/localPipeline.cpp.o: /usr/local/include/pcl-1.8/pcl/exceptions.h
 CMakeFiles/localPipeline.dir/localPipeline.cpp.o: /usr/local/include/pcl-1.8/pcl/features/feature.h
+CMakeFiles/localPipeline.dir/localPipeline.cpp.o: /usr/local/include/pcl-1.8/pcl/features/fpfh.h
 CMakeFiles/localPipeline.dir/localPipeline.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/feature.hpp
+CMakeFiles/localPipeline.dir/localPipeline.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/fpfh.hpp
 CMakeFiles/localPipeline.dir/localPipeline.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/integral_image2D.hpp
 CMakeFiles/localPipeline.dir/localPipeline.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/integral_image_normal.hpp
 CMakeFiles/localPipeline.dir/localPipeline.cpp.o: /usr/local/include/pcl-1.8/pcl/features/impl/normal_3d.hpp

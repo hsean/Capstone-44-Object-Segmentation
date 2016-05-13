@@ -1,0 +1,3 @@
+./template_alignment object_templates.txt person.pcd
+#pcl_viewer
+pcl_viewer data/person.pcd output.pcd

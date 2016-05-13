@@ -18,17 +18,25 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_clusters.h>
+#include <pcl/features/fpfh.h>	//FPFH Features
 
-#define PASSTHROUGH_FILTER
-#define VOXEL_FILTER
+// Predefined 
+//#define PASSTHROUGH_FILTER
+//#define VOXEL_FILTER
 //#define OUTLIER_REMOVAL   
 //#define NORMAL_COMPUTE
-//#define GENERAL_NORMAL_COMPUTE
- #define PLANE_REMOVAL
-//#define VFH_DESCRIPTOR
+#define GENERAL_NORMAL_COMPUTE
+//#define PLANE_REMOVAL
+#define VFH_DESCRIPTOR
+#define FPFH_FEATURES
 
 std::string modelFileName;
 //std::string sceneFileName;
+
+// enable variables for time logging
+ boost::posix_time::ptime time_before_execution;
+ boost::posix_time::ptime time_after_execution;
+ boost::posix_time::time_duration difference;
 
 //-------------------------------------------------------
 // Command line parser 
@@ -145,54 +153,7 @@ int main( int argc, char *argv[])
 
 	#endif	
 
-
-     //================================================================================//
-	/* //==========================================================================
-      //POINT CLOUD---> Flitering   
-	  //*** Note this tool is very tricky. You will have to juggle with fine tuning
-	  // The standard deviation and number of points!
-      //c) Statistical Outlier Removal is a technique that removes outliers from 
-      // an image  
-     //===============================================================================//
-      // Create a cloud for voxel filter
-    #ifdef OUTLIER_REMOVAL
-		std::cerr << "PointCloud before OUTLIER filtering: " << cloud->width * cloud->height 
-       << " data points (" << pcl::getFieldsList (*cloud) << ").";
-
-		 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_outlier_removal (new pcl::PointCloud<pcl::PointXYZ>);
-
-		// a pcl::VoxelGrid filter is created with a leaf size of 1cm,
-		// the input data is passed, and the output is computed and stored in cloud_filtered.
-	// Create the filtering object
- 	 	pcl::StatisticalOutlierRemoval<pcl::PointXYZ> outliers;
-  		outliers.setInputCloud (cloud);
-  		outliers.setMeanK (100);
-  		outliers.setStddevMulThresh (0.05);
-  		outliers.filter (*cloud_outlier_removal);
-
-		std::cerr << "PointCloud after OUTLIER filtering: " << cloud_outlier_removal->width *cloud_outlier_removal->height 
-      	 << " data points (" << pcl::getFieldsList (*cloud_outlier_removal) << ").";
-      	
-      	// Set cloud = new cloud voxal filtered
-      	 cloud = cloud_outlier_removal;
-     	// Save to a file
-     	// pcl::io::savePCDFileASCII ("downsampledModel.pcd",*cloud_voxal_filtered);
-		
-	
-	
-		//visualize Filtered Data
-		pcl::visualization::CloudViewer viewer("PCL Viewer");
-		
-		viewer.showCloud(cloud);
-		while(!viewer.wasStopped())
-		{
-			
-		}  
-
-	#endif	
-
-	*/
-	//=============================================================
+    //=============================================================
 	// Remove the plane
 	//===========================================================
 	#ifdef PLANE_REMOVAL
@@ -296,18 +257,31 @@ int main( int argc, char *argv[])
 		//Create an object for the normal estimation and 
 		//compute the normals
 	//	pcl::io::loadPCDFile("milk_cartoon_downsampled.pcd", *cloud);
+		std::cout << "Computing Normals" << std::endl;
+  		
 		pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
+
 		// The AVERAGE_3D_GRADIENT mode creates 6 integral images to 
 		//compute the normals using the cross-product of horizontal and
 		//vertical 3D gradients and computes the normals using the cross-
 		//product between these two gradients.
 
 		pcl::IntegralImageNormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
-             ne.setNormalEstimationMethod (ne.AVERAGE_3D_GRADIENT);
-             ne.setMaxDepthChangeFactor(0.02f);
-             ne.setNormalSmoothingSize(10.0f);
-             ne.setInputCloud(cloud);   		// Load the cloud
-             ne.compute(*normals);				// Compute Normal
+
+		time_before_execution = boost::posix_time::microsec_clock::local_time();  // time before
+	     ne.setNormalEstimationMethod (ne.AVERAGE_3D_GRADIENT);
+	     ne.setMaxDepthChangeFactor(0.02f);
+	     ne.setNormalSmoothingSize(10.0f);
+	     ne.setInputCloud(cloud);   		// Load the cloud
+	     ne.compute(*normals);				// Compute Normal
+	
+		// Time after calculation
+		time_after_execution = boost::posix_time::microsec_clock::local_time(); // time after
+		difference = time_after_execution - time_before_execution;  // get execution time
+		std::cout << std::setw(5) << difference.total_milliseconds() << ": "
+              << "Normal Computation "<< std::endl;
+
+        /*
          //visualize normals
 		pcl::visualization::PCLVisualizer viewer("PCL Viewer");
 		viewer.setBackgroundColor(0.0,0.0,0.5);
@@ -315,7 +289,7 @@ int main( int argc, char *argv[])
 		while(!viewer.wasStopped())
 		{
 			viewer.spinOnce();
-		}  
+		}  */
     #endif
     //=====================================================================================//  
       //================================================================================//
@@ -323,25 +297,34 @@ int main( int argc, char *argv[])
      //===============================================================================//
 	#ifdef GENERAL_NORMAL_COMPUTE	
 		// Output dataset
-		std::cerr << "PointCloud Size before Normal: " << cloud->points.size ()<< ".\n";
-
-		pcl::PointCloud<pcl::Normal>::Ptr general_normals(new pcl::PointCloud<pcl::Normal>);
+		pcl::PointCloud <pcl::Normal>::Ptr gnormals (new pcl::PointCloud <pcl::Normal>);
 		// Create the normal estimation class, and pass the input dataset to it
 		pcl::IntegralImageNormalEstimation<pcl::PointXYZ, pcl::Normal> gne;
+
+		// Timing calculation
+		std::cout << "Computing General Normals" << std::endl;
+  		time_before_execution = boost::posix_time::microsec_clock::local_time();  // time before
+
 		gne.setInputCloud (cloud);
         // Create an empty kdtree representation, and pass it to the normal estimation object.
   		// Its content will be filled inside the object, based on the given input dataset (as no other search surface is given).
   		pcl::search::Search<pcl::PointXYZ>::Ptr gtree = boost::shared_ptr<pcl::search::Search<pcl::PointXYZ> > (new pcl::search::KdTree<pcl::PointXYZ>);
-  		pcl::PointCloud <pcl::Normal>::Ptr normals (new pcl::PointCloud <pcl::Normal>);
+  		
   		pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normal_estimator;
   		normal_estimator.setSearchMethod (gtree);
   		normal_estimator.setInputCloud (cloud);
   		normal_estimator.setKSearch (50);
-  		normal_estimator.compute (*normals);
+  		normal_estimator.compute (*gnormals);
 
- 		std::cerr << "PointCloud Size after Normal: " <<normals->points.size ()<< ".\n";
+		// Time after calculation
+		time_after_execution = boost::posix_time::microsec_clock::local_time(); // time after
+		difference = time_after_execution - time_before_execution;  // get execution time
+		std::cout << std::setw(5) << difference.total_milliseconds() << ": "
+              << " General Normal Computation "<< std::endl;
 
- 	//	pcl::io::savePCDFileASCII ("normals.pcd",*normals);
+        
+ 	//	pcl::io::savePCDFileASCII ("gnormals.pcd",*gnormals);
+     /*	
      	 //visualize normals
 		pcl::visualization::PCLVisualizer viewer("PCL Viewer");
 		viewer.setBackgroundColor(0.0,0.0,0.5);
@@ -349,7 +332,7 @@ int main( int argc, char *argv[])
 		while(!viewer.wasStopped())
 		{
 			viewer.spinOnce();
-		}  
+		}  */
     #endif
     //=====================================================================================//      //POINT CLOUD---> Flitering---> Normals----> VFH Extraction    
       //a) 
@@ -357,15 +340,18 @@ int main( int argc, char *argv[])
      #ifdef VFH_DESCRIPTOR
    		 // Now the normal is computed, we are ready to use VFH
     	 pcl::VFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> vfh;
-   		 vfh.setInputCloud(cloud_pass_filtered);
-     	 vfh.setInputNormals(normals);
+    	 // Timing calculation
+		 std::cout << "Computing VFH" << std::endl;
+  		 time_before_execution = boost::posix_time::microsec_clock::local_time();  // time before
+   		 vfh.setInputCloud(cloud);
+     	 vfh.setInputNormals(gnormals);
 
     	 // Create an empty kdtree representation, and pass it to the FPFH
     	 //estimation object.
     	 //Its content will be filled inside the object, based on the given input dataset
 
-    	 pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>());
-    	 vfh.setSearchMethod(tree);
+    	// pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>());
+    	 vfh.setSearchMethod(gtree);   // Using the last tree
 
      	//Output datasets
      	// Create an empty PointCloud representation, and pass it to vfh
@@ -376,16 +362,65 @@ int main( int argc, char *argv[])
     	vfh.setNormalizeDistance(false);
     	// Compute the features
      	 vfh.compute(*vfhs);
-     
+
+     	 // Time after calculation
+		time_after_execution = boost::posix_time::microsec_clock::local_time(); // time after
+		difference = time_after_execution - time_before_execution;  // get execution time
+		std::cout << std::setw(5) << difference.total_milliseconds() << ": "
+              << " VFH Computation "<< std::endl;
+     /*
      	//VFH Visualization.
 		pcl::visualization::PCLHistogramVisualizer viewer;
 
 		// Set the size of the descriptor beforehand
 		viewer.addFeatureHistogram(*vfhs, 308);
 
-		viewer.spin(); 
+		viewer.spin(); */
 	#endif
 	//===============================================================================//
+	#ifdef FPFH_FEATURES
+		// Create the FPFH estimation class, and pass the input dataset+normals to it
+		pcl::FPFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::FPFHSignature33> fpfh;
+		// Timing calculation
+		std::cout << "Computing FPFH" << std::endl;
+  		time_before_execution = boost::posix_time::microsec_clock::local_time();  // time before
+
+		fpfh.setInputCloud (cloud);
+		fpfh.setInputNormals (gnormals);
+		// alternatively, if cloud is of tpe PointNormal, do fpfh.setInputNormals (cloud);
+
+		fpfh.setSearchMethod (gtree);  // Reuse the same KD-Tree
+
+		// Output datasets
+		pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs (new pcl::PointCloud<pcl::FPFHSignature33> ());
+
+		// Use all neighbors in a sphere of radius 1cm
+		// IMPORTANT: the radius used here has to be larger than the radius used to estimate the surface normals!!!
+		fpfh.setRadiusSearch (0.01);
+
+		// Compute the features
+		fpfh.compute (*fpfhs);
+
+		// Time after calculation
+		time_after_execution = boost::posix_time::microsec_clock::local_time(); // time after
+		difference = time_after_execution - time_before_execution;  // get execution time
+		std::cout << std::setw(5) << difference.total_milliseconds() << ": "
+              << " FPFH Computation "<< std::endl;
+
+
+         /*
+        //VISUALIZE
+		//VFH Visualization.
+		pcl::visualization::PCLHistogramVisualizer viewer;
+
+		// Set the size of the descriptor beforehand
+		viewer.addFeatureHistogram(*fpfhs, 308);
+
+		viewer.spin(); */
+
+	#endif  
+
+//====================================================================================================
 
 	return 0;
 }
