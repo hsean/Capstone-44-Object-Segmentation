@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 2.6)
+
 set(SUBSYS_NAME c44)
 set(SUBSYS_DESC "Application examples/samples that show how PCL works")
 set(SUBSYS_DEPS common geometry io filters sample_consensus segmentation visualization kdtree features surface octree registration keypoints tracking search recognition ml stereo)
