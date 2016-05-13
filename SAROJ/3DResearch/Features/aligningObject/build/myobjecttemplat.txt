@@ -1,2 +1,2 @@
 # A list of point clouds to try aligning
-milk.pcd
+downsampledModel.pcd

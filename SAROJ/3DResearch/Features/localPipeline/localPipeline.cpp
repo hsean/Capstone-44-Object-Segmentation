@@ -22,13 +22,13 @@
 
 // Predefined 
 //#define PASSTHROUGH_FILTER
-//#define VOXEL_FILTER
+#define VOXEL_FILTER
 //#define OUTLIER_REMOVAL   
 //#define NORMAL_COMPUTE
 #define GENERAL_NORMAL_COMPUTE
-//#define PLANE_REMOVAL
-#define VFH_DESCRIPTOR
-#define FPFH_FEATURES
+#define PLANE_REMOVAL
+//#define VFH_DESCRIPTOR
+//#define FPFH_FEATURES
 
 std::string modelFileName;
 //std::string sceneFileName;
@@ -138,7 +138,7 @@ int main( int argc, char *argv[])
       	// Set cloud = new cloud voxal filtered
       	 cloud = cloud_voxal_filtered;  // Indirect Reference
       	// Save to a file
-    //	 pcl::io::savePCDFileASCII ("downsampledModel2.pcd",*cloud_voxal_filtered);
+    	 pcl::io::savePCDFileASCII ("downsampledModel3.pcd",*cloud_voxal_filtered);
 		
 	
 	/*
@@ -203,7 +203,7 @@ int main( int argc, char *argv[])
 		extract.filter (*cloud_f);
 		*cloud_filtered = *cloud_f;  // Removing the value
 		} 
-		/*
+		
 		// Following this is the cluster extraction part. It is very handy to see the size and nature of object
 		  // Creating the KdTree object for the search method of the extraction
   		pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
@@ -233,13 +233,11 @@ int main( int argc, char *argv[])
 		ss << "cloud_cluster_" << j << ".pcd";
 		writer.write<pcl::PointXYZ> (ss.str (), *cloud_cluster, false); //*
 		j++;
-		} */
+		} 
 
 
 		// pcl::io::savePCDFileASCII ("removedPlane2.pcd",*cloud_filtered);
-		
-	
-	
+			
 		//visualize Filtered Data
 		pcl::visualization::CloudViewer viewer("PCL Viewer");
 		
@@ -299,13 +297,13 @@ int main( int argc, char *argv[])
 		// Output dataset
 		pcl::PointCloud <pcl::Normal>::Ptr gnormals (new pcl::PointCloud <pcl::Normal>);
 		// Create the normal estimation class, and pass the input dataset to it
-		pcl::IntegralImageNormalEstimation<pcl::PointXYZ, pcl::Normal> gne;
-
+		//pcl::IntegralImageNormalEstimation<pcl::PointXYZ, pcl::Normal> gne;
+		//pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> gne;
 		// Timing calculation
 		std::cout << "Computing General Normals" << std::endl;
   		time_before_execution = boost::posix_time::microsec_clock::local_time();  // time before
 
-		gne.setInputCloud (cloud);
+		//gne.setInputCloud (cloud);
         // Create an empty kdtree representation, and pass it to the normal estimation object.
   		// Its content will be filled inside the object, based on the given input dataset (as no other search surface is given).
   		pcl::search::Search<pcl::PointXYZ>::Ptr gtree = boost::shared_ptr<pcl::search::Search<pcl::PointXYZ> > (new pcl::search::KdTree<pcl::PointXYZ>);

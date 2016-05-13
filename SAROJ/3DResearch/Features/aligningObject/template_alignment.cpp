@@ -82,10 +82,15 @@ class FeatureCloud
     {
       normals_ = SurfaceNormals::Ptr (new SurfaceNormals);
 
+      pcl::search::Search<pcl::PointXYZ>::Ptr gtree = boost::shared_ptr<pcl::search::Search<pcl::PointXYZ> > (new pcl::search::KdTree<pcl::PointXYZ>);
+    
+
       pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> norm_est;
       norm_est.setInputCloud (xyz_);
-      norm_est.setSearchMethod (search_method_xyz_);
-      norm_est.setRadiusSearch (normal_radius_);
+      norm_est.setSearchMethod (gtree);
+   //   norm_est.setSearchMethod (search_method_xyz_);
+      norm_est.setKSearch (50);
+   //   norm_est.setRadiusSearch (normal_radius_);
       norm_est.compute (*normals_);
     }
 
