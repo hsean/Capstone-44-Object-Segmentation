@@ -1,0 +1,1 @@
+/home/saroj/Capstone/Capstone-44-Object-Segmentation/SAROJ/3DResearch/Features/aligningObject/build/CMakeFiles/template_alignment.dir

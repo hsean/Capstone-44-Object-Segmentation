@@ -1,0 +1,2 @@
+# A list of point clouds to try aligning
+downsampledModel.pcd

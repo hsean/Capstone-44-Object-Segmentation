@@ -220,7 +220,6 @@ main (int argc, char *argv[])
   norm_est.setKSearch (10);
   norm_est.setInputCloud (model);
   norm_est.compute (*model_normals);
-
   norm_est.setInputCloud (scene);
   norm_est.compute (*scene_normals);
 
