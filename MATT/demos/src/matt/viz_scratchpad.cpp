@@ -165,6 +165,47 @@ PointCloud<PointXYZ>::Ptr xyzcloud;
 ColorHandlerPtr color_handler;
 GeometryHandlerPtr geometry_handler;
 
+void drawConvexHull(SegmentationPipeline& pipeline, int viewport){
+  MomentOfInertiaEstimation<PointXYZ> feature_extractor;
+  feature_extractor.setInputCloud((pipeline.getConvexHull()));
+  feature_extractor.compute();
+  
+  pcl::PointXYZ min_point_OBB,
+  max_point_OBB,
+  position_OBB;
+  
+  Eigen::Matrix3f rotational_matrix_OBB;
+  
+  
+  feature_extractor.getOBB (min_point_OBB,
+                            max_point_OBB,
+                            position_OBB,
+                            rotational_matrix_OBB);
+  
+  Vector3f position(position_OBB.x,
+                    position_OBB.y,
+                    position_OBB.z);
+  
+  Quaternionf hullOrientation(rotational_matrix_OBB);
+  
+  p->addCube(position,
+             hullOrientation,
+             max_point_OBB.x - min_point_OBB.x,
+             max_point_OBB.y - min_point_OBB.y,
+             max_point_OBB.z - min_point_OBB.z,
+             //0.58,0.73,0.40,
+             "convex hull " + viewport,
+             viewport);
+  
+  //    color_handler.reset (new pcl::visualization::PointCloudColorHandlerCustom<Cloud3D> (pipeline.planeCloud, 0.0, 0.0, 255.0));
+  //p->addPointCloud<pcl::PointXYZ> (_xyz_cloud, geometry_handler, color_handler, "plane", viewport);
+  //pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color(pipeline.planeCloud, 0, 0, 255);
+  
+  //p->addPointCloud<pcl::PointXYZ> (pipeline.planeCloud, single_color, "sample cloud" + viewport,viewport);
+  
+}
+
+
 void
 pp_callback (const pcl::visualization::PointPickingEvent& event, void* cookie)
 {
@@ -264,8 +305,11 @@ main (int argc, char** argv)
   poseparam &= pcl::console::parse_multiple_3x_arguments (argc, argv, "-orientation", pose_roll, pose_pitch, pose_yaw);
   
   std::vector<int> psize;
-  pcl::console::parse_multiple_arguments (argc, argv, "-ps", psize);
-  
+  //pcl::console::parse_multiple_arguments (argc, argv, "-ps", psize);
+  psize.push_back(2.0);
+  for (int i = 0; i < 3; i++)
+    psize.push_back(4.0);
+
   std::vector<double> opaque;
   pcl::console::parse_multiple_arguments (argc, argv, "-opaque", opaque);
   
@@ -306,8 +350,8 @@ main (int argc, char** argv)
     if (use_immediate_rendering)
       print_highlight ("Using immediate mode rendering.\n");
   }
-  const unsigned numRows = 2;
-  const unsigned numCols = 2;
+  const unsigned numRows = 1;
+  const unsigned numCols = 4;
   const unsigned numIterations = numRows * numCols;
   // Multiview enabled?
   int y_s = 0, x_s = 0;
@@ -337,9 +381,9 @@ main (int argc, char** argv)
   }
   
   // Fix invalid multiple arguments
-  if (psize.size () != p_file_indices.size () && psize.size () > 0)
-    for (size_t i = psize.size (); i < p_file_indices.size (); ++i)
-      psize.push_back (1);
+//  if (psize.size () != p_file_indices.size () && psize.size () > 0)
+//    for (size_t i = psize.size (); i < p_file_indices.size (); ++i)
+//      psize.push_back (1);
   if (opaque.size () != p_file_indices.size () && opaque.size () > 0)
     for (size_t i = opaque.size (); i < p_file_indices.size (); ++i)
       opaque.push_back (1.0);
@@ -358,35 +402,30 @@ main (int argc, char** argv)
   // Load the data files
   pcl::PCDReader pcd;
   pcl::console::TicToc tt;
-  ColorHandlerPtr color_handler;
-  GeometryHandlerPtr geometry_handler;
-  
+//  ColorHandlerPtr color_handler;
+//  GeometryHandlerPtr geometry_handler;
+//  
   
   
   pcl::PCLPointCloud2::Ptr cloud;
   Cloud3D::Ptr xyzCloud;
   cloud.reset (new pcl::PCLPointCloud2);
+  
   xyzCloud.reset(new Cloud3D);
   Eigen::Vector4f origin;
   Eigen::Quaternionf orientation;
   int version;
   
-//  if (pcd.read (argv[p_file_indices.at (0)], *cloud, origin, orientation, version) < 0)
-//    return (-1);
-//  
+  //  if (pcd.read (argv[p_file_indices.at (0)], *cloud, origin, orientation, version) < 0)
+  //    return (-1);
+  //
   // Go through PCD files
   tt.tic ();
   
   print_highlight (stderr, "Loading "); print_value (stderr, "%s ", argv[p_file_indices.at (0)]);
   
   
-  
-  
   std::stringstream cloud_name;
-  
-  
-  
-  
   
   
   // Create the PCLVisualizer object here on the first encountered XYZ file
@@ -411,17 +450,49 @@ main (int argc, char** argv)
   
   // Multiview enabled?
   
+  p->setRepresentationToWireframeForAllActors();
   
-  float voxelSize = 0.006;
+  float voxelSize = 0.007;
   float sampleSize = 50;
   
   float stdDev = 1.0;
   float iterationDivisor = 1.0;
   //float iterationDivisor = 1.0;
   boost::posix_time::time_duration runTime;
-  auto startTime = boost::posix_time::microsec_clock::local_time();
+  if (pcd.read (argv[p_file_indices.at (0)], *cloud, origin, orientation, version) < 0)
+    return (-1);
+  if (cloud->width * cloud->height == 0)
+  {
+    print_error ("[error: no points found!]\n");
+    return (-1);
+  }
+  //      color_handler.reset (new pcl::visualization::PointCloudColorHandlerRandom<pcl::PCLPointCloud2> (cloud));
   
-  for (int i = 0; i < 1; i++){
+  PointCloud<PointXYZ>::Ptr xyzCloudCopy(new PointCloud<PointXYZ>);
+  fromPCLPointCloud2(*cloud, *xyzCloud);
+  copyPointCloud(*xyzCloud, *xyzCloudCopy);
+  auto startTime = boost::posix_time::microsec_clock::local_time();
+  SegmentationPipeline pipeline(xyzCloud,
+                                voxelSize,
+                                sampleSize,
+                                stdDev,
+                                iterationDivisor);
+  
+  if(!pipeline.performSegmentation(0.05)){
+    print_error("couldnt segment cloud");
+    return (-1);
+
+  }
+//  double pcl_r = 246;
+//  double pcl_g = 135;
+//  double pcl_b = 34;
+  double pcl_r = 43;
+  double pcl_g = 78;
+  double pcl_b = 114;
+  
+  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color(pipeline.denoisedCloud, pcl_r, pcl_g, pcl_b);
+  double big_point_size = 3.0;
+  for (int i = 0; i < 4; i++){
     p->createViewPort (k * x_step, l * y_step, (k + 1) * x_step, (l + 1) * y_step, viewport);
     k++;
     if (k >= x_s)
@@ -432,56 +503,39 @@ main (int argc, char** argv)
 
     
     
-    if (i == 0){
-      if (pcd.read (argv[p_file_indices.at (0)], *cloud, origin, orientation, version) < 0)
-        return (-1);
-      if (cloud->width * cloud->height == 0)
-      {
-        print_error ("[error: no points found!]\n");
-        return (-1);
-      }
-      color_handler.reset (new pcl::visualization::PointCloudColorHandlerRandom<pcl::PCLPointCloud2> (cloud));
-
-      cloud_name << argv[p_file_indices.at (0)] ;
+    
+    if (i == 2){
+      pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color2(xyzCloudCopy, pcl_r, pcl_g, pcl_b);
       
-      // Add the dataset with a XYZ and a random handler
-      geometry_handler.reset (new pcl::visualization::PointCloudGeometryHandlerXYZ<pcl::PCLPointCloud2> (cloud));
-      // Add the cloud to the renderer
-      p->addPointCloud (cloud, geometry_handler, color_handler, origin, orientation, "original", viewport);
+      p->addPointCloud<pcl::PointXYZ> (xyzCloudCopy, single_color2, "original", viewport);
+      //p->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2.0, "original");
 
-//      fromPCLPointCloud2(*cloud, *xyzCloud);      
-//      pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color(xyzCloud, 43, 78, 114);
-//      p->addPointCloud<pcl::PointXYZ> (xyzCloud, single_color, "original", viewport);
+    } else if (i == 3){
       
+      
+      p->addPointCloud<pcl::PointXYZ> (pipeline.denoisedCloud, single_color, "downsampled",viewport);
+      p->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, big_point_size,"downsampled");
+    } else if (i == 0){
+      double _r = 246;
+      double _g = 135;
+      double _b = 34;
+
+      pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color3(pipeline.cloudMinusPrism, _r, _g, _b);
+      pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color4(pipeline.planeCloud, _r, _g, _b);
+      //drawConvexHull(pipeline, viewport);
+      p->addPointCloud<pcl::PointXYZ> (pipeline.cloudMinusPrism, single_color3, "downsampled 2",viewport);
+      p->addPointCloud<pcl::PointXYZ> (pipeline.planeCloud, single_color4, "plane",viewport);
+      p->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, big_point_size,"downsampled 2");
+      p->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, big_point_size,"plane");
     } else if (i == 1){
-      Cloud3D::Ptr denoisedCloud(xyzCloud);
-      passthroughFilter(denoisedCloud,
-                        denoisedCloud,
-                        "z", 0.0, 1.5);
-      voxelFilter(denoisedCloud, denoisedCloud, 0.012);
-      pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color(denoisedCloud, 43, 78, 114);
-      p->addPointCloud<pcl::PointXYZ> (denoisedCloud, single_color, "downsampled",viewport);
       
-    } else if (i == 2){
-      continue;
-      SegmentationPipeline pipeline(xyzCloud,
-                                    voxelSize,
-                                    sampleSize,
-                                    stdDev,
-                                    iterationDivisor);
-
-      if(!pipeline.performSegmentation(0.05)){
-        print_error("couldnt segment cloud");
-        return (-1);
-      
-      }
       runTime = boost::posix_time::microsec_clock::local_time() - startTime;
       for (int j = 0; j < pipeline.objectCount(); j++){
         auto obj = pipeline.getObjectAtIndex(j);
         
-        pcl::PCDWriter writer;
-        pcl::io::savePCDFileASCII ("hand_low_res.pcd", *obj.point_cloud);
-        
+        //        pcl::PCDWriter writer;
+        //        pcl::io::savePCDFileASCII ("hand_low_res.pcd", *obj.point_cloud);
+        //
         
         const auto bbox = obj.getBoundingBox();
         auto centroid = bbox.centroid;
@@ -491,15 +545,38 @@ main (int argc, char** argv)
         Eigen::Translation3f translation(centroid.x(),
                                          centroid.y(),
                                          centroid.z());
+        
         Eigen::AngleAxisf rotation(bbox.rotational_matrix_OBB);
         
+        Vector3f position(bbox.position_OBB.x,
+                          bbox.position_OBB.y,
+                          bbox.position_OBB.z);
+
+        Quaternionf bboxOrientation(bbox.rotational_matrix_OBB);
         
-        std::stringstream boxName;
+        //std::stringstream ss;
+        cloud_name.clear();
+        cloud_name << "homer " << j;
+        p->addCube(position,
+                   bboxOrientation,
+                   bbox.max_point_OBB.x - bbox.min_point_OBB.x,
+                   bbox.max_point_OBB.y - bbox.min_point_OBB.y,
+                   bbox.max_point_OBB.z - bbox.min_point_OBB.z,
+                   255,0,0,
+                   cloud_name.str(),
+                   viewport);
         
-        boxName << "oriented bounding box";
         
+        /*
+        //std::stringstream boxName;
+        
+        //boxName << "oriented bounding box";
+        //break;
+ 
         if (j == 0){
+          
           Vector3f normal = -pipeline.getPlaneNormal();
+          
           float nDotV = normal.dot(normal);
           float t = (pipeline.getPlaneOffset() - normal.dot(centroid))/nDotV;
           PointXYZ centroidProjectedOntoPlane(
@@ -550,9 +627,9 @@ main (int argc, char** argv)
                      1.0,0.0,0.0,
                      lineName.str(),viewport);
         }
-        
+        */
         float r = 1.0, g = 1.0, b = 1.0;
-        
+        /*
         if (j == 0){
           r = 0.0;
           g = 255.0;
@@ -561,206 +638,68 @@ main (int argc, char** argv)
           r = 255.0;
           g = 255.0;
           b = 0.0;
+        } else if (j == 2){
+          r = 0.0;
+          g = 255.0;
+          b = 0.0;
         } else {
           r = 255.0;
           g = 0.0;
           b = 255.0;
         }
-        //manually draw the lines for the bounding box
-        {
-          int i;
-          
-          
-          std::stringstream lineName;
-          PointXYZ p0, p1;
-          auto corners = bbox.getCorners();
-          
-          for (i = 0; i < 3; i++){
-            lineName << "line_" << i << "_to_" << (i+1) << "_" << j;
-            
-            p->addLine(corners[i],
-                       corners[i+1], r,g,b,lineName.str(),viewport);
-            lineName.clear();
-          }
-          
-          lineName << "line_" << "_3_to_0_"  << j;
-          p->addLine(corners[3],
-                     corners[0], r,g,b,lineName.str(),viewport);
-          
-          for (i = 4; i < 7; i++){
-            lineName << "line_" << "_" << i << "_to_" << (i+1) << "_" << j;
-            p->addLine(corners[i],
-                       corners[i+1], r,g,b,lineName.str(),viewport);
-            lineName.clear();
-          }
-          lineName << "line_" << "_7_to_4_" << j;
-          p->addLine(corners[7],
-                     corners[4], r,g,b,lineName.str(),viewport);
-          
-          for (i = 0; i < 4; i++){
-            lineName << "line_" << "_" << i << "_to_" << (i+4) << "_" << j;
-            p->addLine(corners[i],
-                       corners[i+4], r,g,b,lineName.str(),viewport);
-            lineName.clear();
-          }
-          
-          
+        */
+        if (j == 0){
+          r = 39;
+          g = 144;
+          b = 176.0;
+        } else if (j == 1) {
+          r = 246;
+          g = 135;
+          b = 34;
+        } else if (j == 2){
+          r = 148;
+          g = 186.0;
+          b = 101.0;
+        } else {
+          r = 43.0;
+          g = 78.0;
+          b = 114.0;
         }
         
-        
-        //p->setRepresentationToWireframeForAllActors();
         
         
         
         cloud_name << argv[p_file_indices.at (0)] << "_obj_" << j;
-        pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color(pipeline.planeCloud, r, g, b);
         
         // Add the dataset with a XYZ and a random handler
         //geometry_handler.reset (new pcl::visualization::PointCloudGeometryHandlerXYZ<pcl::PCLPointCloud2> (cloud));
         // Add the cloud to the renderer
-        
-        p->addPointCloud<pcl::PointXYZ> (obj.point_cloud, single_color, cloud_name.str ());
+        pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color3(obj.point_cloud, r, g, b);
+        p->addPointCloud<pcl::PointXYZ> (obj.point_cloud, single_color3, cloud_name.str (),viewport);
+        p->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, big_point_size,cloud_name.str());
+
         cloud_name.clear();
-        
-        
         
       }
       
-      
-      
-      
-      MomentOfInertiaEstimation<PointXYZ> feature_extractor;
-      feature_extractor.setInputCloud((pipeline.getConvexHull()));
-      feature_extractor.compute();
-      
-      pcl::PointXYZ min_point_OBB,
-      max_point_OBB,
-      position_OBB;
-      
-      Eigen::Matrix3f rotational_matrix_OBB;
-      
-      
-      feature_extractor.getOBB (min_point_OBB,
-                                max_point_OBB,
-                                position_OBB,
-                                rotational_matrix_OBB);
-      
-      Vector3f position(position_OBB.x,
-                        position_OBB.y,
-                        position_OBB.z);
-      
-      Quaternionf hullOrientation(rotational_matrix_OBB);
-      
-      p->addCube(position,
-                 hullOrientation,
-                 max_point_OBB.x - min_point_OBB.x,
-                 max_point_OBB.y - min_point_OBB.y,
-                 max_point_OBB.z - min_point_OBB.z,
-                 "convex hull",
-                 viewport);
-      //p->setRepresentationToWireframeForAllActors();
-      //    color_handler.reset (new pcl::visualization::PointCloudColorHandlerCustom<Cloud3D> (pipeline.planeCloud, 0.0, 0.0, 255.0));
-      //p->addPointCloud<pcl::PointXYZ> (_xyz_cloud, geometry_handler, color_handler, "plane", viewport);
-      pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color(pipeline.planeCloud, 0, 0, 255);
-      
-      p->addPointCloud<pcl::PointXYZ> (pipeline.planeCloud, single_color, "sample cloud");
+      p->setRepresentationToWireframeForAllActors();
+      drawConvexHull(pipeline, viewport);
+      drawConvexHull(pipeline, viewport-1);
       
     } else {
-//      std::stringstream s;
-//      s << "could not find plane on iteration; exiting";
-//      std::cout << s.str() << std::endl;
-//      return (-1);
+      break;
     }
-    viewport++;
+    
   }
   
+
   
-  //p->addPointCloud (cloud, geometry_handler, color_handler, origin, orientation, cloud_name.str (), viewport);
   
   
-  // Add every dimension as a possible color
-  //  if (!fcolorparam)
-  //  {
-  //    int rgb_idx = 0;
-  //    int label_idx = 0;
-  //    for (size_t f = 0; f < cloud->fields.size (); ++f)
-  //    {
-  //      if (cloud->fields[f].name == "rgb" || cloud->fields[f].name == "rgba")
-  //      {
-  //        rgb_idx = f + 1;
-  //        color_handler.reset (new pcl::visualization::PointCloudColorHandlerRGBField<pcl::PCLPointCloud2> (cloud));
-  //      }
-  //      //          else if (cloud->fields[f].name == "label")
-  //      //          {
-  //      //            label_idx = f + 1;
-  //      //            color_handler.reset (new pcl::visualization::PointCloudColorHandlerLabelField<pcl::PCLPointCloud2> (cloud, !use_optimal_l_colors));
-  //      //          }
-  //      else
-  //      {
-  //        if (!isValidFieldName (cloud->fields[f].name))
-  //          continue;
-  //        color_handler.reset (new pcl::visualization::PointCloudColorHandlerGenericField<pcl::PCLPointCloud2> (cloud, cloud->fields[f].name));
-  //      }
-  //      // Add the cloud to the renderer
-  //      //p->addPointCloud<pcl::PointXYZ> (cloud_xyz, color_handler, cloud_name.str (), viewport);
-  //      p->addPointCloud (cloud, color_handler, origin, orientation, cloud_name.str (), viewport);
-  //    }
-  //    // Set RGB color handler or label handler as default
-  //    p->updateColorHandlerIndex (cloud_name.str (), (rgb_idx ? rgb_idx : label_idx));
-  //  }
-  
-  // Additionally, add normals as a handler
-  geometry_handler.reset (new pcl::visualization::PointCloudGeometryHandlerSurfaceNormal<pcl::PCLPointCloud2> (cloud));
-  if (geometry_handler->isCapable ())
-    //p->addPointCloud<pcl::PointXYZ> (cloud_xyz, geometry_handler, cloud_name.str (), viewport);
-    p->addPointCloud (cloud, geometry_handler, origin, orientation, cloud_name.str (), viewport);
-  
-  if (use_immediate_rendering)
-    // Set immediate mode rendering ON
-    p->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_IMMEDIATE_RENDERING, 1.0, cloud_name.str ());
-  
-  // Change the cloud rendered point size
-  
-  // Reset camera viewpoint to center of cloud if camera parameters were not passed manually and this is the first loaded cloud
-  if (!p->cameraParamsSet () && !p->cameraFileLoaded ())
-  {
-    p->resetCameraViewpoint (cloud_name.str ());
-    p->resetCamera ();
-  }
-  
-  print_info ("[done, "); print_value ("%g", tt.toc ()); print_info (" ms : "); print_value ("%u", cloud->width * cloud->height); print_info (" points]\n");
-  print_info ("Available dimensions: "); print_value ("%s\n", pcl::getFieldsList (*cloud).c_str ());
-  if (p->cameraFileLoaded ())
-    print_info ("Camera parameters restored from %s.\n", p->getCameraFile ().c_str ());
-  if (!mview && p)
-  {
-    std::string str;
-    if (!p_file_indices.empty ())
-      str = std::string (argv[p_file_indices.at (0)]);
-    else if (!vtk_file_indices.empty ())
-      str = std::string (argv[vtk_file_indices.at (0)]);
-    
-    for (size_t i = 1; i < p_file_indices.size (); ++i)
-      str += ", " + std::string (argv[p_file_indices.at (i)]);
-    
-    for (size_t i = 1; i < vtk_file_indices.size (); ++i)
-      str += ", " + std::string (argv[vtk_file_indices.at (i)]);
-    
-    p->addText (str, 5, 5, 10, 1.0, 1.0, 1.0, "text_allnames");
-  }
   
   if (p)
     p->setBackgroundColor (bcolor[0], bcolor[1], bcolor[2]);
   // Read axes settings
-  double axes  = 0.0;
-  pcl::console::parse_argument (argc, argv, "-ax", axes);
-  if (axes != 0.0 && p)
-  {
-    float ax_x = 0.0, ax_y = 0.0, ax_z = 0.0;
-    pcl::console::parse_3x_arguments (argc, argv, "-ax_pos", ax_x, ax_y, ax_z);
-    // Draw XYZ axes if command-line enabled
-    p->addCoordinateSystem (axes, ax_x, ax_y, ax_z, "global");
-  }
   
   // Clean up the memory used by the binary blob
   // Note: avoid resetting the cloud, otherwise the PointPicking callback will fail

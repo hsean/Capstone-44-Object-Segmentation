@@ -14,10 +14,22 @@ using namespace c44;
 using namespace pcl;
 using namespace fusion;
 
-BoundingBox GraspableObject::getBoundingBox() const{
+BoundingBox RigidBody::getBoundingBox() const{
   return BoundingBox(this->point_cloud);
 }
 
+RigidBody::RigidBody(Cloud3D::Ptr cloud,
+                     float normal_search_radius) :
+point_cloud(cloud),
+normal_search_radius(normal_search_radius),
+normal_cloud(new PointCloud<Normal>){
+  pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normalEstimation;
+  normalEstimation.setInputCloud(point_cloud);
+  normalEstimation.setRadiusSearch(normal_search_radius);
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
+  normalEstimation.setSearchMethod(kdtree);
+  normalEstimation.compute(*normal_cloud);
+}
 
 
 template <>

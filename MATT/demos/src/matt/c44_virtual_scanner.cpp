@@ -486,10 +486,10 @@ main (int argc, char** argv)
       mls.setUpsamplingStepSize (0.0015);
       PointCloud<PointXYZ>::Ptr cloud_smoothed (new PointCloud<PointXYZ> ());
       mls.process (*cloud_smoothed);
-      c44::RigidBody model(cloud_smoothed);
+      c44::RigidBody model(cloud_smoothed,0.03);
       descriptor = model.computeDescriptor<dflt_est_method>();
     } else {
-      c44::RigidBody model(xyz_cloud);
+      c44::RigidBody model(xyz_cloud,0.03);
       descriptor = model.computeDescriptor<dflt_est_method>();
     }
     hist_fname = ss.str () + "/" + seq + ".pcd" + fileExt<dflt_est_method>();

@@ -58,6 +58,8 @@ namespace c44{
     template <EstimationMethod E>
     static size_t descriptorSize()
     {
+      //some template madness to determine the size of the histogram
+      // associated with this estimation method
       return fusion::result_of::value_at<c44::type_vec, boost::mpl::int_<E>>::type::descriptorSize();
     }
 
@@ -72,17 +74,20 @@ namespace c44{
               float normal_search_radius) :
     coefficients(mc), point_cloud(cloud), normal_cloud(normals),
     normal_search_radius(normal_search_radius){};
-    RigidBody(PointCloud<PointXYZ>::Ptr cloud,
+    RigidBody(Cloud3D::Ptr cloud,
               PointCloud<Normal>::Ptr normals,
               float normal_search_radius) :
-                point_cloud(cloud), normal_cloud(normals),
-                normal_search_radius(normal_search_radius)
+              point_cloud(cloud), normal_cloud(normals),
+              normal_search_radius(normal_search_radius)
     {};
+    
+    RigidBody(Cloud3D::Ptr cloud, float normal_search_radius);
 
+    
     template<EstimationMethod E>
     typename PointCloud<typename fusion::result_of::value_at<type_vec, mpl::int_<E>>::type>::Ptr
     computeDescriptor() const;
-
+    BoundingBox getBoundingBox() const;
   };
 
   
@@ -97,16 +102,7 @@ namespace c44{
   };
   
 
-  struct GraspableObject : RigidBody{
-  public:
-    GraspableObject(ModelCoefficients mc,
-                    Cloud3D::Ptr points,
-                    PointCloud<Normal>::Ptr normals) :
-    RigidBody(mc,points,normals,0.03){}
-    
-    BoundingBox getBoundingBox() const;
-    
-  };
+  
 }
 
 #endif

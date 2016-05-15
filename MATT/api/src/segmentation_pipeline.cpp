@@ -16,8 +16,9 @@ SegmentationPipeline::SegmentationPipeline(Cloud3D::Ptr rawCloud,
                                            float iterationDivisor) :
 
         normals(new PointCloud<Normal>),
-        objectCloud(new Cloud3D),
+//objectCloud(new Cloud3D),
         denoisedCloud(rawCloud),
+        cloudMinusPrism(new Cloud3D),
         iterationDivisor(iterationDivisor),
         convexHull (new Cloud3D),
         planeCloud(new Cloud3D),
@@ -52,9 +53,9 @@ SegmentationPipeline::SegmentationPipeline(Cloud3D::Ptr rawCloud,
 }
 
 
-bool SegmentationPipeline::performSegmentation(){
+bool SegmentationPipeline::performSegmentation(float cluster_tolerance){
     if (extractPrism()){
-      clusterize();
+      clusterize(cluster_tolerance);
         //this is to support extracting multiple objects
 //      int max = 3;
 //      bool stillFindingStuff = true;
@@ -125,21 +126,21 @@ bool SegmentationPipeline::extractPrism()
         ExtractIndices<PointXYZ> extractor;
         extractor.setInputCloud(denoisedCloud);
         extractor.setIndices(objectIndices);
-        extractor.filter(*objectCloud);
+        extractor.filter(*cloudMinusPrism);
 
         ExtractIndices<Normal> normalExtractor;
         normalExtractor.setInputCloud (normals);
         normalExtractor.setIndices(objectIndices);
         normalExtractor.filter (*normals);
 
-        return objectCloud->points.size() > 0;
+        return cloudMinusPrism->points.size() > 0;
     } else{
         return false;
     }
 }
 
 
-
+/*
 bool SegmentationPipeline::extractGraspableObject(SacModel model)
 {
   
@@ -156,6 +157,7 @@ bool SegmentationPipeline::extractGraspableObject(SacModel model)
               denoisedObjectCloud,
               sampleSize, stdDev);
   clusterize();
+  
   
   normals.reset(new PointCloud<Normal>);
 
@@ -210,15 +212,16 @@ bool SegmentationPipeline::extractGraspableObject(SacModel model)
 
 
 }
+*/
 
-
-void SegmentationPipeline::clusterize(){
+void SegmentationPipeline::clusterize(float cluster_tolerance){
   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+  objectCloud = Cloud3D::Ptr(cloudMinusPrism);
   tree->setInputCloud (objectCloud);
   
   std::vector<pcl::PointIndices> cluster_indices;
   pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-  ec.setClusterTolerance (0.2);
+  ec.setClusterTolerance (cluster_tolerance);
   ec.setMinClusterSize (100);
   ec.setMaxClusterSize (125000);
   ec.setSearchMethod (tree);
