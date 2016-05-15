@@ -12,6 +12,12 @@
 #include <pcl/features/fpfh.h>
 #include <pcl/registration/ia_ransac.h>
 
+
+// enable variables for time logging
+ boost::posix_time::ptime time_before_execution;
+ boost::posix_time::ptime time_after_execution;
+ boost::posix_time::time_duration difference;
+
 class FeatureCloud
 {
   public:
@@ -228,6 +234,7 @@ class TemplateAlignment
 int
 main (int argc, char **argv)
 {
+    time_before_execution = boost::posix_time::microsec_clock::local_time();  // time before
   if (argc < 3)
   {
     printf ("No target PCD file given!\n");
@@ -308,6 +315,13 @@ main (int argc, char **argv)
   // Save the aligned template for visualization
   pcl::PointCloud<pcl::PointXYZ> transformed_cloud;
   pcl::transformPointCloud (*best_template.getPointCloud (), transformed_cloud, best_alignment.final_transformation);
+
+// Time after calculation
+    time_after_execution = boost::posix_time::microsec_clock::local_time(); // time after
+    difference = time_after_execution - time_before_execution;  // get execution time
+    std::cout << std::setw(5) << difference.total_milliseconds() << ": "
+              << "Total Execution Time"<< std::endl;
+
   pcl::io::savePCDFileBinary ("output.pcd", transformed_cloud);
 
   return (0);

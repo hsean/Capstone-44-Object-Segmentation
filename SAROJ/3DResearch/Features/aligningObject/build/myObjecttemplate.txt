@@ -1,2 +1,2 @@
 # A list of point clouds to try aligning
-downsampledModel.pcd
+downsampled_InMoove_hand_Model.pcd
