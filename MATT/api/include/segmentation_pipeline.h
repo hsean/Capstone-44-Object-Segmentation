@@ -93,8 +93,6 @@ namespace c44{
   public:
     static const float normal_search_radius;
     
-    
-    
     SegmentationPipeline(Cloud3D::Ptr rawCloud,
                          float voxelSize,
                          float sampleSize,

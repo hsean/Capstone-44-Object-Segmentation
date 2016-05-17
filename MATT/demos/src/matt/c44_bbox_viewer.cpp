@@ -58,8 +58,6 @@
 #include <vtkPolyDataReader.h>
 #include <vtkTransform.h>
 #include <pcl/common/angles.h>
-
-
 #include "segmentation_pipeline.h"
 
 using namespace pcl::console;
@@ -486,7 +484,7 @@ main (int argc, char** argv)
                     float accuracy;
                     const auto bbox = obj.getBoundingBox();
                     if (goldenModel == nullptr){
-                        goldenModel = new BoundingBox(obj.pointCloud);
+                        goldenModel = new BoundingBox(obj.point_cloud);
                         accuracy = goldenModel->accuracyWRT(*goldenModel);
                     } else{
                         accuracy = bbox.accuracyWRT(*goldenModel);
@@ -576,8 +574,8 @@ main (int argc, char** argv)
                     );
 
 
-                    auto Θ = acosf(reverseLOS.normalized().dot(-normal));
-                    auto height = -reverseLOS.norm() * cosf(Θ);
+                    auto theta = acosf(reverseLOS.normalized().dot(-normal));
+                    auto height = -reverseLOS.norm() * cosf(theta);
                     auto heightVec = height*normal;
                     PointXYZ cameraHeightAbovePlane(
                             centroidProjectedOntoPlane.x + heightVec.x(),
