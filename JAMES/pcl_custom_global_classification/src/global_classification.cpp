@@ -20,7 +20,7 @@
 
 template<template<class > class DistT, typename PointT, typename FeatureT>
 void
-segmentAndClassify (typename pcl::rec_3d_framework::GlobalNNPipeline<DistT, PointT, FeatureT> & global, std::string scene_path)
+segmentAndClassify (typename pcl::rec_3d_framework::GlobalNNPipeline<DistT, PointT, FeatureT> & global,  std::string scene_path)
 {
     //get point cloud from the kinect, segment it and classify it
     //OpenNIFrameSource::OpenNIFrameSource camera;
@@ -47,7 +47,7 @@ std::cout << "Reading Point Cloud, width: " << cloud_scene->width << " height: "
     size_t previous_categories_size = 0;
 
     float Z_DIST_ = 1.5f;
-    float text_scale = 0.03f;
+    float text_scale = 0.02f;
 
 
     //pcl::ScopeTime frame_process ("Global frame processing ------------- ");
@@ -66,7 +66,7 @@ std::cout << "Reading Point Cloud, width: " << cloud_scene->width << " height: "
     dps.setObjectMinHeight (0.02);
     dps.setMinClusterSize (30);
     dps.setWSize (9);
-    dps.setDistanceBetweenClusters (0.5f);
+    dps.setDistanceBetweenClusters (0.05f);
     dps.setObjectMaxHeight(0.5);
 
     std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> clusters;
@@ -76,8 +76,8 @@ std::cout << "Reading Point Cloud, width: " << cloud_scene->width << " height: "
     dps.getIndicesClusters (indices);
 //std::cout << "Indicies recieved: " << indices.empty() << std::endl;
     Eigen::Vector4f table_plane_;
-    Eigen::Vector3f normal_plane_ = Eigen::Vector3f (table_plane_[0], table_plane_[1], table_plane_[2]);
     dps.getTableCoefficients (table_plane_);
+    Eigen::Vector3f normal_plane_ = Eigen::Vector3f (table_plane_[0], table_plane_[1], table_plane_[2]);
 
     pcl::console::print_info ("[Segmentation done, "); pcl::console::print_value ("%g", tt_seg.toc ()); pcl::console::print_info (" ms] \n");
 
@@ -104,7 +104,7 @@ std::cout << "Reading Point Cloud, width: " << cloud_scene->width << " height: "
     //    }
 
     previous_categories_size = 0;
-    float dist_ = 0.03f;
+    float dist_ = 50.0f;
 
     for (size_t i = 0; i < clusters.size (); i++)
     {
@@ -148,14 +148,18 @@ std::cout << "Reading Point Cloud, width: " << cloud_scene->width << " height: "
 //std::cout << "Done... found " << categories.size() << " categories" <<  std::endl;
       for (size_t kk = 0; kk < categories.size (); kk++)
       {
-        pcl::PointXYZ pos;
-        pos.x = centroid[0] + normal_plane_[0] * static_cast<float> (kk + 1) * dist_;
-        pos.y = centroid[1] + normal_plane_[1] * static_cast<float> (kk + 1) * dist_;
-        pos.z = centroid[2] + normal_plane_[2] * static_cast<float> (kk + 1) * dist_;
+        pcl::PointXYZ pos; //normal_plane_[0]
+//std::cout << "x: centroid (" << centroid[0] << " + " << normal_plane_[0] << " * (" << kk  << "+ 1)" << " * " << dist_ << std::endl;
+        pos.x = centroid[0] + normal_plane_[0] * (static_cast<float> (kk + 1) * dist_);
+//std::cout << "y: centroid (" << centroid[1] << " + " << normal_plane_[1] << " * (" << kk  << "+ 1)" << " * " << dist_ << std::endl;
+        pos.y = centroid[1] + normal_plane_[0] * (static_cast<float> (kk + 1) * dist_);
+//std::cout << "z: centroid (" << centroid[2] << " + " << normal_plane_[2] << " * (" << kk  << "+ 1)" << " * " << dist_ << std::endl;
+        pos.z = centroid[2] + normal_plane_[0] * (static_cast<float> (kk + 1) * dist_);
+//std::cout << "Displaying text at [x, y, z]: [" << pos.x << ", " << pos.y << ", " << pos.z << "]" << std::endl;
 
         std::ostringstream prob_str;
         prob_str.precision (1);
-        prob_str << categories[kk] << " [" << conf[kk] << "]";
+        prob_str << "cluster[" << i << "]: " << categories[kk] << " [" << conf[kk] << "]";
 std::cout << "Cluster: " << cluster_name.str() << ", Category[conf]-" << kk << ": " << prob_str.str() << endl;
 
         std::stringstream cluster_text;
