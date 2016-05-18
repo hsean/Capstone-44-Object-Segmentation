@@ -17,7 +17,7 @@
 #define LINUX
 #define DEBUG
 //#define DEBUG_PLANE
-#define SAVE_PCD
+//d#define SAVE_PCD
 #define Z_CUTOFF 2.5     // 1 meter from camera
 
 // To make it easier to switch between PointXYZ and PointXYZRGB
@@ -119,6 +119,7 @@ bool ros_callback(
     bool success = false;
 
 
+
     pcl::PCDWriter writer;
 
     // check for valid file
@@ -145,10 +146,12 @@ bool ros_callback(
     int ransac_iterations = 1000;
     double threshold_distance = 0.01;
     double min_object_distance = 0.02;
-    double max_object_distance = 0.3;
+    double max_object_distance = 0.5;
     double cluster_tolerance = 0.02;
-    int min_cluster_size = 10;
+    int min_cluster_size = 20;
     int max_cluster_size = 1000;
+
+    c44_pipes::passthroughFilter(cloud_original, cloud_original, "z", 0.1f, 1.5f);
 
     // seperate prism on top of plane into a new cloud (that hopefully contains the objects)
     result = c44_pipes::getPrism(
@@ -235,9 +238,10 @@ bool ros_callback(
                 success = true;
                 // write out cluster as a PCD file
                 std::cout << "PointCloud representing the Cluster: " << cloud_cluster->points.size () << " data points." << std::endl;
+
+
                 std::stringstream ss;
                 ss << file_no_ext << "_found_obj_" << j << ".pcd";
-
 #ifdef SAVE_PCD
                 writer.write<pcl::PointXYZRGB> (ss.str (), *cloud_cluster, false);
 #endif
@@ -278,6 +282,7 @@ bool ros_callback(
 TODO*/
             j++;
         }
+        std::cout << "Objects segmented: " << j << std::endl;
     }
 
     if(!success)
@@ -292,6 +297,7 @@ TODO*/
     difference = time_after_execution - time_before_execution;  // get execution time
     std::cout << std::setw(5) << difference.total_milliseconds() << " ms operation time for whole pipline." << std::endl;
 
+    std::cout << "[Segmentation done, " << difference.total_milliseconds() << " ms] \n";
     while (!viewer->wasStopped ()){
         viewer->spinOnce (100);
     }

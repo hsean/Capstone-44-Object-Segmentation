@@ -6,7 +6,7 @@ project(hand_obj_seg)
 #    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 #endif()
 
-find_package(PCL 1.7 REQUIRED)
+find_package(PCL 1.8 REQUIRED)
 
 # pcl dependent directories
 include_directories(${PCL_INCLUDE_DIRS})

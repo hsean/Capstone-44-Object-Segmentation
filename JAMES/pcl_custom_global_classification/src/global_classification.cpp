@@ -64,7 +64,7 @@ std::cout << "Reading Point Cloud, width: " << cloud_scene->width << " height: "
     dps.setInputCloud (xyz_points);
     dps.setMaxZBounds (Z_DIST_);
     dps.setObjectMinHeight (0.02);
-    dps.setMinClusterSize (30);
+    dps.setMinClusterSize (50);
     dps.setWSize (9);
     dps.setDistanceBetweenClusters (0.05f);
     dps.setObjectMaxHeight(0.5);
@@ -78,8 +78,8 @@ std::cout << "Reading Point Cloud, width: " << cloud_scene->width << " height: "
     Eigen::Vector4f table_plane_;
     dps.getTableCoefficients (table_plane_);
     Eigen::Vector3f normal_plane_ = Eigen::Vector3f (table_plane_[0], table_plane_[1], table_plane_[2]);
-
-    pcl::console::print_info ("[Segmentation done, "); pcl::console::print_value ("%g", tt_seg.toc ()); pcl::console::print_info (" ms] \n");
+    std::cout << "Objects segmented: " << clusters.size() << std::endl;
+    std::cout << "[Segmentation done, " << tt_seg.toc() << " ms] \n";
 
     pcl::console::TicToc tt;
     tt.tic();
@@ -170,7 +170,9 @@ std::cout << "Cluster: " << cluster_name.str() << ", Category[conf]-" << kk << "
     }
 
     previous_cluster_size = clusters.size ();
-    pcl::console::print_info ("[Classification done, "); pcl::console::print_value ("%g", tt.toc ()); pcl::console::print_info (" ms] \n");
+
+    std::cout << "[Classification done, " << tt.toc() << " ms] \n";
+//    pcl::console::print_info ("[Classification done, "); pcl::console::print_info ("%g", tt.toc ()); pcl::console::print_info (" ms] \n");
 
     vis.spinOnce ();
     while (!vis.wasStopped())

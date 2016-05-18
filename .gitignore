@@ -3,3 +3,4 @@ build*/*
 *~
 */build*/*
 */*/build*/*
+.idea
