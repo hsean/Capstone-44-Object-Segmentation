@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GA_TESTS", "pclGA\pclGA.vcxproj", "{54B43427-75F7-4A4B-A6ED-2BD4C8CC6FF5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GA_TUI", "GA_TUI\GA_TUI.vcxproj", "{A31641B1-6B84-4200-AAC8-841B7AF2ECBD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{54B43427-75F7-4A4B-A6ED-2BD4C8CC6FF5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{54B43427-75F7-4A4B-A6ED-2BD4C8CC6FF5}.Debug|Win32.Build.0 = Debug|Win32
+		{54B43427-75F7-4A4B-A6ED-2BD4C8CC6FF5}.Release|Win32.ActiveCfg = Release|Win32
+		{54B43427-75F7-4A4B-A6ED-2BD4C8CC6FF5}.Release|Win32.Build.0 = Release|Win32
+		{A31641B1-6B84-4200-AAC8-841B7AF2ECBD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A31641B1-6B84-4200-AAC8-841B7AF2ECBD}.Debug|Win32.Build.0 = Debug|Win32
+		{A31641B1-6B84-4200-AAC8-841B7AF2ECBD}.Release|Win32.ActiveCfg = Release|Win32
+		{A31641B1-6B84-4200-AAC8-841B7AF2ECBD}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

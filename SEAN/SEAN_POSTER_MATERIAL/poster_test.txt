@@ -1,0 +1,101 @@
+Script started on Mon 23 May 2016 03:05:07 PM PDT
+]0;hsean@ubuntu: ~/Documents/pcl/demos/poster_demo/buildhsean@ubuntu:~/Documents/pcl/demos/poster_demo/build$ ./poster_demo 
+usage: ./poster_demo <filename>
+]0;hsean@ubuntu: ~/Documents/pcl/demos/poster_demo/buildhsean@ubuntu:~/Documents/pcl/demos/poster_demo/build$ ./poster_demo ../pictures/original_image.ppcd 
+Reading Point Cloud
+size of original cloud: 172800 points
+RUNNING PASSTHROUGH FILTER TESTS
+    8: passthrough filter, custom 1: 64604 points
+    1: passthrough filter, custom 2: 64604 points
+    0: passthrough filter, custom 3: 64604 points
+RUNNING VOXEL FILTER LEAF SIZE TEST
+   50: voxel filter, 01:4620 points
+    3: voxel filter, 02:1553 points
+    4: voxel filter, 03:823 points
+    3: voxel filter, 04:591 points
+    3: voxel filter, 05:407 points
+    6: voxel filter, 06:331 points
+    5: voxel filter, 07:264 points
+    3: voxel filter, 08:226 points
+    3: voxel filter, 09:200 points
+    3: voxel filter, 10:163 points
+RUNNING NOISE REMOVAL NEAREST NEIGHBORS TEST
+  325: noise neighbors, 01: 171972 points
+  288: noise neighbors, 02: 171784 points
+  288: noise neighbors, 03: 171591 points
+  405: noise neighbors, 04: 171464 points
+  455: noise neighbors, 05: 171414 points
+  528: noise neighbors, 06: 171389 points
+  645: noise neighbors, 07: 171342 points
+  724: noise neighbors, 08: 171304 points
+  802: noise neighbors, 09: 171282 points
+  895: noise neighbors, 10: 171227 points
+RUNNING NOISE REMOVAL THRESHOLD TEST
+  456: noise threshold, 01: 164459 points
+  454: noise threshold, 02: 168591 points
+  455: noise threshold, 03: 170202 points
+  456: noise threshold, 04: 170954 points
+  458: noise threshold, 05: 171312 points
+  459: noise threshold, 06: 171488 points
+  456: noise threshold, 07: 171587 points
+  456: noise threshold, 08: 171655 points
+  458: noise threshold, 09: 171759 points
+  465: noise threshold, 10: 171822 points
+  454: noise threshold, 11: 171893 points
+RUNNING PLANE ITERATIONS TEST
+  507: plane Iterations, 01: 12018 points
+  941: plane Iterations, 02: 27219 points
+ 1398: plane Iterations, 03: 27219 points
+ 1871: plane Iterations, 04: 27219 points
+ 2327: plane Iterations, 05: 27219 points
+ 2791: plane Iterations, 06: 27219 points
+ 2779: plane Iterations, 07: 27219 points
+ 2786: plane Iterations, 08: 27219 points
+ 2783: plane Iterations, 09: 27219 points
+ 2780: plane Iterations, 10: 27219 points
+RUNNING PLANE THRESHOLD TEST
+ 2338: plane threshold, 01: 27219 points
+ 2197: plane threshold, 02: 29930 points
+ 1305: plane threshold, 03: 34886 points
+  924: plane threshold, 04: 38956 points
+  676: plane threshold, 05: 43721 points
+  513: plane threshold, 06: 48292 points
+  446: plane threshold, 07: 50996 points
+  399: plane threshold, 08: 52585 points
+  371: plane threshold, 09: 54704 points
+  339: plane threshold, 10: 55902 points
+RUNNING EXTRACT PRISM ITERATIONS TEST
+  514: prism Iterations, 01: 12930 points
+  956: prism Iterations, 02: 22938 points
+ 1417: prism Iterations, 03: 22938 points
+ 1881: prism Iterations, 04: 22938 points
+ 2353: prism Iterations, 05: 22938 points
+ 2829: prism Iterations, 06: 22938 points
+ 2828: prism Iterations, 07: 22938 points
+ 2810: prism Iterations, 08: 22938 points
+ 2811: prism Iterations, 09: 22938 points
+ 2822: prism Iterations, 10: 22938 points
+RUNNING EXTRACT PRISM THRESHOLD TEST
+ 2370: prism threshold, 01: 22938 points
+ 2201: prism threshold, 02: 46296 points
+ 1310: prism threshold, 03: 42369 points
+  944: prism threshold, 04: 18366 points
+  691: prism threshold, 05: 21527 points
+  529: prism threshold, 06: 34242 points
+  461: prism threshold, 07: 38347 points
+  417: prism threshold, 08: 42999 points
+  392: prism threshold, 09: 37939 points
+  360: prism threshold, 10: 45008 points
+RUNNING OBJECT SEGMENTATION TEST
+   79: object segmentation, 01: 1172 points
+   20: obj seg, Iterations, 01: 1172 points
+   17: obj seg, Iterations, 02: 1172 points
+   15: obj seg, Iterations, 03: 1172 points
+   18: obj seg, Iterations, 04: 1172 points
+   20: obj seg, voxel, 01: 1172 points
+    9: obj seg, voxel, 02: 353 points
+    7: obj seg, voxel, 03: 176 points
+    6: obj seg, voxel, 04: 106 points
+    8: obj seg, optimized, 01: 355 points
+]0;hsean@ubuntu: ~/Documents/pcl/demos/poster_demo/buildhsean@ubuntu:~/Documents/pcl/demos/poster_demo/build$ exit
+Script done on Mon 23 May 2016 03:06:55 PM PDT

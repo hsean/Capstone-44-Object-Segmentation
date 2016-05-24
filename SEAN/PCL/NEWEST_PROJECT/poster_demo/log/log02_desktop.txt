@@ -1,0 +1,68 @@
+Script started on Sun 28 Feb 2016 01:49:21 PM PST
+]0;hsean@ubuntu: ~/Documents/pcl/demos/demo03/buildhsean@ubuntu:~/Documents/pcl/demos/demo03/build$ ./demo03 ../../../realSense/correct_orientation/five_objects2.pcd 
+Reading Point Cloud
+size of original cloud: 172800 points
+RUNNING PASSTHROUGH FILTER TESTS
+   11: passthrough filter, custom 1: 64604 points
+    0: passthrough filter, custom 2: 64604 points
+    1: passthrough filter, custom 3: 64604 points
+RUNNING VOXEL FILTER LEAF SIZE TEST
+   34: voxel filter, 01:4620 points
+    7: voxel filter, 02:1553 points
+    7: voxel filter, 03:823 points
+    7: voxel filter, 04:591 points
+    7: voxel filter, 05:407 points
+    7: voxel filter, 06:331 points
+    3: voxel filter, 07:264 points
+    2: voxel filter, 08:226 points
+    2: voxel filter, 09:200 points
+    2: voxel filter, 10:163 points
+RUNNING NOISE REMOVAL NEAREST NEIGHBORS TEST
+  259: noise neighbors, 01: 171972 points
+  253: noise neighbors, 02: 171784 points
+  266: noise neighbors, 03: 171591 points
+  375: noise neighbors, 04: 171464 points
+  427: noise neighbors, 05: 171414 points
+  498: noise neighbors, 06: 171389 points
+  603: noise neighbors, 07: 171342 points
+  689: noise neighbors, 08: 171304 points
+  762: noise neighbors, 09: 171282 points
+  837: noise neighbors, 10: 171227 points
+RUNNING NOISE REMOVAL THRESHOLD TEST
+  430: noise threshold, 01: 164459 points
+  428: noise threshold, 02: 168591 points
+  426: noise threshold, 03: 170202 points
+  432: noise threshold, 04: 170954 points
+  422: noise threshold, 05: 171312 points
+  436: noise threshold, 06: 171488 points
+  424: noise threshold, 07: 171587 points
+  426: noise threshold, 08: 171655 points
+  427: noise threshold, 09: 171759 points
+  426: noise threshold, 10: 171822 points
+  428: noise threshold, 11: 171893 points
+RUNNING EXTRACT PRISM ITERATIONS TEST
+  692: prism Iterations, 01: 12930 points
+  915: prism Iterations, 02: 22938 points
+ 1376: prism Iterations, 03: 22938 points
+ 1824: prism Iterations, 04: 22938 points
+ 2286: prism Iterations, 05: 22938 points
+ 2718: prism Iterations, 06: 22938 points
+ 2718: prism Iterations, 07: 22938 points
+ 2723: prism Iterations, 08: 22938 points
+ 2722: prism Iterations, 09: 22938 points
+ 2725: prism Iterations, 10: 22938 points
+RUNNING EXTRACT PRISM THRESHOLD TEST
+ 2269: prism threshold, 01: 22938 points
+ 2124: prism threshold, 02: 46296 points
+ 1297: prism threshold, 03: 42369 points
+  909: prism threshold, 04: 18366 points
+  669: prism threshold, 05: 21527 points
+  517: prism threshold, 06: 34242 points
+  447: prism threshold, 07: 38347 points
+  404: prism threshold, 08: 42999 points
+  382: prism threshold, 09: 37939 points
+  353: prism threshold, 10: 45008 points
+]0;hsean@ubuntu: ~/Documents/pcl/demos/demo03/buildhsean@ubuntu:~/Documents/pcl/demos/demo03/build$ exit
+exit
+
+Script done on Sun 28 Feb 2016 01:50:32 PM PST

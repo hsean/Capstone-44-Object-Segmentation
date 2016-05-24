@@ -1,0 +1,37 @@
+This log contains the output from demo03 as of 2/27/2016.
+These values were taken from a VM on a desktop PC.
+
+hsean@ubuntu:~/Documents/pcl/demos/demo03/build$ ./demo03 ../../../realSense/correct_orientation/five_objects2.pcd 
+Reading Point Cloud
+size of original cloud: 172800 points
+RUNNING PASSTHROUGH FILTER TESTS
+   14: passthrough filter, custom 1: 64604 points
+    0: passthrough filter, custom 2: 64604 points
+    0: passthrough filter, custom 3: 64604 points
+RUNNING VOXEL FILTER TEST
+   43: voxel filter, custom 1:4620 points
+    3: voxel filter, custom 2:1553 points
+    3: voxel filter, custom 3:591 points
+    2: voxel filter, custom 4:226 points
+RUNNING NOISE REMOVAL TEST
+  446: noise removal, custom 1: 171414 points
+  843: noise removal, custom 1: 171227 points
+  249: noise removal, custom 1: 171972 points
+  432: noise removal, custom 1: 171822 points
+  431: noise removal, custom 1: 164459 points
+RUNNING PLANE SEGMENTATION TEST
+ 2303: plane segmentation, custom 1: 27219 points
+[pcl::SampleConsensusModelPlane::optimizeModelCoefficients] Not enough inliers found to support a model (0)! Returning the same coefficients.
+ERROR: No plane found
+ 2699: plane segmentation, custom 3: 27219 points
+ 2250: plane segmentation, custom 4: 27219 points
+ 2250: plane segmentation, custom 5: 27219 points
+ 2273: plane segmentation, custom 6: 27219 points
+ 2292: plane segmentation, custom 7: 27219 points
+ 2266: plane segmentation, custom 8: 11535 points
+ 2366: plane segmentation, custom 9: 27219 points
+RUNNING EXTRACT PRISM TEST
+LOG PRISM: ENTERING FUNCTION
+ 2364: polygonal prism, custom 1: 22938 points
+LOG PRISM: LEAVING FUNCTION
+

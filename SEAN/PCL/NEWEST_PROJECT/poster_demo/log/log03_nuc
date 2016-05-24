@@ -1,0 +1,70 @@
+Script started on Mon 29 Feb 2016 01:30:30 PM PST
+]0;cap44@cap44-nuc: ~/Documents/pcl/demos/demo03/buildcap44@cap44-nuc:~/Documents/pcl/demos/demo03/build$ ./demo03 ../../../realSense/ correct_orientation/five_objects2.pcd 
+Reading Point Cloud
+size of original cloud: 172800 points
+RUNNING PASSTHROUGH FILTER TESTS
+    3: passthrough filter, custom 1: 64604 points
+    1: passthrough filter, custom 2: 64604 points
+    1: passthrough filter, custom 3: 64604 points
+RUNNING VOXEL FILTER LEAF SIZE TEST
+    8: voxel filter, 01:4620 points
+    4: voxel filter, 02:1553 points
+    4: voxel filter, 03:823 points
+    3: voxel filter, 04:591 points
+    3: voxel filter, 05:407 points
+    3: voxel filter, 06:331 points
+    3: voxel filter, 07:264 points
+    3: voxel filter, 08:226 points
+    3: voxel filter, 09:200 points
+    4: voxel filter, 10:163 points
+RUNNING NOISE REMOVAL NEAREST NEIGHBORS TEST
+  266: noise neighbors, 01: 171972 points
+  278: noise neighbors, 02: 171784 points
+  299: noise neighbors, 03: 171591 points
+  423: noise neighbors, 04: 171464 points
+  487: noise neighbors, 05: 171414 points
+  570: noise neighbors, 06: 171389 points
+  688: noise neighbors, 07: 171342 points
+  788: noise neighbors, 08: 171304 points
+  877: noise neighbors, 09: 171282 points
+  964: noise neighbors, 10: 171227 points
+RUNNING NOISE REMOVAL THRESHOLD TEST
+  489: noise threshold, 01: 164459 points
+  490: noise threshold, 02: 168591 points
+  487: noise threshold, 03: 170202 points
+  487: noise threshold, 04: 170954 points
+  487: noise threshold, 05: 171312 points
+  487: noise threshold, 06: 171488 points
+  487: noise threshold, 07: 171587 points
+  489: noise threshold, 08: 171655 points
+  487: noise threshold, 09: 171759 points
+  487: noise threshold, 10: 171822 points
+  488: noise threshold, 11: 171893 points
+RUNNING EXTRACT PRISM ITERATIONS TEST
+  584: prism Iterations, 01: 12930 points
+ 1117: prism Iterations, 02: 22938 points
+ 1662: prism Iterations, 03: 22938 points
+ 2206: prism Iterations, 04: 22938 points
+ 2748: prism Iterations, 05: 22938 points
+ 3294: prism Iterations, 06: 22938 points
+ 3293: prism Iterations, 07: 22938 points
+ 3293: prism Iterations, 08: 22938 points
+ 3293: prism Iterations, 09: 22938 points
+ 3295: prism Iterations, 10: 22938 points
+RUNNING EXTRACT PRISM THRESHOLD TEST
+ 2749: prism threshold, 01: 22938 points
+ 2576: prism threshold, 02: 46296 points
+ 1540: prism threshold, 03: 42369 points
+ 1096: prism threshold, 04: 18366 points
+  806: prism threshold, 05: 21527 points
+  620: prism threshold, 06: 34242 points
+  537: prism threshold, 07: 38347 points
+  485: prism threshold, 08: 42999 points
+  457: prism threshold, 09: 37939 points
+  418: prism threshold, 10: 45008 points
+RUNNING OBJECT SEGMENTATION TEST
+   39: object Segmentation, 01: 1172 points
+]0;cap44@cap44-nuc: ~/Documents/pcl/demos/demo03/buildcap44@cap44-nuc:~/Documents/pcl/demos/demo03/build$ exit
+exit
+
+Script done on Mon 29 Feb 2016 01:31:52 PM PST
