@@ -519,7 +519,7 @@ There are several global descriptors that are available to store the data: Viewp
 
 
 \subsubsection{VFH}
-The VFH has a viewpoint dependent part, which stores data on the angles between the normal vectors of the points in the cloud and the vector from the camera viewpoint to the cluster centroid.  Another portion of the histogram stores data on the distances of the points in the cluster to the cluster’s centroid.  There are other components to the histogram as well, but the full details are somewhat beyond the scope of this handout, and the reader is referred to \cite{aldoma2} for a detailed description. 
+The VFH has a viewpoint dependent part, which stores data on the angles between the normal vectors of the points in the cloud and the vector from the camera viewpoint to the cluster centroid.  Another portion of the histogram stores data on the distances of the points in the cluster to the cluster’s centroid.  There are other components to the histogram as well, but the full details are somewhat beyond the scope of this handout, and the reader is referred to \cite{clusterrec} for a detailed description. 
 
 \subsubsection{CVFH}
 The Clustered VFH descriptor is similar to VFH except that it first divides the cluster into several regions using region-growing segmentation.  An example would be a milk carton being divided into clusters corresponding to the sides of the carton.  From here, VFHs are computed for each region.  This offers an  advantage over VFH, in that only one of the regions needs to be visible for the object to be identified.  So, for example, if the desired object is occluded by some other object standing in front of it, the desired object can still be picked out based on the visible part.
@@ -672,30 +672,32 @@ We were able to successfully implement an object segmentation pipeline and an ob
 
 \begin{thebibliography}{1}
 
-\bibitem{aldoma}
-Aldoma, Aitor, Federico Tombari, Luigi Di Stefano, and Markus Vincze, "A global hypotheses verification method for 3D object recognition.," In \emph{Computer Vision-ECCV}, pp. 511-524. Springer Berlin Heidelberg, 2012.
-
-
-\bibitem{6DOF}
-"PCL/OpenNI tutorial 5: 3D object recognition (pipeline)." Robotics Group of the University of Leon.  Updated Nov 1, 2015.  Accessed May 29, 2015.  http://robotica.unileon.es/mediawiki/index.php \\ /PCL/OpenNI\_tutorial\_5:\_3D\_object\_recognition\_(pipeline).
-
+\bibitem{aldoma4}
+Aldoma, Aitor et al. "OUR-CVFH – Oriented, Unique and Repeatable Clustered Viewpoint Feature Histogram for Object Recognition and 6DOF Pose Estimation."  Computer Vision Laboratory, Dept. of Computer Science and Engineering, University of Bologna.  Accessed June 2, 2016.  http://vision.deis.unibo.it/fede/papers/dagm12.pdf
 
 \bibitem{clusterrec}
 "Cluster Recognition and 6DOF Pose Estimation using VFH descriptors." \emph{pointclouds.org}.  Perception Foundation.
 Accessed May 29, 2015. http://pointclouds.org/documentation/tutorials/vfh\_recognition.php
 
 
+
 \bibitem{aldoma2}
 Aldoma, Aitor et al.  "Three-Dimensional Object Recognition and 6 DoF Pose Estimation." \emph{IEEE Robotics \& Automation Magazine}, September 2012.
+
+
+\bibitem{aldoma}
+Aldoma, Aitor, Federico Tombari, Luigi Di Stefano, and Markus Vincze, "A global hypotheses verification method for 3D object recognition.," In \emph{Computer Vision-ECCV}, pp. 511-524. Springer Berlin Heidelberg, 2012.
 
 \bibitem{aligning}
 "Aligning Object Templates to a Point Cloud." - Point Cloud Library (PCL).  Accessed May 30, 2016.  http://pointclouds.org/documentation/tutorials/template\_alignment.php.
 
+
 \bibitem{aldoma3}
 Aldoma, Aitor, and Federico Tombari. "3D Object Recognition Based on Correspondence Grouping." - Point Cloud Library (PCL). Accessed May 30, 2016. http://www.pointclouds.org/documentation \\ /tutorials/correspondence\_grouping.php. 
 
-\bibitem{aldoma4}
-Aldoma, Aitor et al. "OUR-CVFH – Oriented, Unique and Repeatable Clustered Viewpoint Feature Histogram for Object Recognition and 6DOF Pose Estimation."  Computer Vision Laboratory, Dept. of Computer Science and Engineering, University of Bologna.  Accessed June 2, 2016.  http://vision.deis.unibo.it/fede/papers/dagm12.pdf
+
+\bibitem{6DOF}
+"PCL/OpenNI tutorial 5: 3D object recognition (pipeline)." Robotics Group of the University of Leon.  Updated Nov 1, 2015.  Accessed May 29, 2015.  http://robotica.unileon.es/mediawiki/index.php \\ /PCL/OpenNI\_tutorial\_5:\_3D\_object\_recognition\_(pipeline).
 
 
 \bibitem{c44source}
