@@ -74,10 +74,6 @@ namespace c44{
   class SegmentationPipeline{
 
     
-    Cloud3D::Ptr objectCloud,
-            denoisedCloud,
-            convexHull,
-            planeCloud;
     ModelCoefficients::Ptr planeCoefficients;
     SACSegmentationFromNormals<PointXYZ, Normal> seg;
     PointCloud<Normal>::Ptr normals;
@@ -86,13 +82,14 @@ namespace c44{
 
     bool extractPlane();
     bool extractPrism();
-    bool extractGraspableObject(SacModel model);
-    void clusterize();
+    //bool extractGraspableObject(SacModel model);
+    void clusterize(float cluster_tolerance);
     float iterationDivisor;
 
   public:
     static const float normal_search_radius;
-    
+    Cloud3D::Ptr convexHull, planeCloud,objectCloud,cloudMinusPrism,
+    denoisedCloud;
     
     
     SegmentationPipeline(Cloud3D::Ptr rawCloud,
@@ -100,11 +97,15 @@ namespace c44{
                          float sampleSize,
                          float stdDev,
                          float iterationDivisor);
-    bool performSegmentation();
-    std::vector<GraspableObject> graspableObjects;
-    void extractObjects();
+    bool performSegmentation(float cluster_tolerance = 0.1);
+    //void extractObjects();
     Cloud3D::Ptr getConvexHull() const{
       return convexHull;
+    }
+    
+    
+    size_t objectCount() const {
+      return objects.size();
     }
     
     Vector3f getPlaneNormal() const{

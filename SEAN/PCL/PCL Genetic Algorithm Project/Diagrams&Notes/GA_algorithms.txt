@@ -1,0 +1,18 @@
+This file contains algorithms for my Genetic Algorithm.  algorithms will be
+written in pseudo code.
+
+ALGORITHM: Test GA
+generate new population with random binary strings
+add population to generation 1
+set execution time and validity of population
+set fitness of population
+update population statistics
+WHILE (you want to continue with more generations)
+	generate new population based on previous population
+	add population to next generation
+	set execution time and validity of population
+	update population statistics
+	ask user if they want to create a new generation
+END WHILE
+
+

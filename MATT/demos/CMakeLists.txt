@@ -108,6 +108,21 @@ if(build)
       pcl_segmentation
     )
 
+    PCL_ADD_EXECUTABLE(viz_scratchpad
+      "${SUBSUBSYS_NAME}"
+      ${moc_srcs}
+      src/matt/viz_scratchpad.cpp
+      ${incs}
+      ${impl_incs}
+    )
+
+    target_link_libraries(viz_scratchpad
+      c44api
+      pcl_visualization
+      pcl_segmentation
+    )
+
+
 
 endif(build)
 

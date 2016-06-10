@@ -1,0 +1,10 @@
+To run this program:
+First make sure, your scene image and myObjectTemplate.txt files are inside build folders.
+
+Inside the build folder,change the model image name in: myObjectTemplate.txt  [ Ex. model.pcd ]
+
+To execute the program do: ./template_alignment myObjectTemplate.txt scene.pcd
+
+The result will be published in a output.pcd
+
+To view the output do: pcl_viewer output.pcd scene.pcd

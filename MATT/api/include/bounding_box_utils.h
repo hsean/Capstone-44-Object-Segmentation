@@ -1,16 +1,17 @@
 //
-//  Geometries.hpp
+//  bounding_box_utils.h
 //  PCLTestbench
 //
 //  Created on 2/10/16.
 //
 
-#ifndef Geometries_hpp
-#define Geometries_hpp
+#ifndef bounding_box_utils_hpp
+#define bounding_box_utils_hpp
 #include <stdio.h>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
+#include <pcl/PointIndices.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/features/normal_3d.h>
@@ -26,6 +27,7 @@
 #include <pcl/features/our_cvfh.h>
 #include <pcl/features/grsd.h>
 #include <pcl/features/esf.h>
+
 
 
 namespace c44{
@@ -44,9 +46,43 @@ namespace c44{
 
   
   
-  struct BoundingBox{
+  struct BoundingBox : public pcl::PCLBase <PointXYZ>{
+  private:
+    void computeMeanValue();
+    Eigen::Vector3f mean_value_;
+    
+    /** \brief Major eigen vector */
+    Eigen::Vector3f major_axis_;
+    
+    /** \brief Middle eigen vector */
+    Eigen::Vector3f middle_axis_;
+    
+    /** \brief Minor eigen vector */
+    Eigen::Vector3f minor_axis_;
+    
+    /** \brief Major eigen value */
+    float major_value_;
+    
+    /** \brief Middle eigen value */
+    float middle_value_;
+    
+    /** \brief Minor eigen value */
+    float minor_value_;
+
+    using PCLBase <PointXYZ>::indices_;
+    
+    //pcl::PointIndices::Ptr indices_;
+    void computeEigenVectors(const Eigen::Matrix <float, 3, 3>& covariance_matrix,
+                        Eigen::Vector3f& major_axis,
+                        Eigen::Vector3f& middle_axis,
+                        Eigen::Vector3f& minor_axis,
+                        float& major_value,
+                        float& middle_value,
+                        float& minor_value);
+    void computeCovarianceMatrix(Eigen::Matrix <float, 3, 3>& covariance_matrix) const;
+    void computeOBB ();
   public:
-    BoundingBox(Cloud3D::Ptr cloud);
+    BoundingBox(const Cloud3D::Ptr cloud);
       
     std::vector<float> moment_of_inertia;
     std::vector<float> eccentricity;
@@ -82,4 +118,4 @@ namespace c44{
   
 
 }
-#endif /* Geometries_hpp */
+#endif /* bounding_box_utils_hpp  */
